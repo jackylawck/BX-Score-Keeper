@@ -461,13 +461,21 @@
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分機制 (Points)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>極致收尾 (Xtreme) - 3分</b>：完全進入極限區且無法返回。</li>
-                            <li><b>完工 (Over) - 2分</b> / <b>爆裂 (Burst) - 2分</b></li>
-                            <li><b>旋轉收尾 (Spin) - 1分</b></li>
+                            <li><b>極致收尾 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回。</li>
+                            <li><b>完工 (Over Finish) - 2分</b>：完全進入超區且無法返回。</li>
+                            <li><b>爆裂終結 (Burst Finish) - 2分</b>：部件先行分離。</li>
+                            <li><b>旋轉收尾 (Spin Finish) - 1分</b>：先行停止旋轉。</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 團隊戰 KOF 機制 (Team Battle)</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3對3賽制 (3on3 Battle)</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
+                            <li>預先決定 3 個順序，不得使用重複部件。</li>
+                            <li>打完 3 場未滿 4 分，<b>得分保留，重新排列順序（由 1 號重新開始）</b>。</li>
+                        </ul>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">3. 團隊戰 KOF 機制 (Team Battle)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
                             <li>每局採<b>先得 2 分制</b>，勝方留場，敗方換下一位隊員。</li>
                             <li>換人時當前局比分重置為 0-0，累積團隊總勝場。</li>
@@ -487,7 +495,32 @@
                 teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
                 reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
                 disclaimer: "Unofficial fan-made score keeper tool based on BEYBLADE X Regulations (Asia Version) 12th Edition.",
-                rulesBody: `Scoring & KOF Team rules applied.`
+                rulesBody: `
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
+                            <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone and cannot return.</li>
+                            <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone and cannot return.</li>
+                            <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
+                            <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
+                        </ul>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3on3 Battle Rules</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
+                            <li>Set 3 Beys in order. No duplicate parts allowed.</li>
+                            <li>If no one reaches 4 pts after 3 battles, <b>scores stay, rearrange order and restart from item #1</b>.</li>
+                        </ul>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">3. Team Battle Outcomes (KOF)</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
+                            <li>Each individual battle follows a <b>first-to-2-points rule</b>.</li>
+                            <li>Winning Blader stays, losing Blader replaced by next team member.</li>
+                            <li>Points reset to 0-0 when a new opponent steps in, team win counter is tracked.</li>
+                        </ul>
+                    </div>
+                `
             }
         };
 
