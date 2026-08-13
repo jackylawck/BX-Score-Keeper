@@ -10,17 +10,20 @@
 本專案是為我和兒子共渡美好時光而開發的非商業個人專案！特別打造了這個計分工具，讓每一次對戰都更流暢、更有儀式感，並完美貼合官方賽事標準。誠摯邀請所有大朋友和小朋友一起使用，享受公平對戰的樂趣，共創無價的親子回憶！
 
 ### ✨ 核心功能
-* **完美對應官方第 12 版規則**：
+* **完美對應官方第 12 版規則 (2026年3月最新標準)**：
   * 🔴 **極致收尾 (Xtreme Finish)**：+3 分
   * 🟠 **完工 / 超區 (Over Finish)**：+2 分
   * 🟡 **爆裂終結 (Burst Finish)**：+2 分
   * 🟢 **旋轉收尾 (Spin Finish)**：+1 分
-* **多種賽事模式支援**：
+  * 🟣 **犯規罰分 (Opponent Penalty)**：對方發射失誤/犯規累積時，獲得 +1 分
+* **全賽事模式支援**：
   * ⚔️ **1v1 Standard**：經典 4 分獲勝制。
   * 🛡️ **3on3 Battle**：自動追蹤 3 陀螺 Deck 順序（ITEM #1 ~ #3）；打完 3 場若未滿 4 分，自動提示並重置出場順序（保留比分）。
   * 👥 **Team Battle (KOF 模式)**：每局 2 分制，勝方留場、敗方換人，自動重置局比分（0-0）並累計團隊總勝場。
+  * 🌀 **3-Player Battle (5-pt System)**：3人同場大亂鬥！依據官方 5 分制規則，淘汰對手獲得相應分數，率先累積 5 分者勝。
 * **PWA & Offline-First (離線優先)**：可直接加至手機主畫面當作原生 App 使用，無網路環境亦可順暢運作。
 * **賽事輔助工具**：
+  * 🤝 **平手機制 (Draw)**：一鍵記錄同分重賽。
   * 🔊 **Web Audio 聲效**：加分與勝利時播放科技感音效。
   * 📜 **實時對局紀錄 (Battle Log)** 與 **Undo (復原)** 功能。
   * 💾 **LocalStorage 自動儲存**：防止意外重新整理掉資料。
@@ -39,12 +42,15 @@ This repository is a non-commercial personal project created to capture precious
   * 🟠 **Over Finish**: +2 pts
   * 🟡 **Burst Finish**: +2 pts
   * 🟢 **Spin Finish**: +1 pt
+  * 🟣 **Opponent Penalty**: +1 pt awarded upon opponent's accumulated shooting errors
 * **Multiple Tournament Formats**:
   * ⚔️ **1v1 Standard**: First to 4 points.
   * 🛡️ **3on3 Battle**: Tracks 3-Bey Deck order (ITEM #1 ~ #3). Automatically prompts for order re-arrangement after 3 rounds if no player reaches 4 points (scores retained).
   * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. Winner stays, loser rotates out. Resets round scores to 0-0 while tracking cumulative team wins.
+  * 🌀 **3-Player Battle**: 5-point System for 3-blader matches according to official regulations. First to 5 points wins.
 * **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional without an internet connection.
 * **Tournament Utilities**:
+  * 🤝 **Draw Support**: One-tap draw recording for simultaneous finishes.
   * 🔊 **Web Audio Sound Effects**: Instant sound feedback for scoring and match victory.
   * 📜 **Real-time Battle Log** and **Undo** support.
   * 💾 **State Persistence**: Auto-saves current score state to `localStorage` to prevent data loss.
