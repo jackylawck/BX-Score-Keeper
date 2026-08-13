@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BX Score Keeper | 爆旋賽事計分器</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f97316;
+            --accent-yellow: #eab308;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.25rem; margin: 0; }
+        .subtitle { font-size: 0.8rem; color: var(--text-sub); }
+
+        .nav-btns { display: flex; gap: 8px; }
+
+        .top-btn {
+            background: #334155;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .player-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #38bdf8;
+            margin: 8px 0;
+            line-height: 1;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            width: 100%;
+        }
+
+        button.score-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 8px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        button.score-btn:active { transform: scale(0.98); }
+
+        .btn-xtreme { background-color: var(--accent-red); }
+        .btn-over { background-color: var(--accent-orange); }
+        .btn-burst { background-color: var(--accent-yellow); color: #000 !important; }
+        .btn-spin { background-color: var(--accent-green); }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .ctrl-btn {
+            background: #334155;
+            color: var(--text-main);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .ctrl-btn.reset { background: #b91c1c; }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: var(--text-main);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .rule-section { margin-bottom: 16px; }
+        .rule-section h3 { color: #38bdf8; margin-bottom: 6px; font-size: 1rem; }
+        .rule-section ul { padding-left: 20px; margin: 0; font-size: 0.85rem; color: #cbd5e1; }
+        .rule-section li { margin-bottom: 4px; }
+
+        footer {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            text-align: center;
+            max-width: 600px;
+        }
+
+        @media (max-width: 480px) {
+            .score-display { font-size: 3rem; }
+            button.score-btn { font-size: 0.8rem; padding: 10px 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>BX Score Keeper</h1>
+            <div class="subtitle" id="rules-tag">Asia Regs v12 (Target: 4 pts)</div>
+        </div>
+        <div class="nav-btns">
+            <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
+            <button class="top-btn" onclick="toggleLanguage()" id="lang-btn">EN</button>
+        </div>
+    </header>
+
+    <div class="scoreboard">
+        <!-- Player 1 -->
+        <div class="player-card">
+            <div class="player-name" id="p1-title">Player 1</div>
+            <div class="score-display" id="score-p1">0</div>
+            <div class="btn-grid">
+                <button class="score-btn btn-xtreme" onclick="addScore(1, 3)">
+                    <span class="txt-xtreme">Xtreme Finish</span><span>+3</span>
+                </button>
+                <button class="score-btn btn-over" onclick="addScore(1, 2)">
+                    <span class="txt-over">Over Finish</span><span>+2</span>
+                </button>
+                <button class="score-btn btn-burst" onclick="addScore(1, 2)">
+                    <span class="txt-burst">Burst Finish</span><span>+2</span>
+                </button>
+                <button class="score-btn btn-spin" onclick="addScore(1, 1)">
+                    <span class="txt-spin">Spin Finish</span><span>+1</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Player 2 -->
+        <div class="player-card">
+            <div class="player-name" id="p2-title">Player 2</div>
+            <div class="score-display" id="score-p2">0</div>
+            <div class="btn-grid">
+                <button class="score-btn btn-xtreme" onclick="addScore(2, 3)">
+                    <span class="txt-xtreme">Xtreme Finish</span><span>+3</span>
+                </button>
+                <button class="score-btn btn-over" onclick="addScore(2, 2)">
+                    <span class="txt-over">Over Finish</span><span>+2</span>
+                </button>
+                <button class="score-btn btn-burst" onclick="addScore(2, 2)">
+                    <span class="txt-burst">Burst Finish</span><span>+2</span>
+                </button>
+                <button class="score-btn btn-spin" onclick="addScore(2, 1)">
+                    <span class="txt-spin">Spin Finish</span><span>+1</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn" onclick="undo()" id="btn-undo">Undo / 上一步</button>
+        <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">Reset / 重置</button>
+    </div>
+
+    <!-- Rules Modal -->
+    <div class="modal" id="rules-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin:0; font-size:1.1rem;" id="modal-title">BEYBLADE X 亞洲版第 12 版規則摘要</h2>
+                <button class="close-btn" onclick="closeRules()">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- Dynamic Rule Content -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p id="disclaimer">Unofficial fan-made tool for scoring purposes only. BEYBLADE is a registered trademark of TAKARA TOMY.</p>
+    </footer>
+
+    <script>
+        let scoreP1 = 0;
+        let scoreP2 = 0;
+        let history = [];
+        let currentLang = 'zh';
+
+        const i18n = {
+            zh: {
+                rulesTag: "亞洲版規則 第12版 (先得 4 分獲勝)",
+                rulesBtn: "規則",
+                modalTitle: "亞洲版第 12 版官方規則要點 (2026年3月)",
+                xtreme: "極致收尾 (Xtreme)",
+                over: "完工 / 超區 (Over)",
+                burst: "爆裂終結 (Burst)",
+                spin: "旋轉收尾 (Spin)",
+                undo: "復原 (Undo)",
+                reset: "重置比賽",
+                p1: "選手 A (Player 1)",
+                p2: "選手 B (Player 2)",
+                win: "獲勝！",
+                disclaimer: "本工具為玩家自製非官方應用，僅供對戰計分使用。BEYBLADE 及 爆旋陀螺 為 TAKARA TOMY 之註冊商標。",
+                rulesBody: `
+                    <div class="rule-section">
+                        <h3>1. 得分機制 (Points)</h3>
+                        <ul>
+                            <li><b>極致收尾 (Xtreme Finish) - 3分</b>：完全進入極限區 (Xtreme Zone) 且無法返回對戰區。</li>
+                            <li><b>完工 / 超區 (Over Finish) - 2分</b>：完全進入超區 (Over Zone) 且無法返回對戰區。</li>
+                            <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先一步分離。</li>
+                            <li><b>旋轉收尾 (Spin Finish) - 1分</b>：對手陀螺在對戰區內先停止旋轉。</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <h3>2. 3對3賽制 (3on3 Battle)</h3>
+                        <ul>
+                            <li>預先決定 3 個陀螺出場順序並進行 Bey Check。</li>
+                            <li>三個陀螺<b>不得使用重複部件</b>（即使顏色不同亦視為同一部件）。</li>
+                            <li>比賽期間未經裁判允許不得變更順序或組合，先得 4 分者勝。</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <h3>3. 團隊戰 (Team Battle)</h3>
+                        <ul>
+                            <li>每局對戰採<b>先得 2 分制</b>。</li>
+                            <li>勝方留場繼續對戰，敗方由下一位隊員接替 (KOF模式)。</li>
+                            <li>換人時上一場分數不累積，新對戰比分重新由 0-0 開始。</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <h3>4. 發射違規 (Shooting Errors)</h3>
+                        <ul>
+                            <li>過早發射 (Premature Launch) 或 延遲發射 (Delayed Launch) 會被裁判警告。</li>
+                            <li>同一戰中累積第二次發射失誤/違規，裁判將判給對方 1 分並重賽。</li>
+                        </ul>
+                    </div>
+                `
+            },
+            en: {
+                rulesTag: "Asia Regs v12 (First to 4 pts)",
+                rulesBtn: "Rules",
+                modalTitle: "Asia Regs 12th Edition Summary (March 2026)",
+                xtreme: "Xtreme Finish",
+                over: "Over Finish",
+                burst: "Burst Finish",
+                spin: "Spin Finish",
+                undo: "Undo",
+                reset: "Reset Match",
+                p1: "Player 1",
+                p2: "Player 2",
+                win: "Wins the Match!",
+                disclaimer: "Unofficial fan-made tool for scoring purposes only. BEYBLADE is a registered trademark of TAKARA TOMY.",
+                rulesBody: `
+                    <div class="rule-section">
+                        <h3>1. Scoring Systems</h3>
+                        <ul>
+                            <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone and cannot return.</li>
+                            <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone and cannot return.</li>
+                            <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
+                            <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <h3>2. 3on3 Battle Rules</h3>
+                        <ul>
+                            <li>Place 3 Beys in deck case in battle order for Bey Check.</li>
+                            <li><b>No duplicate parts</b> allowed among 3 Beys (different colors count as same part).</li>
+                            <li>Order cannot be changed during match. First to 4 pts wins.</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <h3>3. Team Battle Outcomes</h3>
+                        <ul>
+                            <li>Each individual battle follows a <b>first-to-2-points rule</b>.</li>
+                            <li>Winning Blader stays, losing Blader replaced by next team member.</li>
+                            <li>Points do not carry over when a new opponent steps in.</li>
+                        </ul>
+                    </div>
+                    <div class="rule-section">
+                        <h3>4. Shooting Errors</h3>
+                        <ul>
+                            <li>Premature or delayed launches will receive warnings from judge.</li>
+                            <li>Accumulating two shooting errors in same battle awards 1 pt to opponent and replays.</li>
+                        </ul>
+                    </div>
+                `
+            }
+        };
+
+        function addScore(player, pts) {
+            if (scoreP1 >= 4 || scoreP2 >= 4) return;
+
+            history.push({ p1: scoreP1, p2: scoreP2 });
+
+            if (player === 1) scoreP1 += pts;
+            else scoreP2 += pts;
+
+            updateDisplay();
+            checkWinner();
+        }
+
+        function undo() {
+            if (history.length > 0) {
+                const lastState = history.pop();
+                scoreP1 = lastState.p1;
+                scoreP2 = lastState.p2;
+                updateDisplay();
+            }
+        }
+
+        function resetMatch() {
+            if (confirm("Reset current scores? / 確定重置比分？")) {
+                scoreP1 = 0;
+                scoreP2 = 0;
+                history = [];
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score-p1').innerText = scoreP1;
+            document.getElementById('score-p2').innerText = scoreP2;
+        }
+
+        function checkWinner() {
+            setTimeout(() => {
+                const lang = i18n[currentLang];
+                if (scoreP1 >= 4) {
+                    alert(`${lang.p1} ${lang.win}`);
+                } else if (scoreP2 >= 4) {
+                    alert(`${lang.p2} ${lang.win}`);
+                }
+            }, 50);
+        }
+
+        function openRules() {
+            document.getElementById('rules-modal').style.display = 'flex';
+        }
+
+        function closeRules() {
+            document.getElementById('rules-modal').style.display = 'none';
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            const lang = i18n[currentLang];
+
+            document.getElementById('rules-tag').innerText = lang.rulesTag;
+            document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
+            document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
+            document.getElementById('p1-title').innerText = lang.p1;
+            document.getElementById('p2-title').innerText = lang.p2;
+            document.getElementById('btn-undo').innerText = lang.undo;
+            document.getElementById('btn-reset').innerText = lang.reset;
+            document.getElementById('disclaimer').innerText = lang.disclaimer;
+            document.getElementById('modal-title').innerText = lang.modalTitle;
+            document.getElementById('modal-body').innerHTML = lang.rulesBody;
+
+            document.querySelectorAll('.txt-xtreme').forEach(el => el.innerText = lang.xtreme);
+            document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
+            document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
+            document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
+        }
+
+        // Init Language
+        toggleLanguage();
+    </script>
+</body>
+</html>
