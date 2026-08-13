@@ -8,25 +8,25 @@
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
 
     <!-- SEO Meta -->
-    <title>BX Score Keeper 爆旋計分器</title>
-    <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式、KOF 團隊戰與 3人亂鬥。">
-    <meta name="keywords" content="爆旋陀螺X, Beyblade X, BX, 計分器, Score Keeper, Beyblade X Counter, 亞洲版第12版, 3on3對戰, 團隊戰, 3人亂鬥, 5分制, PWA, 陀螺戰鬥助手">
+    <title>BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器 (香港官方 12th Ed)</title>
+    <meta name="description" content="專為《爆旋陀螺X》香港賽事規則設計的免費對戰計分器 Web App / PWA。完美支援香港官方譯名（極限終結、擊出終結、爆裂終結、迴轉勝利），支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
+    <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, 極限終結, 擊出終結, 爆裂終結, 迴轉勝利, 亞洲版第12版, PWA, 陀螺戰鬥助手">
     <meta name="author" content="羅子淇 Jacky Law">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://jackylawck.github.io/BX-Score-Keeper/">
 
     <!-- Open Graph (Facebook, WhatsApp, Discord) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="BX Score Keeper 爆旋計分器">
-    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
+    <meta property="og:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
+    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。採用香港官方譯名，支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
     <meta property="og:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
     <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
     <meta property="og:site_name" content="BX Score Keeper">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="BX Score Keeper 爆旋計分器">
-    <meta name="twitter:description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的對戰計分工具。">
+    <meta name="twitter:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
+    <meta name="twitter:description" content="專為《爆旋陀螺X》賽事規則設計的對戰計分工具。">
     <meta name="twitter:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
 
     <!-- PWA & Favicon Settings -->
@@ -418,19 +418,19 @@
             <div class="score-display" id="score-p1">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
-                    <span class="txt-xtreme">Xtreme Finish</span><span class="pts-badge">+3</span>
+                    <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
                 </button>
                 <button class="score-btn btn-over" onclick="addScore(1, 2, 'Over')">
-                    <span class="txt-over">Over Finish</span><span class="pts-badge">+2</span>
+                    <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-burst" onclick="addScore(1, 2, 'Burst')">
-                    <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
+                    <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
-                    <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
+                    <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
                 </button>
                 <button class="score-btn btn-foul" id="btn-foul-p1" onclick="addFoul(1)">
-                    <span id="txt-foul-p1">發射失誤 (Foul)</span><span class="pts-badge" id="foul-badge-p1">0/2</span>
+                    <span id="txt-foul-p1">發射失誤</span><span class="pts-badge" id="foul-badge-p1">0/2</span>
                 </button>
             </div>
         </div>
@@ -441,19 +441,19 @@
             <div class="score-display" id="score-p2">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
-                    <span class="txt-xtreme">Xtreme Finish</span><span class="pts-badge">+3</span>
+                    <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
                 </button>
                 <button class="score-btn btn-over" onclick="addScore(2, 2, 'Over')">
-                    <span class="txt-over">Over Finish</span><span class="pts-badge">+2</span>
+                    <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-burst" onclick="addScore(2, 2, 'Burst')">
-                    <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
+                    <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
-                    <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
+                    <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
                 </button>
                 <button class="score-btn btn-foul" id="btn-foul-p2" onclick="addFoul(2)">
-                    <span id="txt-foul-p2">發射失誤 (Foul)</span><span class="pts-badge" id="foul-badge-p2">0/2</span>
+                    <span id="txt-foul-p2">發射失誤</span><span class="pts-badge" id="foul-badge-p2">0/2</span>
                 </button>
             </div>
         </div>
@@ -464,27 +464,27 @@
             <div class="score-display" id="score-p3">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(3, 3, 'Xtreme')">
-                    <span class="txt-xtreme">Xtreme Finish</span><span class="pts-badge">+3</span>
+                    <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
                 </button>
                 <button class="score-btn btn-over" onclick="addScore(3, 2, 'Over')">
-                    <span class="txt-over">Over Finish</span><span class="pts-badge">+2</span>
+                    <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-burst" onclick="addScore(3, 2, 'Burst')">
-                    <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
+                    <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(3, 1, 'Spin')">
-                    <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
+                    <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
                 </button>
                 <button class="score-btn btn-foul" id="btn-foul-p3" onclick="addFoul(3)">
-                    <span id="txt-foul-p3">發射失誤 (Foul)</span><span class="pts-badge" id="foul-badge-p3">0/2</span>
+                    <span id="txt-foul-p3">發射失誤</span><span class="pts-badge" id="foul-badge-p3">0/2</span>
                 </button>
             </div>
         </div>
     </div>
 
     <div class="controls">
-        <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原 (Undo)</button>
-        <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手 (Draw / 重賽)</button>
+        <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原</button>
+        <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手 (重賽)</button>
         <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局 (KOF 換人)</button>
         <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
     </div>
@@ -522,7 +522,7 @@
 
     <script>
         let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
-        let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0; // 追蹤失誤次數 (0/2, 1/2)
+        let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
         let teamWinsP1 = 0, teamWinsP2 = 0;
         let battleCount = 1;
         let matchMode = 'std';
@@ -550,13 +550,13 @@
                 rulesTag: "《爆旋陀螺X規則（亞洲版）》第 12 版",
                 rulesBtn: "規則",
                 modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
-                xtreme: "極限勝利 (Xtreme)",
-                over: "擊飛勝利 (Over)",
-                burst: "爆裂勝利 (Burst)",
-                spin: "迴轉勝利 (Spin)",
-                foulTxt: "發射失誤 (Foul)",
-                undo: "復原 (Undo)",
-                drawBtn: "平手 (Draw / 重賽)",
+                xtreme: "極限終結",
+                over: "擊出終結",
+                burst: "爆裂終結",
+                spin: "迴轉勝利",
+                foulTxt: "發射失誤",
+                undo: "復原",
+                drawBtn: "平手 (重賽)",
                 reset: "重置賽事",
                 nextKof: "下一局 (KOF 換人)",
                 reorderBtn: "重置順序",
@@ -570,9 +570,9 @@
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分與判定機制 (Scoring Outcomes)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>極限勝利 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回對戰區。</li>
-                            <li><b>擊飛勝利 (Over Finish) - 2分</b>：完全進入超區且無法返回對戰區。</li>
-                            <li><b>爆裂勝利 (Burst Finish) - 2分</b>：對手陀螺部件先行分離。</li>
+                            <li><b>極限終結 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回對戰區。</li>
+                            <li><b>擊出終結 (Over Finish) - 2分</b>：完全進入超區且無法返回對戰區。</li>
+                            <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先行分離。</li>
                             <li><b>迴轉勝利 (Spin Finish) - 1分</b>：對手陀螺先行停止旋轉。</li>
                             <li><b>同時發生/平手 (Draw)</b>：雙方同時發生 Finish 視為 Draw，無人得分並重賽。</li>
                             <li><b>發射失誤/罰分 (Shooting Errors)</b>：同一局累積 2 次發射失誤 (Premature/Delayed/Miss)，對手直接獲得 1 分並重賽。正式得分後之前的失誤自動清零。</li>
@@ -611,7 +611,7 @@
                 spin: "Spin Finish",
                 foulTxt: "Shooting Error",
                 undo: "Undo",
-                drawBtn: "Draw (Replay)",
+                drawBtn: "Draw",
                 reset: "Reset Match",
                 nextKof: "Next Round (KOF)",
                 reorderBtn: "Reset Order",
@@ -685,9 +685,9 @@
             }
 
             resetMatch(false);
+            applyLanguage();
         }
 
-        /* 正式得分：自動清空雙方的失誤次數 (Nullified) */
         function addScore(player, pts, typeName) {
             if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
 
@@ -705,13 +705,20 @@
             let name3 = document.getElementById('p3-title').value;
 
             let pName = player === 1 ? name1 : (player === 2 ? name2 : name3);
-            logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${typeName})`);
+            let displayType = typeName;
+            if (currentLang === 'zh') {
+                if (typeName === 'Xtreme') displayType = '極限終結';
+                else if (typeName === 'Over') displayType = '擊出終結';
+                else if (typeName === 'Burst') displayType = '爆裂終結';
+                else if (typeName === 'Spin') displayType = '迴轉勝利';
+            }
+
+            logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${displayType})`);
 
             if (player === 1) scoreP1 += pts;
             else if (player === 2) scoreP2 += pts;
             else if (player === 3) scoreP3 += pts;
 
-            // 正式得分後，根據官方條款自動重置失誤次數
             foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
 
             battleCount++;
@@ -732,7 +739,6 @@
             }
         }
 
-        /* ⚠️ 核心邏輯：按兩次發射失誤，自動處罰給對手 +1 分 */
         function addFoul(player) {
             if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
 
@@ -757,23 +763,19 @@
             let currentFouls = player === 1 ? foulsP1 : (player === 2 ? foulsP2 : foulsP3);
 
             if (currentFouls === 1) {
-                // 第 1 次失誤：僅記錄，不加分
                 logs.unshift(`Round ${battleCount}: ${offenderName} 發射失誤 (1/2)`);
             } else if (currentFouls >= 2) {
-                // 累積滿 2 次失誤：重置該玩家失誤，自動處罰給對手 +1 分 (重賽)
                 if (player === 1) foulsP1 = 0;
                 else if (player === 2) foulsP2 = 0;
                 else if (player === 3) foulsP3 = 0;
 
-                logs.unshift(`Round ${battleCount}: ${offenderName} 累積2次失誤 ➔ 對手 +1 分 (重賽)`);
+                logs.unshift(`Round ${battleCount}: ${offenderName} 累積2次失誤 ➔ 對手 +1 分`);
 
                 if (matchMode === 'p3') {
-                    // 3人戰：其餘兩位未犯規玩家各 +1 分
                     if (player !== 1) scoreP1 += 1;
                     if (player !== 2) scoreP2 += 1;
                     if (player !== 3) scoreP3 += 1;
                 } else {
-                    // 1v1 / Team Battle：對手 +1 分
                     if (player === 1) scoreP2 += 1;
                     else scoreP1 += 1;
                 }
@@ -837,6 +839,7 @@
                 history = []; logs = [];
                 updateDisplay();
                 saveState();
+                applyLanguage();
             }
         }
 
@@ -845,7 +848,6 @@
             document.getElementById('score-p2').innerText = scoreP2;
             document.getElementById('score-p3').innerText = scoreP3;
 
-            // 更新失誤次數 Badge 與樣式 Highlight
             document.getElementById('foul-badge-p1').innerText = `${foulsP1}/2`;
             document.getElementById('foul-badge-p2').innerText = `${foulsP2}/2`;
             document.getElementById('foul-badge-p3').innerText = `${foulsP3}/2`;
