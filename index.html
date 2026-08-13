@@ -12,6 +12,7 @@
             --accent-red: #ef4444;
             --accent-orange: #f97316;
             --accent-yellow: #eab308;
+            --accent-blue: #38bdf8;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
         }
@@ -34,7 +35,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         h1 { font-size: 1.25rem; margin: 0; }
@@ -51,6 +52,64 @@
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: bold;
+        }
+
+        /* Mode Selector Banner */
+        .mode-banner {
+            width: 100%;
+            max-width: 800px;
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            border: 1px solid #334155;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mode-toggle { display: flex; gap: 6px; }
+
+        .mode-btn {
+            background: #0f172a;
+            color: var(--text-sub);
+            border: 1px solid #334155;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .mode-btn.active {
+            background: var(--accent-blue);
+            color: #0f172a;
+            border-color: var(--accent-blue);
+        }
+
+        .deck-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .deck-indicator {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+        }
+
+        .reorder-btn {
+            background: #334155;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
         }
 
         .scoreboard {
@@ -71,16 +130,12 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
-        .player-name {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
+        .player-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
 
         .score-display {
             font-size: 4rem;
             font-weight: 800;
-            color: #38bdf8;
+            color: var(--accent-blue);
             margin: 8px 0;
             line-height: 1;
         }
@@ -112,11 +167,7 @@
         .btn-burst { background-color: var(--accent-yellow); color: #000 !important; }
         .btn-spin { background-color: var(--accent-green); }
 
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 12px;
-        }
+        .controls { margin-top: 16px; display: flex; gap: 12px; }
 
         .ctrl-btn {
             background: #334155;
@@ -130,12 +181,28 @@
 
         .ctrl-btn.reset { background: #b91c1c; }
 
+        /* Battle Log Panel */
+        .log-panel {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-top: 16px;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 1px solid #334155;
+        }
+
+        .log-title { font-size: 0.9rem; font-weight: bold; color: var(--text-sub); margin-bottom: 8px; }
+        .log-list { list-style: none; padding: 0; margin: 0; max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
+        .log-item { padding: 4px 0; border-bottom: 1px dashed #334155; display: flex; justify-content: space-between; }
+
         /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             justify-content: center;
             align-items: center;
             z-index: 100;
@@ -144,8 +211,8 @@
         .modal-content {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 20px;
-            max-width: 700px;
+            padding: 24px;
+            max-width: 600px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
@@ -161,18 +228,10 @@
             margin-bottom: 12px;
         }
 
-        .close-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-sub);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
+        .close-btn { background: transparent; border: none; color: var(--text-sub); font-size: 1.5rem; cursor: pointer; }
 
-        .rule-section { margin-bottom: 16px; }
-        .rule-section h3 { color: #38bdf8; margin-bottom: 6px; font-size: 1rem; }
-        .rule-section ul { padding-left: 20px; margin: 0; font-size: 0.85rem; color: #cbd5e1; }
-        .rule-section li { margin-bottom: 4px; }
+        .winner-box { text-align: center; padding: 20px 0; }
+        .winner-title { font-size: 2.2rem; color: #38bdf8; margin: 10px 0; font-weight: 800; }
 
         footer {
             margin-top: auto;
@@ -202,22 +261,35 @@
         </div>
     </header>
 
+    <!-- Mode Banner -->
+    <div class="mode-banner">
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std')">1v1 Standard</button>
+            <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3')">3on3 Battle</button>
+            <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team')">Team Battle</button>
+        </div>
+        <div class="deck-controls" id="deck-box" style="display: none;">
+            <span class="deck-indicator" id="deck-status">Bey #1</span>
+            <button class="reorder-btn" onclick="resetBattleCounter()" id="reorder-btn">重新排陣</button>
+        </div>
+    </div>
+
     <div class="scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
             <div class="player-name" id="p1-title">Player 1</div>
             <div class="score-display" id="score-p1">0</div>
             <div class="btn-grid">
-                <button class="score-btn btn-xtreme" onclick="addScore(1, 3)">
+                <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
                     <span class="txt-xtreme">Xtreme Finish</span><span>+3</span>
                 </button>
-                <button class="score-btn btn-over" onclick="addScore(1, 2)">
+                <button class="score-btn btn-over" onclick="addScore(1, 2, 'Over')">
                     <span class="txt-over">Over Finish</span><span>+2</span>
                 </button>
-                <button class="score-btn btn-burst" onclick="addScore(1, 2)">
+                <button class="score-btn btn-burst" onclick="addScore(1, 2, 'Burst')">
                     <span class="txt-burst">Burst Finish</span><span>+2</span>
                 </button>
-                <button class="score-btn btn-spin" onclick="addScore(1, 1)">
+                <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span>+1</span>
                 </button>
             </div>
@@ -228,16 +300,16 @@
             <div class="player-name" id="p2-title">Player 2</div>
             <div class="score-display" id="score-p2">0</div>
             <div class="btn-grid">
-                <button class="score-btn btn-xtreme" onclick="addScore(2, 3)">
+                <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
                     <span class="txt-xtreme">Xtreme Finish</span><span>+3</span>
                 </button>
-                <button class="score-btn btn-over" onclick="addScore(2, 2)">
+                <button class="score-btn btn-over" onclick="addScore(2, 2, 'Over')">
                     <span class="txt-over">Over Finish</span><span>+2</span>
                 </button>
-                <button class="score-btn btn-burst" onclick="addScore(2, 2)">
+                <button class="score-btn btn-burst" onclick="addScore(2, 2, 'Burst')">
                     <span class="txt-burst">Burst Finish</span><span>+2</span>
                 </button>
-                <button class="score-btn btn-spin" onclick="addScore(2, 1)">
+                <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span>+1</span>
                 </button>
             </div>
@@ -249,6 +321,12 @@
         <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">Reset / 重置</button>
     </div>
 
+    <!-- Battle Log -->
+    <div class="log-panel">
+        <div class="log-title" id="log-title">對局紀錄 (Battle Log)</div>
+        <ul class="log-list" id="log-list"></ul>
+    </div>
+
     <!-- Rules Modal -->
     <div class="modal" id="rules-modal">
         <div class="modal-content">
@@ -256,8 +334,18 @@
                 <h2 style="margin:0; font-size:1.1rem;" id="modal-title">BEYBLADE X 亞洲版第 12 版規則摘要</h2>
                 <button class="close-btn" onclick="closeRules()">&times;</button>
             </div>
-            <div id="modal-body">
-                <!-- Dynamic Rule Content -->
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="win-modal">
+        <div class="modal-content" style="text-align: center;">
+            <div class="winner-box">
+                <div style="font-size: 3rem;">🎉</div>
+                <div class="winner-title" id="winner-name">Player 1</div>
+                <p style="font-size: 1.2rem; color: #fff;" id="win-msg">MATCH WINNER!</p>
+                <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px;">OK</button>
             </div>
         </div>
     </div>
@@ -269,12 +357,17 @@
     <script>
         let scoreP1 = 0;
         let scoreP2 = 0;
+        let battleCount = 1;
+        let matchMode = 'std'; // 'std', '3v3', 'team'
+        let targetScore = 4;
         let history = [];
+        let logs = [];
         let currentLang = 'zh';
 
         const i18n = {
             zh: {
-                rulesTag: "亞洲版規則 第12版 (先得 4 分獲勝)",
+                rulesTag4: "亞洲版規則 第12版 (先得 4 分獲勝)",
+                rulesTag2: "團隊戰規則 (每局先得 2 分獲勝)",
                 rulesBtn: "規則",
                 modalTitle: "亞洲版第 12 版官方規則要點 (2026年3月)",
                 xtreme: "極致收尾 (Xtreme)",
@@ -283,9 +376,11 @@
                 spin: "旋轉收尾 (Spin)",
                 undo: "復原 (Undo)",
                 reset: "重置比賽",
+                reorderBtn: "重新排陣",
                 p1: "選手 A (Player 1)",
                 p2: "選手 B (Player 2)",
-                win: "獲勝！",
+                winMsg: "率先達到目標分數，獲得最終勝利！",
+                reorderMsg: "3 個陀螺已全部登場，比分尚未達到 4 分！請雙方重新排列 3 個陀螺順序，從 Bey #1 繼續比賽。",
                 disclaimer: "本工具為玩家自製非官方應用，僅供對戰計分使用。BEYBLADE 及 爆旋陀螺 為 TAKARA TOMY 之註冊商標。",
                 rulesBody: `
                     <div class="rule-section">
@@ -301,29 +396,22 @@
                         <h3>2. 3對3賽制 (3on3 Battle)</h3>
                         <ul>
                             <li>預先決定 3 個陀螺出場順序並進行 Bey Check。</li>
-                            <li>三個陀螺<b>不得使用重複部件</b>（即使顏色不同亦視為同一部件）。</li>
-                            <li>比賽期間未經裁判允許不得變更順序或組合，先得 4 分者勝。</li>
+                            <li>打完 3 場若未有人累積滿 4 分，<b>得分保留，重新排列 3 個陀螺順序（由 Bey #1 重新開始）</b>繼續比賽。</li>
                         </ul>
                     </div>
                     <div class="rule-section">
                         <h3>3. 團隊戰 (Team Battle)</h3>
                         <ul>
-                            <li>每局對戰採<b>先得 2 分制</b>。</li>
+                            <li>每局個人對戰採<b>先得 2 分制</b>。</li>
                             <li>勝方留場繼續對戰，敗方由下一位隊員接替 (KOF模式)。</li>
                             <li>換人時上一場分數不累積，新對戰比分重新由 0-0 開始。</li>
-                        </ul>
-                    </div>
-                    <div class="rule-section">
-                        <h3>4. 發射違規 (Shooting Errors)</h3>
-                        <ul>
-                            <li>過早發射 (Premature Launch) 或 延遲發射 (Delayed Launch) 會被裁判警告。</li>
-                            <li>同一戰中累積第二次發射失誤/違規，裁判將判給對方 1 分並重賽。</li>
                         </ul>
                     </div>
                 `
             },
             en: {
-                rulesTag: "Asia Regs v12 (First to 4 pts)",
+                rulesTag4: "Asia Regs v12 (First to 4 pts)",
+                rulesTag2: "Team Battle Regs (First to 2 pts)",
                 rulesBtn: "Rules",
                 modalTitle: "Asia Regs 12th Edition Summary (March 2026)",
                 xtreme: "Xtreme Finish",
@@ -332,9 +420,11 @@
                 spin: "Spin Finish",
                 undo: "Undo",
                 reset: "Reset Match",
+                reorderBtn: "Reset Order",
                 p1: "Player 1",
                 p2: "Player 2",
-                win: "Wins the Match!",
+                winMsg: "Reached target score and wins the match!",
+                reorderMsg: "All 3 Beys have battled, but no one reached 4 pts. Scores stay, rearrange your 3-Bey order and restart from Bey #1!",
                 disclaimer: "Unofficial fan-made tool for scoring purposes only. BEYBLADE is a registered trademark of TAKARA TOMY.",
                 rulesBody: `
                     <div class="rule-section">
@@ -350,8 +440,7 @@
                         <h3>2. 3on3 Battle Rules</h3>
                         <ul>
                             <li>Place 3 Beys in deck case in battle order for Bey Check.</li>
-                            <li><b>No duplicate parts</b> allowed among 3 Beys (different colors count as same part).</li>
-                            <li>Order cannot be changed during match. First to 4 pts wins.</li>
+                            <li>If no one reaches 4 pts after 3 battles, <b>scores stay, rearrange order and restart from Bey #1</b>.</li>
                         </ul>
                     </div>
                     <div class="rule-section">
@@ -362,27 +451,57 @@
                             <li>Points do not carry over when a new opponent steps in.</li>
                         </ul>
                     </div>
-                    <div class="rule-section">
-                        <h3>4. Shooting Errors</h3>
-                        <ul>
-                            <li>Premature or delayed launches will receive warnings from judge.</li>
-                            <li>Accumulating two shooting errors in same battle awards 1 pt to opponent and replays.</li>
-                        </ul>
-                    </div>
                 `
             }
         };
 
-        function addScore(player, pts) {
-            if (scoreP1 >= 4 || scoreP2 >= 4) return;
+        function setMatchMode(mode) {
+            matchMode = mode;
+            targetScore = (mode === 'team') ? 2 : 4;
 
-            history.push({ p1: scoreP1, p2: scoreP2 });
+            document.getElementById('mode-std-btn').classList.toggle('active', mode === 'std');
+            document.getElementById('mode-3v3-btn').classList.toggle('active', mode === '3v3');
+            document.getElementById('mode-team-btn').classList.toggle('active', mode === 'team');
+            document.getElementById('deck-box').style.display = mode === '3v3' ? 'flex' : 'none';
+
+            resetMatch(false);
+        }
+
+        function addScore(player, pts, typeName) {
+            if (scoreP1 >= targetScore || scoreP2 >= targetScore) return;
+
+            // Record History
+            history.push({ p1: scoreP1, p2: scoreP2, battle: battleCount, logs: [...logs] });
+
+            let pName = player === 1 ? i18n[currentLang].p1 : i18n[currentLang].p2;
+            logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${typeName})`);
 
             if (player === 1) scoreP1 += pts;
             else scoreP2 += pts;
 
+            battleCount++;
             updateDisplay();
-            checkWinner();
+
+            // Check Win Condition
+            if (checkWinner()) return;
+
+            // 3on3 Mode: Every 3 battles logic
+            if (matchMode === '3v3' && (battleCount - 1) % 3 === 0) {
+                if (scoreP1 < 4 && scoreP2 < 4) {
+                    setTimeout(() => {
+                        alert(i18n[currentLang].reorderMsg);
+                        battleCount = 1; // RESET battle counter to 1 for new deck round
+                        updateDisplay();
+                    }, 100);
+                }
+            }
+        }
+
+        function resetBattleCounter() {
+            if (matchMode === '3v3') {
+                battleCount = 1;
+                updateDisplay();
+            }
         }
 
         function undo() {
@@ -390,15 +509,19 @@
                 const lastState = history.pop();
                 scoreP1 = lastState.p1;
                 scoreP2 = lastState.p2;
+                battleCount = lastState.battle;
+                logs = lastState.logs;
                 updateDisplay();
             }
         }
 
-        function resetMatch() {
-            if (confirm("Reset current scores? / 確定重置比分？")) {
+        function resetMatch(askConfirm = true) {
+            if (!askConfirm || confirm("Reset current scores? / 確定重置比分？")) {
                 scoreP1 = 0;
                 scoreP2 = 0;
+                battleCount = 1;
                 history = [];
+                logs = [];
                 updateDisplay();
             }
         }
@@ -406,38 +529,54 @@
         function updateDisplay() {
             document.getElementById('score-p1').innerText = scoreP1;
             document.getElementById('score-p2').innerText = scoreP2;
+
+            if (matchMode === '3v3') {
+                let currentBeyNum = ((battleCount - 1) % 3) + 1;
+                document.getElementById('deck-status').innerText = `Bey #${currentBeyNum}`;
+            }
+
+            // Update Logs
+            const logList = document.getElementById('log-list');
+            logList.innerHTML = logs.map(l => `<li class="log-item"><span>${l}</span></li>`).join('');
         }
 
         function checkWinner() {
-            setTimeout(() => {
-                const lang = i18n[currentLang];
-                if (scoreP1 >= 4) {
-                    alert(`${lang.p1} ${lang.win}`);
-                } else if (scoreP2 >= 4) {
-                    alert(`${lang.p2} ${lang.win}`);
-                }
-            }, 50);
+            const lang = i18n[currentLang];
+            if (scoreP1 >= targetScore) {
+                showWinModal(lang.p1);
+                return true;
+            } else if (scoreP2 >= targetScore) {
+                showWinModal(lang.p2);
+                return true;
+            }
+            return false;
         }
 
-        function openRules() {
-            document.getElementById('rules-modal').style.display = 'flex';
+        function showWinModal(winner) {
+            document.getElementById('winner-name').innerText = winner;
+            document.getElementById('win-msg').innerText = i18n[currentLang].winMsg;
+            document.getElementById('win-modal').style.display = 'flex';
         }
 
-        function closeRules() {
-            document.getElementById('rules-modal').style.display = 'none';
+        function closeWinModal() {
+            document.getElementById('win-modal').style.display = 'none';
         }
+
+        function openRules() { document.getElementById('rules-modal').style.display = 'flex'; }
+        function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
 
         function toggleLanguage() {
             currentLang = currentLang === 'zh' ? 'en' : 'zh';
             const lang = i18n[currentLang];
 
-            document.getElementById('rules-tag').innerText = lang.rulesTag;
+            document.getElementById('rules-tag').innerText = targetScore === 2 ? lang.rulesTag2 : lang.rulesTag4;
             document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
             document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
             document.getElementById('p1-title').innerText = lang.p1;
             document.getElementById('p2-title').innerText = lang.p2;
             document.getElementById('btn-undo').innerText = lang.undo;
             document.getElementById('btn-reset').innerText = lang.reset;
+            document.getElementById('reorder-btn').innerText = lang.reorderBtn;
             document.getElementById('disclaimer').innerText = lang.disclaimer;
             document.getElementById('modal-title').innerText = lang.modalTitle;
             document.getElementById('modal-body').innerHTML = lang.rulesBody;
@@ -448,7 +587,7 @@
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
         }
 
-        // Init Language
+        // Init
         toggleLanguage();
     </script>
 </body>
