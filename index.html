@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BX Score Keeper | 賽事對戰計分器</title>
     
     <!-- PWA Settings -->
@@ -37,7 +37,7 @@
             background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--text-main);
             margin: 0;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -47,19 +47,19 @@
 
         header {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             border-bottom: 2px solid var(--neon-blue);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
             box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
         }
 
         h1 {
             font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 900;
             font-style: italic;
             margin: 0;
@@ -70,20 +70,20 @@
             letter-spacing: 1px;
         }
 
-        .subtitle { font-size: 0.75rem; color: var(--text-sub); font-weight: bold; }
+        .subtitle { font-size: 0.7rem; color: var(--text-sub); font-weight: bold; }
 
-        .nav-btns { display: flex; gap: 8px; }
+        .nav-btns { display: flex; gap: 6px; }
 
         .top-btn {
             background: rgba(0, 240, 255, 0.1);
             color: var(--neon-blue);
             border: 1px solid var(--neon-blue);
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
             transition: all 0.2s;
         }
 
@@ -91,32 +91,32 @@
 
         .mode-banner {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background: rgba(17, 24, 39, 0.8);
             border: 1px solid rgba(0, 240, 255, 0.3);
             border-radius: 6px;
-            padding: 8px 12px;
-            margin-bottom: 16px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
             backdrop-filter: blur(5px);
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .mode-toggle { display: flex; gap: 8px; }
+        .mode-toggle { display: flex; gap: 6px; }
 
         .mode-btn {
             background: #0f172a;
             color: var(--text-sub);
             border: 1px solid #334155;
-            padding: 6px 12px;
-            font-size: 0.8rem;
+            padding: 4px 10px;
+            font-size: 0.75rem;
             font-weight: 900;
             cursor: pointer;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
             transition: all 0.2s;
         }
 
@@ -124,14 +124,14 @@
             background: var(--neon-blue);
             color: #000;
             border-color: var(--neon-blue);
-            box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
         }
 
-        .deck-controls { display: flex; align-items: center; gap: 10px; }
+        .deck-controls { display: flex; align-items: center; gap: 8px; }
 
         .deck-indicator {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 900;
             color: var(--neon-yellow);
             text-shadow: 0 0 8px var(--neon-yellow);
@@ -141,8 +141,8 @@
             background: rgba(255, 204, 0, 0.15);
             color: var(--neon-yellow);
             border: 1px solid var(--neon-yellow);
-            padding: 4px 10px;
-            font-size: 0.75rem;
+            padding: 2px 8px;
+            font-size: 0.7rem;
             font-weight: bold;
             cursor: pointer;
             border-radius: 4px;
@@ -150,45 +150,45 @@
 
         .team-tracker-bar {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background: rgba(0, 240, 255, 0.05);
             border: 1px dashed var(--neon-blue);
-            padding: 8px;
+            padding: 6px;
             border-radius: 6px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             box-sizing: border-box;
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
         }
 
         .scoreboard {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
         }
 
         .player-card {
-            background: linear-gradient(135deg, rgba(31, 41, 61, 0.9), rgba(17, 24, 39, 0.9));
+            background: linear-gradient(135deg, rgba(31, 41, 61, 0.95), rgba(17, 24, 39, 0.95));
             border: 2px solid #2a3852;
             border-radius: 8px;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+            clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
         }
 
         .player-name-input {
             font-family: 'Noto Sans TC', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 900;
             color: #fff;
             text-transform: uppercase;
@@ -203,19 +203,19 @@
 
         .score-display {
             font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
+            font-size: 4.2rem;
             font-weight: 900;
             color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
-            margin: 4px 0;
+            text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue);
+            margin: 2px 0;
             line-height: 1;
         }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+        .btn-grid { display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%; }
 
         button.score-btn {
             border: none;
-            padding: 12px 12px;
+            padding: 10px 12px;
             font-family: 'Noto Sans TC', sans-serif;
             font-weight: 900;
             color: #fff;
@@ -223,9 +223,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
             transition: transform 0.1s, box-shadow 0.2s;
         }
 
@@ -236,16 +236,17 @@
         .btn-burst { background: linear-gradient(90deg, #806600, var(--neon-yellow)); color: #000 !important; border-left: 4px solid var(--neon-yellow); }
         .btn-spin { background: linear-gradient(90deg, #008033, var(--neon-green)); border-left: 4px solid var(--neon-green); }
 
-        .pts-badge { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900; }
+        .pts-badge { font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; }
 
-        .controls { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .controls { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
         .ctrl-btn {
             background: #1e293b;
             color: #fff;
             border: 1px solid #475569;
-            padding: 10px 18px;
+            padding: 8px 16px;
             font-weight: bold;
+            font-size: 0.85rem;
             cursor: pointer;
             border-radius: 4px;
         }
@@ -254,19 +255,20 @@
 
         .log-panel {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background: rgba(17, 24, 39, 0.85);
             border-radius: 6px;
-            margin-top: 16px;
-            padding: 12px;
+            margin-top: 12px;
+            padding: 10px;
             box-sizing: border-box;
             border: 1px solid #2a3852;
         }
 
-        .log-title { font-size: 0.85rem; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-bottom: 8px; }
-        .log-list { list-style: none; padding: 0; margin: 0; max-height: 120px; overflow-y: auto; font-size: 0.8rem; }
-        .log-item { padding: 4px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; }
+        .log-title { font-size: 0.8rem; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-bottom: 6px; }
+        .log-list { list-style: none; padding: 0; margin: 0; max-height: 80px; overflow-y: auto; font-size: 0.75rem; }
+        .log-item { padding: 3px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; }
 
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -283,7 +285,7 @@
             border: 2px solid var(--neon-blue);
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
             border-radius: 8px;
-            padding: 24px;
+            padding: 20px;
             max-width: 600px;
             width: 90%;
             max-height: 80vh;
@@ -293,14 +295,46 @@
 
         .winner-title {
             font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: var(--neon-blue);
             text-shadow: 0 0 20px var(--neon-blue);
             margin: 10px 0;
             font-weight: 900;
         }
 
-        footer { margin-top: auto; padding-top: 20px; font-size: 0.7rem; color: var(--text-sub); text-align: center; }
+        footer { margin-top: auto; padding-top: 12px; font-size: 0.65rem; color: var(--text-sub); text-align: center; }
+
+        /* =========================================================
+           📱 橫屏專屬優化 (Landscape Mode Layout)
+           ========================================================= */
+        @media (orientation: landscape) and (max-height: 500px) {
+            body { padding: 6px 12px; }
+            header { margin-bottom: 4px; padding-bottom: 2px; }
+            h1 { font-size: 1rem; }
+            .subtitle { font-size: 0.6rem; }
+
+            .mode-banner { margin-bottom: 6px; padding: 4px 8px; }
+            .mode-btn { font-size: 0.7rem; padding: 2px 6px; }
+
+            .team-tracker-bar { padding: 4px; margin-bottom: 4px; font-size: 0.75rem; }
+
+            .scoreboard { gap: 10px; }
+            .player-card { padding: 6px 10px; }
+            .player-name-input { font-size: 0.85rem; }
+            .score-display { font-size: 2.8rem; margin: 0; }
+
+            .btn-grid { gap: 5px; }
+            button.score-btn { padding: 6px 8px; font-size: 0.75rem; }
+            .pts-badge { font-size: 0.85rem; }
+
+            .controls { margin-top: 6px; gap: 6px; }
+            .ctrl-btn { padding: 4px 12px; font-size: 0.75rem; }
+
+            .log-panel { margin-top: 6px; padding: 6px; }
+            .log-list { max-height: 50px; }
+
+            footer { padding-top: 6px; font-size: 0.6rem; }
+        }
     </style>
 </head>
 <body>
@@ -403,7 +437,7 @@
     <!-- Win Modal -->
     <div class="modal" id="win-modal">
         <div class="modal-content" style="text-align: center;">
-            <div style="font-size: 3.5rem;">🏆</div>
+            <div style="font-size: 3rem;">🏆</div>
             <div class="winner-title" id="winner-name">PLAYER 1</div>
             <p style="font-size: 1.1rem; color: #fff; font-weight: bold;" id="win-msg">MATCH WINNER!</p>
             <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">OK</button>
