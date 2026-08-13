@@ -7,7 +7,7 @@
 <a name="繁體中文"></a>
 ## 📖 關於本專案 (About This Project)
 
-本專案是為我和兒子共渡美好時光而開發的非商業個人專案！特別打造了這個計分工具，讓每一次對戰都更流暢、更有儀式感，並完美貼合官方賽事標準。誠摯邀請所有大朋友和小朋友一起使用，享受公平對戰的樂趣，共創無價的親子回憶！
+本專案是為我和兒子共渡美好時光而開發的非商業個人專案！特別打造了這個計分工具，讓每一次對戰都更流暢、更有儀式感，並完美貼合官方賽事標準。誠摯邀請所有大朋友和小朋友一起使用，享受公平對戰的樂趣，共創無價的回憶！
 
 ### ✨ 核心功能
 * **完美對應官方第 12 版規則 (2026年3月最新標準)**：
@@ -34,7 +34,7 @@
 <a name="english"></a>
 ## 📖 About This Project
 
-This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by a shared passion for top-tier competitive play, we built this scorekeeper to make every battle seamless, engaging, and fully aligned with official tournament standards. We warmly invite parents, kids, and players of all ages to use it, enjoy fair battles, and create unforgettable family memories together!
+This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by a shared passion for top-tier competitive play, we built this scorekeeper to make every battle seamless, engaging, and fully aligned with official tournament standards. We warmly invite parents, kids, and players of all ages to use it, enjoy fair battles, and create unforgettable memories together!
 
 ### ✨ Features
 * **Official 12th Edition Scoring Alignment**:
