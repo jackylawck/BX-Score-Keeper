@@ -9,7 +9,7 @@
 
     <!-- SEO Meta -->
     <title>BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器 (亞洲版第 12 版)</title>
-    <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式、KOF 團隊戰與 3人亂鬥 5分制。">
+    <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式、KOF 團隊戰與 3人亂鬥。">
     <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, Beyblade X Counter, 亞洲版第12版, 3on3對戰, 團隊戰, 3人亂鬥, 5分制, PWA, 陀螺戰鬥助手">
     <meta name="author" content="羅子淇 Jacky Law">
     <meta name="robots" content="index, follow">
@@ -18,7 +18,7 @@
     <!-- Open Graph (Facebook, WhatsApp, Discord) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
-    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥 5分制。">
+    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
     <meta property="og:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
     <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
     <meta property="og:site_name" content="BX Score Keeper">
@@ -48,6 +48,7 @@
             --neon-orange: #ff7700;
             --neon-yellow: #ffcc00;
             --neon-green: #00ff66;
+            --neon-purple: #a855f7;
             --text-main: #ffffff;
             --text-sub: #8b9bb4;
         }
@@ -198,9 +199,7 @@
             max-width: 950px;
         }
 
-        .scoreboard.p3-mode {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
+        .scoreboard.p3-mode { grid-template-columns: 1fr 1fr 1fr; }
 
         .player-card {
             background: linear-gradient(135deg, rgba(31, 41, 61, 0.95), rgba(17, 24, 39, 0.95));
@@ -264,6 +263,7 @@
         .btn-over { background: linear-gradient(90deg, #803b00, var(--neon-orange)); border-left: 4px solid var(--neon-orange); }
         .btn-burst { background: linear-gradient(90deg, #806600, var(--neon-yellow)); color: #000 !important; border-left: 4px solid var(--neon-yellow); }
         .btn-spin { background: linear-gradient(90deg, #008033, var(--neon-green)); border-left: 4px solid var(--neon-green); }
+        .btn-penalty { background: linear-gradient(90deg, #4c1d95, var(--neon-purple)); border-left: 4px solid var(--neon-purple); }
 
         .pts-badge { font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; }
 
@@ -280,6 +280,7 @@
             border-radius: 4px;
         }
 
+        .ctrl-btn.draw { background: rgba(0, 240, 255, 0.15); color: var(--neon-blue); border-color: var(--neon-blue); }
         .ctrl-btn.reset { background: rgba(255, 0, 85, 0.15); color: var(--neon-red); border-color: var(--neon-red); }
 
         .log-panel {
@@ -314,7 +315,7 @@
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
             border-radius: 8px;
             padding: 20px;
-            max-width: 600px;
+            max-width: 650px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
@@ -420,6 +421,9 @@
                 <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
+                <button class="score-btn btn-penalty" onclick="addScore(1, 1, 'Penalty')">
+                    <span class="txt-penalty">Opponent Foul</span><span class="pts-badge">+1</span>
+                </button>
             </div>
         </div>
 
@@ -439,6 +443,9 @@
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
+                </button>
+                <button class="score-btn btn-penalty" onclick="addScore(2, 1, 'Penalty')">
+                    <span class="txt-penalty">Opponent Foul</span><span class="pts-badge">+1</span>
                 </button>
             </div>
         </div>
@@ -460,12 +467,16 @@
                 <button class="score-btn btn-spin" onclick="addScore(3, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
+                <button class="score-btn btn-penalty" onclick="addScore(3, 1, 'Penalty')">
+                    <span class="txt-penalty">Opponent Foul</span><span class="pts-badge">+1</span>
+                </button>
             </div>
         </div>
     </div>
 
     <div class="controls">
         <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原 (Undo)</button>
+        <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手 (Draw / 重賽)</button>
         <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局 (KOF 換人)</button>
         <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
     </div>
@@ -505,7 +516,7 @@
         let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
         let teamWinsP1 = 0, teamWinsP2 = 0;
         let battleCount = 1;
-        let matchMode = 'std'; // 'std', '3v3', 'team', 'p3'
+        let matchMode = 'std';
         let targetScore = 4;
         let history = [], logs = [];
         let currentLang = 'zh';
@@ -534,7 +545,9 @@
                 over: "完工 / 超區 (Over)",
                 burst: "爆裂終結 (Burst)",
                 spin: "旋轉收尾 (Spin)",
+                penalty: "對手發射失誤/犯規",
                 undo: "復原 (Undo)",
+                drawBtn: "平手 (Draw / 重賽)",
                 reset: "重置賽事",
                 nextKof: "下一局 (KOF 換人)",
                 reorderBtn: "重置順序",
@@ -546,33 +559,35 @@
                 privacyNotice: "本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分機制 (Points)</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分與判定機制 (Scoring Outcomes)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>極致收尾 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回。</li>
-                            <li><b>完工 (Over Finish) - 2分</b>：完全進入超區且無法返回。</li>
-                            <li><b>爆裂終結 (Burst Finish) - 2分</b>：部件先行分離。</li>
-                            <li><b>旋轉收尾 (Spin Finish) - 1分</b>：先行停止旋轉。</li>
+                            <li><b>極致收尾 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回對戰區。</li>
+                            <li><b>完工 (Over Finish) - 2分</b>：完全進入超區且無法返回對戰區。</li>
+                            <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先行分離。</li>
+                            <li><b>旋轉收尾 (Spin Finish) - 1分</b>：對手陀螺先行停止旋轉。</li>
+                            <li><b>同時發生/平手 (Draw)</b>：雙方同時發生 Finish 視為 Draw，無人得分並重賽。</li>
+                            <li><b>發射失誤/罰分 (Shooting Errors)</b>：同一局累積 2 次發射失誤 (Premature/Delayed/Miss)，對手獲得 1 分並重賽。</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3對3賽制 (3on3 Battle)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>預先決定 3 個順序，不得使用重複部件。</li>
-                            <li>打完 3 場未滿 4 分，<b>得分保留，重新排列順序（由 1 號重新開始）</b>。</li>
+                            <li>預先決定 3 個陀螺順序，不得使用重複部件 (Custom Line 鎖晶片限制 1 個)。</li>
+                            <li>打完 3 場未滿 4 分，<b>得分保留，重新排列順序（由 1 號重新開始）</b>繼續對戰。</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">3. 團隊戰 KOF 機制 (Team Battle)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
                             <li>每局採<b>先得 2 分制</b>，勝方留場，敗方換下一位隊員。</li>
-                            <li>換人時當前局比分重置為 0-0，累積團隊總勝場。</li>
+                            <li>換人時當前局比分重置為 0-0，累積團隊總勝場數。</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3人同場大亂鬥 (3-Player Battle)</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3人同場大亂鬥 (3-Blader Battle)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>5分制 (5-point System)</b>：其餘兩位對手淘汰所產生的分數，全數歸屬於最後留在場上的玩家。</li>
-                            <li>率先累積滿 5 分者獲得最終勝利。</li>
+                            <li><b>5分制 (5-point System)</b>：其餘兩位對手淘汰產生的所有分數，全數歸屬於最後留在場上的玩家。先累積滿 5 分獲勝。</li>
+                            <li><b>兩勝制 (Best of Two Wins System)</b>：最後留場者獲得 1 勝，率先取得 2 勝者獲勝。</li>
                         </ul>
                     </div>
                 `
@@ -585,7 +600,9 @@
                 over: "Over Finish",
                 burst: "Burst Finish",
                 spin: "Spin Finish",
+                penalty: "Opponent Foul",
                 undo: "Undo",
+                drawBtn: "Draw (Replay)",
                 reset: "Reset Match",
                 nextKof: "Next Round (KOF)",
                 reorderBtn: "Reset Order",
@@ -597,18 +614,20 @@
                 privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems & Outcomes</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
                             <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone and cannot return.</li>
                             <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone and cannot return.</li>
                             <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
                             <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
+                            <li><b>Simultaneous Finish (Draw)</b>: Both Beys finish simultaneously; 0 pts awarded and battle is replayed.</li>
+                            <li><b>Shooting Errors / Penalties</b>: 2 shooting errors (Premature/Delayed/Miss) in a battle gives 1 pt to opponent and battle is restarted.</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3on3 Battle Rules</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>Set 3 Beys in order. No duplicate parts allowed.</li>
+                            <li>Set 3 Beys in order. No duplicate parts allowed (Lock chips limited).</li>
                             <li>If no one reaches 4 pts after 3 battles, <b>scores stay, rearrange order and restart from item #1</b>.</li>
                         </ul>
                     </div>
@@ -621,10 +640,10 @@
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3-Player Battle</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3-Blader Battles</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>5-point System</b>: All points from the finishing moves of the other two players are awarded to the last person remaining.</li>
-                            <li>The player who first accumulates 5 points wins.</li>
+                            <li><b>5-point System</b>: All points from finishing moves of the other two players are awarded to the last person remaining (First to 5 pts).</li>
+                            <li><b>Best of Two Wins System</b>: Last person remaining earns 1 win (First to 2 wins).</li>
                         </ul>
                     </div>
                 `
@@ -696,6 +715,18 @@
                     }, 100);
                 }
             }
+        }
+
+        function addDraw() {
+            playBeep(300, 'sine', 0.1);
+            history.push({
+                p1: scoreP1, p2: scoreP2, p3: scoreP3, teamP1: teamWinsP1, teamP2: teamWinsP2,
+                battle: battleCount, logs: [...logs]
+            });
+            logs.unshift(`Round ${battleCount}: DRAW (Replay / 重賽)`);
+            battleCount++;
+            updateDisplay();
+            saveState();
         }
 
         function nextKOFRound() {
@@ -815,6 +846,7 @@
             document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
             document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
             document.getElementById('btn-undo').innerText = lang.undo;
+            document.getElementById('btn-draw').innerText = lang.drawBtn;
             document.getElementById('btn-reset').innerText = lang.reset;
             document.getElementById('next-kof-btn').innerText = lang.nextKof;
             document.getElementById('reorder-btn').innerText = lang.reorderBtn;
@@ -828,6 +860,7 @@
             document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
             document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
+            document.querySelectorAll('.txt-penalty').forEach(el => el.innerText = lang.penalty);
         }
 
         function saveState() {
