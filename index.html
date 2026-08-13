@@ -7,7 +7,7 @@
     <!-- Google 網站驗證 (Google Site Verification) -->
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
 
-    <!-- 基本 SEO Meta 標籤 -->
+    <!-- SEO Meta -->
     <title>BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器 (亞洲版第 12 版)</title>
     <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式與 KOF 團隊戰，完全支援離線使用與雙語介面。">
     <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, Beyblade X Counter, 亞洲版第12版, 3on3對戰, 團隊戰, PWA, 陀螺戰鬥助手">
@@ -15,7 +15,7 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://jackylawck.github.io/BX-Score-Keeper/">
 
-    <!-- Open Graph / 社交媒體分享預覽 (Facebook, WhatsApp, Discord) -->
+    <!-- Open Graph (Facebook, WhatsApp, Discord) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
     <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3 與 KOF 團隊戰，完全免費無廣告，支援離線使用。">
@@ -29,7 +29,7 @@
     <meta name="twitter:description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的對戰計分工具。">
     <meta name="twitter:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
 
-    <!-- PWA & Favicon 設定 -->
+    <!-- PWA & Favicon Settings -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="BXScoreKeepericon-192.png">
     <link rel="apple-touch-icon" href="BXScoreKeepericon-192.png">
@@ -291,7 +291,7 @@
 
         .log-title { font-size: 0.8rem; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-bottom: 6px; }
         .log-list { list-style: none; padding: 0; margin: 0; max-height: 80px; overflow-y: auto; font-size: 0.75rem; }
-        .log-item { padding: 3px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; }
+        .log-item { padding: 3px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; word-break: break-all; }
 
         .modal {
             display: none;
@@ -324,6 +324,7 @@
             text-shadow: 0 0 20px var(--neon-blue);
             margin: 10px 0;
             font-weight: 900;
+            word-break: break-all;
         }
 
         footer { margin-top: auto; padding-top: 12px; font-size: 0.65rem; color: var(--text-sub); text-align: center; }
@@ -467,6 +468,7 @@
 
     <footer>
         <p id="disclaimer">Unofficial fan-made tool for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition.</p>
+        <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
     </footer>
 
     <script>
@@ -511,6 +513,7 @@
                 teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
                 reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
                 disclaimer: "本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。",
+                privacyNotice: "本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分機制 (Points)</h3>
@@ -548,6 +551,7 @@
                 teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
                 reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
                 disclaimer: "Unofficial fan-made score keeper tool based on BEYBLADE X Regulations (Asia Version) 12th Edition.",
+                privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
@@ -621,6 +625,7 @@
                         alert(i18n[currentLang].reorderMsg);
                         battleCount = 1;
                         updateDisplay();
+                        saveState();
                     }, 100);
                 }
             }
@@ -663,6 +668,7 @@
             }
         }
 
+        /* 🛡️ 安全更新 DOM：防範 XSS 注入 */
         function updateDisplay() {
             document.getElementById('score-p1').innerText = scoreP1;
             document.getElementById('score-p2').innerText = scoreP2;
@@ -679,8 +685,15 @@
                 document.getElementById('team-wins-p2').innerText = `${name2}: ${teamWinsP2}`;
             }
 
+            // 安全渲染對局 Log（使用 textContent，防範 XSS 攻擊）
             const logList = document.getElementById('log-list');
-            logList.innerHTML = logs.map(l => `<li class="log-item">${l}</li>`).join('');
+            logList.innerHTML = '';
+            logs.forEach(l => {
+                const li = document.createElement('li');
+                li.className = 'log-item';
+                li.textContent = l;
+                logList.appendChild(li);
+            });
         }
 
         function checkWinner() {
@@ -702,7 +715,7 @@
         }
 
         function showWinModal(winner) {
-            document.getElementById('winner-name').innerText = winner;
+            document.getElementById('winner-name').textContent = winner; // XSS Safe
             document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
             document.getElementById('win-modal').style.display = 'flex';
         }
@@ -726,6 +739,7 @@
             document.getElementById('btn-reset').innerText = lang.reset;
             document.getElementById('reorder-btn').innerText = lang.reorderBtn;
             document.getElementById('disclaimer').innerText = lang.disclaimer;
+            document.getElementById('privacy-notice').innerText = lang.privacyNotice;
             document.getElementById('modal-title').innerText = lang.modalTitle;
             document.getElementById('modal-body').innerHTML = lang.rulesBody;
 
@@ -733,8 +747,11 @@
             document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
             document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
+
+            saveState();
         }
 
+        /* 💾 完整實作 LocalStorage 自動儲存 */
         function saveState() {
             const state = {
                 scoreP1, scoreP2, teamWinsP1, teamWinsP2, battleCount, matchMode,
@@ -745,19 +762,28 @@
             localStorage.setItem('bx_score_state', JSON.stringify(state));
         }
 
+        /* 💾 完整實作 LocalStorage 自動讀取復原 */
         function loadState() {
             const saved = localStorage.getItem('bx_score_state');
             if (saved) {
                 try {
                     const state = JSON.parse(saved);
-                    scoreP1 = state.scoreP1 || 0; scoreP2 = state.scoreP2 || 0;
-                    teamWinsP1 = state.teamWinsP1 || 0; teamWinsP2 = state.teamWinsP2 || 0;
-                    battleCount = state.battleCount || 1; matchMode = state.matchMode || 'std';
-                    logs = state.logs || [];
+                    scoreP1 = state.scoreP1 || 0;
+                    scoreP2 = state.scoreP2 || 0;
+                    teamWinsP1 = state.teamWinsP1 || 0;
+                    teamWinsP2 = state.teamWinsP2 || 0;
+                    battleCount = state.battleCount || 1;
+                    matchMode = state.matchMode || 'std';
+                    logs = Array.isArray(state.logs) ? state.logs : [];
+                    currentLang = state.currentLang || 'zh';
+
                     if (state.p1Name) document.getElementById('p1-title').value = state.p1Name;
                     if (state.p2Name) document.getElementById('p2-title').value = state.p2Name;
+
                     setMatchMode(matchMode);
-                } catch(e) {}
+                } catch(e) {
+                    console.error("State restore failed:", e);
+                }
             }
         }
 
@@ -767,6 +793,7 @@
             });
         }
 
+        // 初始化載入狀態
         loadState();
     </script>
 </body>
