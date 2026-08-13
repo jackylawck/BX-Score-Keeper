@@ -1,9 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BX Score Keeper | 賽事對戰計分器</title>
     
-    <!-- PWA & Favicon Settings -->
+    <!-- Google 網站驗證 (Google Site Verification) -->
+    <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
+
+    <!-- 基本 SEO Meta 標籤 -->
+    <title>BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器 (亞洲版第 12 版)</title>
+    <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式與 KOF 團隊戰，完全支援離線使用與雙語介面。">
+    <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, Beyblade X Counter, 亞洲版第12版, 3on3對戰, 團隊戰, PWA, 陀螺戰鬥助手">
+    <meta name="author" content="羅子淇 Jacky Law">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://jackylawck.github.io/BX-Score-Keeper/">
+
+    <!-- Open Graph / 社交媒體分享預覽 (Facebook, WhatsApp, Discord) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
+    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3 與 KOF 團隊戰，完全免費無廣告，支援離線使用。">
+    <meta property="og:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
+    <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
+    <meta property="og:site_name" content="BX Score Keeper">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
+    <meta name="twitter:description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的對戰計分工具。">
+    <meta name="twitter:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
+
+    <!-- PWA & Favicon 設定 -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="BXScoreKeepericon-192.png">
     <link rel="apple-touch-icon" href="BXScoreKeepericon-192.png">
@@ -69,7 +95,7 @@
             letter-spacing: 1px;
         }
 
-        .subtitle { font-size: 0.7rem; color: var(--text-sub); font-weight: bold; }
+        .subtitle { font-size: 0.75rem; color: var(--text-sub); font-weight: bold; }
 
         .nav-btns { display: flex; gap: 6px; }
 
@@ -267,7 +293,6 @@
         .log-list { list-style: none; padding: 0; margin: 0; max-height: 80px; overflow-y: auto; font-size: 0.75rem; }
         .log-item { padding: 3px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -303,14 +328,11 @@
 
         footer { margin-top: auto; padding-top: 12px; font-size: 0.65rem; color: var(--text-sub); text-align: center; }
 
-        /* =========================================================
-           📱 橫屏專屬優化 (Landscape Mode Layout)
-           ========================================================= */
         @media (orientation: landscape) and (max-height: 500px) {
             body { padding: 6px 12px; }
             header { margin-bottom: 4px; padding-bottom: 2px; }
             h1 { font-size: 1rem; }
-            .subtitle { font-size: 0.6rem; }
+            .subtitle { font-size: 0.65rem; }
 
             .mode-banner { margin-bottom: 6px; padding: 4px 8px; }
             .mode-btn { font-size: 0.7rem; padding: 2px 6px; }
@@ -341,7 +363,7 @@
     <header>
         <div>
             <h1>BX SCORE KEEPER</h1>
-            <div class="subtitle" id="rules-tag">BEYBLADE X Regulations (Asia Version) 12th Ed (Target: 4 pts)</div>
+            <div class="subtitle" id="rules-tag">BEYBLADE X Regulations (Asia Version) 12th Ed</div>
         </div>
         <div class="nav-btns">
             <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
@@ -473,8 +495,7 @@
 
         const i18n = {
             zh: {
-                rulesTag4: "《爆旋陀螺X規則（亞洲版）》第 12 版 (先得 4 分獲勝)",
-                rulesTag2: "《爆旋陀螺X規則（亞洲版）》團隊戰 (每局先得 2 分獲勝)",
+                rulesTag: "《爆旋陀螺X規則（亞洲版）》第 12 版",
                 rulesBtn: "規則",
                 modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
                 xtreme: "極致收尾 (Xtreme)",
@@ -517,8 +538,7 @@
                 `
             },
             en: {
-                rulesTag4: "BEYBLADE X Regulations (Asia Version) 12th Ed (First to 4 pts)",
-                rulesTag2: "BEYBLADE X Regulations (Asia Version) Team Battle (First to 2 pts)",
+                rulesTag: "BEYBLADE X Regulations (Asia Version) 12th Ed",
                 rulesBtn: "Rules",
                 modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
                 xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish",
@@ -699,7 +719,7 @@
             currentLang = currentLang === 'zh' ? 'en' : 'zh';
             const lang = i18n[currentLang];
 
-            document.getElementById('rules-tag').innerText = targetScore === 2 ? lang.rulesTag2 : lang.rulesTag4;
+            document.getElementById('rules-tag').innerText = lang.rulesTag;
             document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
             document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
             document.getElementById('btn-undo').innerText = lang.undo;
