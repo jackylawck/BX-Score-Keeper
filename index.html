@@ -9,8 +9,8 @@
 
     <!-- SEO Meta -->
     <title>BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器 (亞洲版第 12 版)</title>
-    <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式與 KOF 團隊戰，完全支援離線使用與雙語介面。">
-    <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, Beyblade X Counter, 亞洲版第12版, 3on3對戰, 團隊戰, PWA, 陀螺戰鬥助手">
+    <meta name="description" content="專為《爆旋陀螺X》亞洲版第 12 版賽事規則設計的免費對戰計分器 Web App / PWA。支援 1v1 標準對戰、3on3 Deck 模式、KOF 團隊戰與 3人亂鬥 5分制。">
+    <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, Beyblade X Counter, 亞洲版第12版, 3on3對戰, 團隊戰, 3人亂鬥, 5分制, PWA, 陀螺戰鬥助手">
     <meta name="author" content="羅子淇 Jacky Law">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://jackylawck.github.io/BX-Score-Keeper/">
@@ -18,7 +18,7 @@
     <!-- Open Graph (Facebook, WhatsApp, Discord) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="BX Score Keeper | 《爆旋陀螺X》賽事對戰計分器">
-    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3 與 KOF 團隊戰，完全免費無廣告，支援離線使用。">
+    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的賽事助手。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥 5分制。">
     <meta property="og:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
     <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
     <meta property="og:site_name" content="BX Score Keeper">
@@ -72,7 +72,7 @@
 
         header {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -116,7 +116,7 @@
 
         .mode-banner {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             background: rgba(17, 24, 39, 0.8);
             border: 1px solid rgba(0, 240, 255, 0.3);
             border-radius: 6px;
@@ -131,7 +131,7 @@
             gap: 6px;
         }
 
-        .mode-toggle { display: flex; gap: 6px; }
+        .mode-toggle { display: flex; gap: 6px; flex-wrap: wrap; }
 
         .mode-btn {
             background: #0f172a;
@@ -175,7 +175,7 @@
 
         .team-tracker-bar {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             background: rgba(0, 240, 255, 0.05);
             border: 1px dashed var(--neon-blue);
             padding: 6px;
@@ -195,7 +195,11 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
+        }
+
+        .scoreboard.p3-mode {
+            grid-template-columns: 1fr 1fr 1fr;
         }
 
         .player-card {
@@ -280,7 +284,7 @@
 
         .log-panel {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             background: rgba(17, 24, 39, 0.85);
             border-radius: 6px;
             margin-top: 12px;
@@ -329,6 +333,11 @@
 
         footer { margin-top: auto; padding-top: 12px; font-size: 0.65rem; color: var(--text-sub); text-align: center; }
 
+        @media (max-width: 600px) {
+            .scoreboard.p3-mode { grid-template-columns: 1fr; }
+            .score-display { font-size: 3.5rem; }
+        }
+
         @media (orientation: landscape) and (max-height: 500px) {
             body { padding: 6px 12px; }
             header { margin-bottom: 4px; padding-bottom: 2px; }
@@ -340,14 +349,14 @@
 
             .team-tracker-bar { padding: 4px; margin-bottom: 4px; font-size: 0.75rem; }
 
-            .scoreboard { gap: 10px; }
-            .player-card { padding: 6px 10px; }
-            .player-name-input { font-size: 0.85rem; }
-            .score-display { font-size: 2.8rem; margin: 0; }
+            .scoreboard { gap: 8px; }
+            .player-card { padding: 6px 8px; }
+            .player-name-input { font-size: 0.8rem; }
+            .score-display { font-size: 2.5rem; margin: 0; }
 
-            .btn-grid { gap: 5px; }
-            button.score-btn { padding: 6px 8px; font-size: 0.75rem; }
-            .pts-badge { font-size: 0.85rem; }
+            .btn-grid { gap: 4px; }
+            button.score-btn { padding: 5px 6px; font-size: 0.7rem; }
+            .pts-badge { font-size: 0.8rem; }
 
             .controls { margin-top: 6px; gap: 6px; }
             .ctrl-btn { padding: 4px 12px; font-size: 0.75rem; }
@@ -377,6 +386,7 @@
             <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std')">1v1 Standard</button>
             <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3')">3on3 Battle</button>
             <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team')">Team Battle</button>
+            <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3')">3-Player (5-pt)</button>
         </div>
         <div class="deck-controls" id="deck-box" style="display: none;">
             <span class="deck-indicator" id="deck-status">ITEM #1</span>
@@ -392,7 +402,7 @@
         <span style="color: var(--neon-red);" id="team-wins-p2">Team B: 0</span>
     </div>
 
-    <div class="scoreboard">
+    <div class="scoreboard" id="main-scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
             <input type="text" class="player-name-input" id="p1-title" value="PLAYER 1" onchange="saveState()">
@@ -428,6 +438,26 @@
                     <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
+                    <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Player 3 (3-Player Battle) -->
+        <div class="player-card" id="p3-card" style="display: none;">
+            <input type="text" class="player-name-input" id="p3-title" value="PLAYER 3" onchange="saveState()">
+            <div class="score-display" id="score-p3">0</div>
+            <div class="btn-grid">
+                <button class="score-btn btn-xtreme" onclick="addScore(3, 3, 'Xtreme')">
+                    <span class="txt-xtreme">Xtreme Finish</span><span class="pts-badge">+3</span>
+                </button>
+                <button class="score-btn btn-over" onclick="addScore(3, 2, 'Over')">
+                    <span class="txt-over">Over Finish</span><span class="pts-badge">+2</span>
+                </button>
+                <button class="score-btn btn-burst" onclick="addScore(3, 2, 'Burst')">
+                    <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
+                </button>
+                <button class="score-btn btn-spin" onclick="addScore(3, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
             </div>
@@ -472,10 +502,10 @@
     </footer>
 
     <script>
-        let scoreP1 = 0, scoreP2 = 0;
+        let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
         let teamWinsP1 = 0, teamWinsP2 = 0;
         let battleCount = 1;
-        let matchMode = 'std';
+        let matchMode = 'std'; // 'std', '3v3', 'team', 'p3'
         let targetScore = 4;
         let history = [], logs = [];
         let currentLang = 'zh';
@@ -509,8 +539,6 @@
                 nextKof: "下一局 (KOF 換人)",
                 reorderBtn: "重置順序",
                 logTitle: "⚡ 對局紀錄 (BATTLE LOG)",
-                p1Default: "PLAYER 1",
-                p2Default: "PLAYER 2",
                 winMsg: "率先達到目標分數，獲得本局勝利！",
                 teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
                 reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
@@ -540,6 +568,13 @@
                             <li>換人時當前局比分重置為 0-0，累積團隊總勝場。</li>
                         </ul>
                     </div>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3人同場大亂鬥 (3-Player Battle)</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
+                            <li><b>5分制 (5-point System)</b>：其餘兩位對手淘汰所產生的分數，全數歸屬於最後留在場上的玩家。</li>
+                            <li>率先累積滿 5 分者獲得最終勝利。</li>
+                        </ul>
+                    </div>
                 `
             },
             en: {
@@ -555,8 +590,6 @@
                 nextKof: "Next Round (KOF)",
                 reorderBtn: "Reset Order",
                 logTitle: "⚡ BATTLE LOG",
-                p1Default: "PLAYER 1",
-                p2Default: "PLAYER 2",
                 winMsg: "Reached target score and wins the match!",
                 teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
                 reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
@@ -587,41 +620,65 @@
                             <li>Points reset to 0-0 when a new opponent steps in, team win counter is tracked.</li>
                         </ul>
                     </div>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3-Player Battle</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
+                            <li><b>5-point System</b>: All points from the finishing moves of the other two players are awarded to the last person remaining.</li>
+                            <li>The player who first accumulates 5 points wins.</li>
+                        </ul>
+                    </div>
                 `
             }
         };
 
         function setMatchMode(mode) {
             matchMode = mode;
-            targetScore = (mode === 'team') ? 2 : 4;
+            if (mode === 'team') targetScore = 2;
+            else if (mode === 'p3') targetScore = 5;
+            else targetScore = 4;
 
             document.getElementById('mode-std-btn').classList.toggle('active', mode === 'std');
             document.getElementById('mode-3v3-btn').classList.toggle('active', mode === '3v3');
             document.getElementById('mode-team-btn').classList.toggle('active', mode === 'team');
+            document.getElementById('mode-p3-btn').classList.toggle('active', mode === 'p3');
+
             document.getElementById('deck-box').style.display = mode === '3v3' ? 'flex' : 'none';
             document.getElementById('team-tracker-bar').style.display = mode === 'team' ? 'flex' : 'none';
             document.getElementById('next-kof-btn').style.display = mode === 'team' ? 'inline-block' : 'none';
+
+            const scoreboard = document.getElementById('main-scoreboard');
+            const p3Card = document.getElementById('p3-card');
+            if (mode === 'p3') {
+                scoreboard.classList.add('p3-mode');
+                p3Card.style.display = 'flex';
+            } else {
+                scoreboard.classList.remove('p3-mode');
+                p3Card.style.display = 'none';
+            }
 
             resetMatch(false);
         }
 
         function addScore(player, pts, typeName) {
-            if (scoreP1 >= targetScore || scoreP2 >= targetScore) return;
+            if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
 
             playBeep(600, 'square', 0.08);
 
             history.push({
-                p1: scoreP1, p2: scoreP2, teamP1: teamWinsP1, teamP2: teamWinsP2,
+                p1: scoreP1, p2: scoreP2, p3: scoreP3, teamP1: teamWinsP1, teamP2: teamWinsP2,
                 battle: battleCount, logs: [...logs]
             });
 
             let name1 = document.getElementById('p1-title').value;
             let name2 = document.getElementById('p2-title').value;
-            let pName = player === 1 ? name1 : name2;
+            let name3 = document.getElementById('p3-title').value;
+
+            let pName = player === 1 ? name1 : (player === 2 ? name2 : name3);
             logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${typeName})`);
 
             if (player === 1) scoreP1 += pts;
-            else scoreP2 += pts;
+            else if (player === 2) scoreP2 += pts;
+            else if (player === 3) scoreP3 += pts;
 
             battleCount++;
             updateDisplay();
@@ -642,7 +699,7 @@
         }
 
         function nextKOFRound() {
-            scoreP1 = 0; scoreP2 = 0; battleCount = 1;
+            scoreP1 = 0; scoreP2 = 0; scoreP3 = 0; battleCount = 1;
             updateDisplay();
             saveState();
         }
@@ -659,7 +716,7 @@
             if (history.length > 0) {
                 playBeep(300, 'sine', 0.1);
                 const last = history.pop();
-                scoreP1 = last.p1; scoreP2 = last.p2;
+                scoreP1 = last.p1; scoreP2 = last.p2; scoreP3 = last.p3 || 0;
                 teamWinsP1 = last.teamP1; teamWinsP2 = last.teamP2;
                 battleCount = last.battle; logs = last.logs;
                 updateDisplay();
@@ -669,7 +726,7 @@
 
         function resetMatch(askConfirm = true) {
             if (!askConfirm || confirm("Reset entire match/scores? / 確定重置賽事？")) {
-                scoreP1 = 0; scoreP2 = 0;
+                scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
                 teamWinsP1 = 0; teamWinsP2 = 0;
                 battleCount = 1;
                 history = []; logs = [];
@@ -681,6 +738,7 @@
         function updateDisplay() {
             document.getElementById('score-p1').innerText = scoreP1;
             document.getElementById('score-p2').innerText = scoreP2;
+            document.getElementById('score-p3').innerText = scoreP3;
 
             if (matchMode === '3v3') {
                 let currentBeyNum = ((battleCount - 1) % 3) + 1;
@@ -707,6 +765,7 @@
         function checkWinner() {
             let name1 = document.getElementById('p1-title').value;
             let name2 = document.getElementById('p2-title').value;
+            let name3 = document.getElementById('p3-title').value;
 
             if (scoreP1 >= targetScore) {
                 if (matchMode === 'team') teamWinsP1++;
@@ -717,6 +776,10 @@
                 if (matchMode === 'team') teamWinsP2++;
                 playBeep(880, 'triangle', 0.3);
                 showWinModal(name2);
+                return true;
+            } else if (matchMode === 'p3' && scoreP3 >= targetScore) {
+                playBeep(880, 'triangle', 0.3);
+                showWinModal(name3);
                 return true;
             }
             return false;
@@ -734,7 +797,7 @@
         }
 
         function openRules() { 
-            applyLanguage(); // 開啟時注入對應語系文案，防止空白
+            applyLanguage();
             document.getElementById('rules-modal').style.display = 'flex'; 
         }
         function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
@@ -745,7 +808,6 @@
             saveState();
         }
 
-        /* 🌐 統一全頁 UI 語言渲染，徹底消除雙語混雜 */
         function applyLanguage() {
             const lang = i18n[currentLang];
 
@@ -770,9 +832,10 @@
 
         function saveState() {
             const state = {
-                scoreP1, scoreP2, teamWinsP1, teamWinsP2, battleCount, matchMode,
+                scoreP1, scoreP2, scoreP3, teamWinsP1, teamWinsP2, battleCount, matchMode,
                 p1Name: document.getElementById('p1-title').value,
                 p2Name: document.getElementById('p2-title').value,
+                p3Name: document.getElementById('p3-title').value,
                 logs, currentLang
             };
             localStorage.setItem('bx_score_state', JSON.stringify(state));
@@ -785,6 +848,7 @@
                     const state = JSON.parse(saved);
                     scoreP1 = state.scoreP1 || 0;
                     scoreP2 = state.scoreP2 || 0;
+                    scoreP3 = state.scoreP3 || 0;
                     teamWinsP1 = state.teamWinsP1 || 0;
                     teamWinsP2 = state.teamWinsP2 || 0;
                     battleCount = state.battleCount || 1;
@@ -794,6 +858,7 @@
 
                     if (state.p1Name) document.getElementById('p1-title').value = state.p1Name;
                     if (state.p2Name) document.getElementById('p2-title').value = state.p2Name;
+                    if (state.p3Name) document.getElementById('p3-title').value = state.p3Name;
 
                     setMatchMode(matchMode);
                 } catch(e) {
