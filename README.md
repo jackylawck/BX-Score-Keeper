@@ -1,4 +1,4 @@
-# ⚡ BX Score Keeper | 《爆旋陀螺X》對戰計分器
+# ⚡ BX Score Keeper | 《爆旋陀螺 X》對戰計分器
 
 [English](#english) | [繁體中文](#繁體中文)
 
