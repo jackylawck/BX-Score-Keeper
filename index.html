@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BX Score Keeper | 爆旋賽事計分器</title>
+    <title>BX Score Keeper | 賽事對戰計分器</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#080c14">
+    <link rel="apple-touch-icon" href="BXScoreKeepericon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap');
 
         :root {
             --bg-color: #080c14;
-            --panel-bg: #111827;
             --card-bg: #1f293d;
             --neon-blue: #00f0ff;
             --neon-red: #ff0055;
@@ -80,13 +87,8 @@
             transition: all 0.2s;
         }
 
-        .top-btn:hover {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
+        .top-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
 
-        /* Banner */
         .mode-banner {
             width: 100%;
             max-width: 800px;
@@ -100,6 +102,8 @@
             align-items: center;
             box-sizing: border-box;
             backdrop-filter: blur(5px);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .mode-toggle { display: flex; gap: 8px; }
@@ -144,7 +148,23 @@
             border-radius: 4px;
         }
 
-        /* Scoreboard Layout */
+        .team-tracker-bar {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px dashed var(--neon-blue);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
         .scoreboard {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -166,19 +186,19 @@
             clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
         }
 
-        .player-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
-        }
-
-        .player-name {
+        .player-name-input {
+            font-family: 'Noto Sans TC', sans-serif;
             font-size: 1.1rem;
             font-weight: 900;
-            letter-spacing: 1px;
             color: #fff;
             text-transform: uppercase;
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--neon-blue);
+            text-align: center;
+            width: 90%;
+            padding: 2px;
+            outline: none;
         }
 
         .score-display {
@@ -191,12 +211,7 @@
             line-height: 1;
         }
 
-        .btn-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            width: 100%;
-        }
+        .btn-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
 
         button.score-btn {
             border: none;
@@ -212,68 +227,31 @@
             text-transform: uppercase;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
             transition: transform 0.1s, box-shadow 0.2s;
-            position: relative;
         }
 
         button.score-btn:active { transform: scale(0.96); }
 
-        .btn-xtreme {
-            background: linear-gradient(90deg, #800020, var(--neon-red));
-            box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
-            border-left: 4px solid var(--neon-red);
-        }
+        .btn-xtreme { background: linear-gradient(90deg, #800020, var(--neon-red)); border-left: 4px solid var(--neon-red); }
+        .btn-over { background: linear-gradient(90deg, #803b00, var(--neon-orange)); border-left: 4px solid var(--neon-orange); }
+        .btn-burst { background: linear-gradient(90deg, #806600, var(--neon-yellow)); color: #000 !important; border-left: 4px solid var(--neon-yellow); }
+        .btn-spin { background: linear-gradient(90deg, #008033, var(--neon-green)); border-left: 4px solid var(--neon-green); }
 
-        .btn-over {
-            background: linear-gradient(90deg, #803b00, var(--neon-orange));
-            box-shadow: 0 0 10px rgba(255, 119, 0, 0.4);
-            border-left: 4px solid var(--neon-orange);
-        }
+        .pts-badge { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900; }
 
-        .btn-burst {
-            background: linear-gradient(90deg, #806600, var(--neon-yellow));
-            color: #000 !important;
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
-            border-left: 4px solid var(--neon-yellow);
-        }
-
-        .btn-spin {
-            background: linear-gradient(90deg, #008033, var(--neon-green));
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
-            border-left: 4px solid var(--neon-green);
-        }
-
-        .pts-badge {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 900;
-        }
-
-        .controls { margin-top: 16px; display: flex; gap: 12px; }
+        .controls { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
         .ctrl-btn {
             background: #1e293b;
             color: #fff;
             border: 1px solid #475569;
-            padding: 10px 20px;
+            padding: 10px 18px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 4px;
-            transition: all 0.2s;
         }
 
-        .ctrl-btn.reset {
-            background: rgba(255, 0, 85, 0.15);
-            color: var(--neon-red);
-            border-color: var(--neon-red);
-        }
+        .ctrl-btn.reset { background: rgba(255, 0, 85, 0.15); color: var(--neon-red); border-color: var(--neon-red); }
 
-        .ctrl-btn.reset:hover {
-            background: var(--neon-red);
-            color: #fff;
-            box-shadow: 0 0 12px var(--neon-red);
-        }
-
-        /* Battle Log Panel */
         .log-panel {
             width: 100%;
             max-width: 800px;
@@ -286,10 +264,9 @@
         }
 
         .log-title { font-size: 0.85rem; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-bottom: 8px; }
-        .log-list { list-style: none; padding: 0; margin: 0; max-height: 100px; overflow-y: auto; font-size: 0.8rem; }
+        .log-list { list-style: none; padding: 0; margin: 0; max-height: 120px; overflow-y: auto; font-size: 0.8rem; }
         .log-item { padding: 4px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -314,41 +291,16 @@
             color: var(--text-main);
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #2a3852;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-        }
-
-        .close-btn { background: transparent; border: none; color: var(--text-sub); font-size: 1.5rem; cursor: pointer; }
-
-        .winner-box { text-align: center; padding: 20px 0; }
         .winner-title {
             font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: var(--neon-blue);
             text-shadow: 0 0 20px var(--neon-blue);
             margin: 10px 0;
             font-weight: 900;
-            font-style: italic;
         }
 
-        footer {
-            margin-top: auto;
-            padding-top: 20px;
-            font-size: 0.7rem;
-            color: var(--text-sub);
-            text-align: center;
-            max-width: 600px;
-        }
-
-        @media (max-width: 480px) {
-            .score-display { font-size: 3.8rem; }
-            button.score-btn { font-size: 0.8rem; padding: 10px 8px; }
-        }
+        footer { margin-top: auto; padding-top: 20px; font-size: 0.7rem; color: var(--text-sub); text-align: center; }
     </style>
 </head>
 <body>
@@ -356,7 +308,7 @@
     <header>
         <div>
             <h1>BX SCORE KEEPER</h1>
-            <div class="subtitle" id="rules-tag">ASIA REGS V12 (TARGET: 4 PTS)</div>
+            <div class="subtitle" id="rules-tag">BEYBLADE X Regulations (Asia Version) 12th Ed (Target: 4 pts)</div>
         </div>
         <div class="nav-btns">
             <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
@@ -364,7 +316,6 @@
         </div>
     </header>
 
-    <!-- Mode Banner -->
     <div class="mode-banner">
         <div class="mode-toggle">
             <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std')">1v1 Standard</button>
@@ -372,15 +323,23 @@
             <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team')">Team Battle</button>
         </div>
         <div class="deck-controls" id="deck-box" style="display: none;">
-            <span class="deck-indicator" id="deck-status">BEY #1</span>
+            <span class="deck-indicator" id="deck-status">ITEM #1</span>
             <button class="reorder-btn" onclick="resetBattleCounter()" id="reorder-btn">重置順序</button>
         </div>
+    </div>
+
+    <!-- Team Battle Tracker Bar -->
+    <div class="team-tracker-bar" id="team-tracker-bar" style="display: none;">
+        <span>TEAM WINS:</span>
+        <span style="color: var(--neon-blue);" id="team-wins-p1">Team A: 0</span>
+        <span>vs</span>
+        <span style="color: var(--neon-red);" id="team-wins-p2">Team B: 0</span>
     </div>
 
     <div class="scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
-            <div class="player-name" id="p1-title">PLAYER 1</div>
+            <input type="text" class="player-name-input" id="p1-title" value="PLAYER 1" onchange="saveState()">
             <div class="score-display" id="score-p1">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
@@ -400,7 +359,7 @@
 
         <!-- Player 2 -->
         <div class="player-card">
-            <div class="player-name" id="p2-title">PLAYER 2</div>
+            <input type="text" class="player-name-input" id="p2-title" value="PLAYER 2" onchange="saveState()">
             <div class="score-display" id="score-p2">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
@@ -421,10 +380,10 @@
 
     <div class="controls">
         <button class="ctrl-btn" onclick="undo()" id="btn-undo">Undo / 上一步</button>
-        <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">Reset / 重置</button>
+        <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局 (KOF 換人)</button>
+        <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">Reset / 重置賽事</button>
     </div>
 
-    <!-- Battle Log -->
     <div class="log-panel">
         <div class="log-title" id="log-title">⚡ 對局紀錄 (BATTLE LOG)</div>
         <ul class="log-list" id="log-list"></ul>
@@ -433,9 +392,9 @@
     <!-- Rules Modal -->
     <div class="modal" id="rules-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 style="margin:0; font-size:1.1rem; color:var(--neon-blue);" id="modal-title">BEYBLADE X 亞洲版第 12 版規則摘要</h2>
-                <button class="close-btn" onclick="closeRules()">&times;</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
+                <h2 style="margin:0; font-size:1.1rem; color:var(--neon-blue);" id="modal-title">《爆旋陀螺X規則（亞洲版）》第 12 版摘要</h2>
+                <button style="background:transparent; border:none; color:var(--text-sub); font-size:1.5rem; cursor:pointer;" onclick="closeRules()">&times;</button>
             </div>
             <div id="modal-body"></div>
         </div>
@@ -444,94 +403,91 @@
     <!-- Win Modal -->
     <div class="modal" id="win-modal">
         <div class="modal-content" style="text-align: center;">
-            <div class="winner-box">
-                <div style="font-size: 3.5rem;">🏆</div>
-                <div class="winner-title" id="winner-name">PLAYER 1</div>
-                <p style="font-size: 1.2rem; color: #fff; font-weight: bold;" id="win-msg">MATCH WINNER!</p>
-                <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">OK</button>
-            </div>
+            <div style="font-size: 3.5rem;">🏆</div>
+            <div class="winner-title" id="winner-name">PLAYER 1</div>
+            <p style="font-size: 1.1rem; color: #fff; font-weight: bold;" id="win-msg">MATCH WINNER!</p>
+            <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">OK</button>
         </div>
     </div>
 
     <footer>
-        <p id="disclaimer">Unofficial fan-made tool for scoring purposes only. BEYBLADE is a registered trademark of TAKARA TOMY.</p>
+        <p id="disclaimer">Unofficial fan-made tool for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition.</p>
     </footer>
 
     <script>
-        let scoreP1 = 0;
-        let scoreP2 = 0;
+        let scoreP1 = 0, scoreP2 = 0;
+        let teamWinsP1 = 0, teamWinsP2 = 0;
         let battleCount = 1;
         let matchMode = 'std';
         let targetScore = 4;
-        let history = [];
-        let logs = [];
+        let history = [], logs = [];
         let currentLang = 'zh';
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
 
         const i18n = {
             zh: {
-                rulesTag4: "亞洲版規則 第12版 (先得 4 分獲勝)",
-                rulesTag2: "團隊戰規則 (每局先得 2 分獲勝)",
+                rulesTag4: "《爆旋陀螺X規則（亞洲版）》第 12 版 (先得 4 分獲勝)",
+                rulesTag2: "《爆旋陀螺X規則（亞洲版）》團隊戰 (每局先得 2 分獲勝)",
                 rulesBtn: "規則",
-                modalTitle: "亞洲版第 12 版官方規則要點 (2026年3月)",
+                modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
                 xtreme: "極致收尾 (Xtreme)",
                 over: "完工 / 超區 (Over)",
                 burst: "爆裂終結 (Burst)",
                 spin: "旋轉收尾 (Spin)",
                 undo: "復原 (Undo)",
-                reset: "重置比賽",
+                reset: "重置賽事",
                 reorderBtn: "重置順序",
-                p1: "選手 A (Player 1)",
-                p2: "選手 B (Player 2)",
-                winMsg: "率先達到目標分數，獲得最終勝利！",
-                reorderMsg: "3 個陀螺已全部登場，比分尚未達到 4 分！請雙方重新排列 3 個陀螺順序，從 Bey #1 繼續比賽。",
-                disclaimer: "本工具為玩家自製非官方應用，僅供對戰計分使用。BEYBLADE 及 爆旋陀螺 為 TAKARA TOMY 之註冊商標。",
+                p1: "選手 / 隊伍 A",
+                p2: "選手 / 隊伍 B",
+                winMsg: "率先達到目標分數，獲得本局勝利！",
+                teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
+                reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
+                disclaimer: "本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分機制 (Points)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>極致收尾 (Xtreme Finish) - 3分</b>：完全進入極限區 (Xtreme Zone) 且無法返回對戰區。</li>
-                            <li><b>完工 / 超區 (Over Finish) - 2分</b>：完全進入超區 (Over Zone) 且無法返回對戰區。</li>
-                            <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先一步分離。</li>
-                            <li><b>旋轉收尾 (Spin Finish) - 1分</b>：對手陀螺在對戰區內先停止旋轉。</li>
+                            <li><b>極致收尾 (Xtreme) - 3分</b>：完全進入極限區且無法返回。</li>
+                            <li><b>完工 (Over) - 2分</b> / <b>爆裂 (Burst) - 2分</b></li>
+                            <li><b>旋轉收尾 (Spin) - 1分</b></li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3對3賽制 (3on3 Battle)</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 團隊戰 KOF 機制 (Team Battle)</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>預先決定 3 個陀螺出場順序並進行 Bey Check。</li>
-                            <li>打完 3 場若未有人累積滿 4 分，<b>得分保留，重新排列 3 個陀螺順序（由 Bey #1 重新開始）</b>繼續比賽。</li>
+                            <li>每局採<b>先得 2 分制</b>，勝方留場，敗方換下一位隊員。</li>
+                            <li>換人時當前局比分重置為 0-0，累積團隊總勝場。</li>
                         </ul>
                     </div>
                 `
             },
             en: {
-                rulesTag4: "ASIA REGS V12 (FIRST TO 4 PTS)",
-                rulesTag2: "TEAM BATTLE REGS (FIRST TO 2 PTS)",
+                rulesTag4: "BEYBLADE X Regulations (Asia Version) 12th Ed (First to 4 pts)",
+                rulesTag2: "BEYBLADE X Regulations (Asia Version) Team Battle (First to 2 pts)",
                 rulesBtn: "Rules",
-                modalTitle: "Asia Regs 12th Edition Summary (March 2026)",
-                xtreme: "Xtreme Finish",
-                over: "Over Finish",
-                burst: "Burst Finish",
-                spin: "Spin Finish",
-                undo: "Undo",
-                reset: "Reset Match",
-                reorderBtn: "Reset Order",
-                p1: "PLAYER 1",
-                p2: "PLAYER 2",
+                modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
+                xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish",
+                undo: "Undo", reset: "Reset Match", reorderBtn: "Reset Order",
+                p1: "Player / Team A", p2: "Player / Team B",
                 winMsg: "Reached target score and wins the match!",
-                reorderMsg: "All 3 Beys have battled, but no one reached 4 pts. Scores stay, rearrange your 3-Bey order and restart from Bey #1!",
-                disclaimer: "Unofficial fan-made tool for scoring purposes only. BEYBLADE is a registered trademark of TAKARA TOMY.",
-                rulesBody: `
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone and cannot return.</li>
-                            <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone and cannot return.</li>
-                            <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
-                            <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
-                        </ul>
-                    </div>
-                `
+                teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
+                reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
+                disclaimer: "Unofficial fan-made score keeper tool based on BEYBLADE X Regulations (Asia Version) 12th Edition.",
+                rulesBody: `Scoring & KOF Team rules applied.`
             }
         };
 
@@ -543,6 +499,8 @@
             document.getElementById('mode-3v3-btn').classList.toggle('active', mode === '3v3');
             document.getElementById('mode-team-btn').classList.toggle('active', mode === 'team');
             document.getElementById('deck-box').style.display = mode === '3v3' ? 'flex' : 'none';
+            document.getElementById('team-tracker-bar').style.display = mode === 'team' ? 'flex' : 'none';
+            document.getElementById('next-kof-btn').style.display = mode === 'team' ? 'inline-block' : 'none';
 
             resetMatch(false);
         }
@@ -550,9 +508,16 @@
         function addScore(player, pts, typeName) {
             if (scoreP1 >= targetScore || scoreP2 >= targetScore) return;
 
-            history.push({ p1: scoreP1, p2: scoreP2, battle: battleCount, logs: [...logs] });
+            playBeep(600, 'square', 0.08);
 
-            let pName = player === 1 ? i18n[currentLang].p1 : i18n[currentLang].p2;
+            history.push({
+                p1: scoreP1, p2: scoreP2, teamP1: teamWinsP1, teamP2: teamWinsP2,
+                battle: battleCount, logs: [...logs]
+            });
+
+            let name1 = document.getElementById('p1-title').value;
+            let name2 = document.getElementById('p2-title').value;
+            let pName = player === 1 ? name1 : name2;
             logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${typeName})`);
 
             if (player === 1) scoreP1 += pts;
@@ -560,6 +525,7 @@
 
             battleCount++;
             updateDisplay();
+            saveState();
 
             if (checkWinner()) return;
 
@@ -574,32 +540,40 @@
             }
         }
 
+        function nextKOFRound() {
+            scoreP1 = 0; scoreP2 = 0; battleCount = 1;
+            updateDisplay();
+            saveState();
+        }
+
         function resetBattleCounter() {
             if (matchMode === '3v3') {
                 battleCount = 1;
                 updateDisplay();
+                saveState();
             }
         }
 
         function undo() {
             if (history.length > 0) {
-                const lastState = history.pop();
-                scoreP1 = lastState.p1;
-                scoreP2 = lastState.p2;
-                battleCount = lastState.battle;
-                logs = lastState.logs;
+                playBeep(300, 'sine', 0.1);
+                const last = history.pop();
+                scoreP1 = last.p1; scoreP2 = last.p2;
+                teamWinsP1 = last.teamP1; teamWinsP2 = last.teamP2;
+                battleCount = last.battle; logs = last.logs;
                 updateDisplay();
+                saveState();
             }
         }
 
         function resetMatch(askConfirm = true) {
-            if (!askConfirm || confirm("Reset current scores? / 確定重置比分？")) {
-                scoreP1 = 0;
-                scoreP2 = 0;
+            if (!askConfirm || confirm("Reset entire match/scores? / 確定重置賽事？")) {
+                scoreP1 = 0; scoreP2 = 0;
+                teamWinsP1 = 0; teamWinsP2 = 0;
                 battleCount = 1;
-                history = [];
-                logs = [];
+                history = []; logs = [];
                 updateDisplay();
+                saveState();
             }
         }
 
@@ -609,7 +583,14 @@
 
             if (matchMode === '3v3') {
                 let currentBeyNum = ((battleCount - 1) % 3) + 1;
-                document.getElementById('deck-status').innerText = `BEY #${currentBeyNum}`;
+                document.getElementById('deck-status').innerText = `ITEM #${currentBeyNum}`;
+            }
+
+            if (matchMode === 'team') {
+                let name1 = document.getElementById('p1-title').value;
+                let name2 = document.getElementById('p2-title').value;
+                document.getElementById('team-wins-p1').innerText = `${name1}: ${teamWinsP1}`;
+                document.getElementById('team-wins-p2').innerText = `${name2}: ${teamWinsP2}`;
             }
 
             const logList = document.getElementById('log-list');
@@ -617,12 +598,18 @@
         }
 
         function checkWinner() {
-            const lang = i18n[currentLang];
+            let name1 = document.getElementById('p1-title').value;
+            let name2 = document.getElementById('p2-title').value;
+
             if (scoreP1 >= targetScore) {
-                showWinModal(lang.p1);
+                if (matchMode === 'team') teamWinsP1++;
+                playBeep(880, 'triangle', 0.3);
+                showWinModal(name1);
                 return true;
             } else if (scoreP2 >= targetScore) {
-                showWinModal(lang.p2);
+                if (matchMode === 'team') teamWinsP2++;
+                playBeep(880, 'triangle', 0.3);
+                showWinModal(name2);
                 return true;
             }
             return false;
@@ -630,11 +617,15 @@
 
         function showWinModal(winner) {
             document.getElementById('winner-name').innerText = winner;
-            document.getElementById('win-msg').innerText = i18n[currentLang].winMsg;
+            document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
             document.getElementById('win-modal').style.display = 'flex';
         }
 
-        function closeWinModal() { document.getElementById('win-modal').style.display = 'none'; }
+        function closeWinModal() {
+            document.getElementById('win-modal').style.display = 'none';
+            if (matchMode === 'team') nextKOFRound();
+        }
+
         function openRules() { document.getElementById('rules-modal').style.display = 'flex'; }
         function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
 
@@ -645,8 +636,6 @@
             document.getElementById('rules-tag').innerText = targetScore === 2 ? lang.rulesTag2 : lang.rulesTag4;
             document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
             document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
-            document.getElementById('p1-title').innerText = lang.p1;
-            document.getElementById('p2-title').innerText = lang.p2;
             document.getElementById('btn-undo').innerText = lang.undo;
             document.getElementById('btn-reset').innerText = lang.reset;
             document.getElementById('reorder-btn').innerText = lang.reorderBtn;
@@ -660,7 +649,39 @@
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
         }
 
-        toggleLanguage();
+        function saveState() {
+            const state = {
+                scoreP1, scoreP2, teamWinsP1, teamWinsP2, battleCount, matchMode,
+                p1Name: document.getElementById('p1-title').value,
+                p2Name: document.getElementById('p2-title').value,
+                logs, currentLang
+            };
+            localStorage.setItem('bx_score_state', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('bx_score_state');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    scoreP1 = state.scoreP1 || 0; scoreP2 = state.scoreP2 || 0;
+                    teamWinsP1 = state.teamWinsP1 || 0; teamWinsP2 = state.teamWinsP2 || 0;
+                    battleCount = state.battleCount || 1; matchMode = state.matchMode || 'std';
+                    logs = state.logs || [];
+                    if (state.p1Name) document.getElementById('p1-title').value = state.p1Name;
+                    if (state.p2Name) document.getElementById('p2-title').value = state.p2Name;
+                    setMatchMode(matchMode);
+                } catch(e) {}
+            }
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+
+        loadState();
     </script>
 </body>
 </html>
