@@ -263,7 +263,15 @@
         .btn-over { background: linear-gradient(90deg, #803b00, var(--neon-orange)); border-left: 4px solid var(--neon-orange); }
         .btn-burst { background: linear-gradient(90deg, #806600, var(--neon-yellow)); color: #000 !important; border-left: 4px solid var(--neon-yellow); }
         .btn-spin { background: linear-gradient(90deg, #008033, var(--neon-green)); border-left: 4px solid var(--neon-green); }
-        .btn-penalty { background: linear-gradient(90deg, #4c1d95, var(--neon-purple)); border-left: 4px solid var(--neon-purple); }
+        
+        .btn-foul {
+            background: linear-gradient(90deg, #3b0764, var(--neon-purple));
+            border-left: 4px solid var(--neon-purple);
+        }
+        .btn-foul.active-foul {
+            background: linear-gradient(90deg, #701a75, #d946ef);
+            box-shadow: 0 0 12px #d946ef;
+        }
 
         .pts-badge { font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; }
 
@@ -421,8 +429,8 @@
                 <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
-                <button class="score-btn btn-penalty" onclick="addScore(1, 1, 'Penalty')">
-                    <span class="txt-penalty">Opponent Foul</span><span class="pts-badge">+1</span>
+                <button class="score-btn btn-foul" id="btn-foul-p1" onclick="addFoul(1)">
+                    <span id="txt-foul-p1">發射失誤 (Foul)</span><span class="pts-badge" id="foul-badge-p1">0/2</span>
                 </button>
             </div>
         </div>
@@ -444,8 +452,8 @@
                 <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
-                <button class="score-btn btn-penalty" onclick="addScore(2, 1, 'Penalty')">
-                    <span class="txt-penalty">Opponent Foul</span><span class="pts-badge">+1</span>
+                <button class="score-btn btn-foul" id="btn-foul-p2" onclick="addFoul(2)">
+                    <span id="txt-foul-p2">發射失誤 (Foul)</span><span class="pts-badge" id="foul-badge-p2">0/2</span>
                 </button>
             </div>
         </div>
@@ -467,8 +475,8 @@
                 <button class="score-btn btn-spin" onclick="addScore(3, 1, 'Spin')">
                     <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
-                <button class="score-btn btn-penalty" onclick="addScore(3, 1, 'Penalty')">
-                    <span class="txt-penalty">Opponent Foul</span><span class="pts-badge">+1</span>
+                <button class="score-btn btn-foul" id="btn-foul-p3" onclick="addFoul(3)">
+                    <span id="txt-foul-p3">發射失誤 (Foul)</span><span class="pts-badge" id="foul-badge-p3">0/2</span>
                 </button>
             </div>
         </div>
@@ -514,6 +522,7 @@
 
     <script>
         let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
+        let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0; // 追蹤失誤次數 (0/2, 1/2)
         let teamWinsP1 = 0, teamWinsP2 = 0;
         let battleCount = 1;
         let matchMode = 'std';
@@ -545,7 +554,7 @@
                 over: "完工 / 超區 (Over)",
                 burst: "爆裂終結 (Burst)",
                 spin: "旋轉收尾 (Spin)",
-                penalty: "對手發射失誤/犯規",
+                foulTxt: "發射失誤 (Foul)",
                 undo: "復原 (Undo)",
                 drawBtn: "平手 (Draw / 重賽)",
                 reset: "重置賽事",
@@ -566,7 +575,7 @@
                             <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先行分離。</li>
                             <li><b>旋轉收尾 (Spin Finish) - 1分</b>：對手陀螺先行停止旋轉。</li>
                             <li><b>同時發生/平手 (Draw)</b>：雙方同時發生 Finish 視為 Draw，無人得分並重賽。</li>
-                            <li><b>發射失誤/罰分 (Shooting Errors)</b>：同一局累積 2 次發射失誤 (Premature/Delayed/Miss)，對手獲得 1 分並重賽。</li>
+                            <li><b>發射失誤/罰分 (Shooting Errors)</b>：同一局累積 2 次發射失誤 (Premature/Delayed/Miss)，對手直接獲得 1 分並重賽。正式得分後之前的失誤自動清零。</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
@@ -600,7 +609,7 @@
                 over: "Over Finish",
                 burst: "Burst Finish",
                 spin: "Spin Finish",
-                penalty: "Opponent Foul",
+                foulTxt: "Shooting Error",
                 undo: "Undo",
                 drawBtn: "Draw (Replay)",
                 reset: "Reset Match",
@@ -621,13 +630,13 @@
                             <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
                             <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
                             <li><b>Simultaneous Finish (Draw)</b>: Both Beys finish simultaneously; 0 pts awarded and battle is replayed.</li>
-                            <li><b>Shooting Errors / Penalties</b>: 2 shooting errors (Premature/Delayed/Miss) in a battle gives 1 pt to opponent and battle is restarted.</li>
+                            <li><b>Shooting Errors / Penalties</b>: 2 shooting errors in a battle gives 1 pt to opponent. Nullified once a point is scored.</li>
                         </ul>
                     </div>
                     <div style="margin-bottom:12px;">
                         <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3on3 Battle Rules</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>Set 3 Beys in order. No duplicate parts allowed (Lock chips limited).</li>
+                            <li>Set 3 Beys in order. No duplicate parts allowed.</li>
                             <li>If no one reaches 4 pts after 3 battles, <b>scores stay, rearrange order and restart from item #1</b>.</li>
                         </ul>
                     </div>
@@ -678,13 +687,16 @@
             resetMatch(false);
         }
 
+        /* 正式得分：自動清空雙方的失誤次數 (Nullified) */
         function addScore(player, pts, typeName) {
             if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
 
             playBeep(600, 'square', 0.08);
 
             history.push({
-                p1: scoreP1, p2: scoreP2, p3: scoreP3, teamP1: teamWinsP1, teamP2: teamWinsP2,
+                p1: scoreP1, p2: scoreP2, p3: scoreP3,
+                f1: foulsP1, f2: foulsP2, f3: foulsP3,
+                teamP1: teamWinsP1, teamP2: teamWinsP2,
                 battle: battleCount, logs: [...logs]
             });
 
@@ -698,6 +710,9 @@
             if (player === 1) scoreP1 += pts;
             else if (player === 2) scoreP2 += pts;
             else if (player === 3) scoreP3 += pts;
+
+            // 正式得分後，根據官方條款自動重置失誤次數
+            foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
 
             battleCount++;
             updateDisplay();
@@ -717,20 +732,77 @@
             }
         }
 
+        /* ⚠️ 核心邏輯：按兩次發射失誤，自動處罰給對手 +1 分 */
+        function addFoul(player) {
+            if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
+
+            playBeep(350, 'sawtooth', 0.12);
+
+            history.push({
+                p1: scoreP1, p2: scoreP2, p3: scoreP3,
+                f1: foulsP1, f2: foulsP2, f3: foulsP3,
+                teamP1: teamWinsP1, teamP2: teamWinsP2,
+                battle: battleCount, logs: [...logs]
+            });
+
+            let name1 = document.getElementById('p1-title').value;
+            let name2 = document.getElementById('p2-title').value;
+            let name3 = document.getElementById('p3-title').value;
+            let offenderName = player === 1 ? name1 : (player === 2 ? name2 : name3);
+
+            if (player === 1) foulsP1++;
+            else if (player === 2) foulsP2++;
+            else if (player === 3) foulsP3++;
+
+            let currentFouls = player === 1 ? foulsP1 : (player === 2 ? foulsP2 : foulsP3);
+
+            if (currentFouls === 1) {
+                // 第 1 次失誤：僅記錄，不加分
+                logs.unshift(`Round ${battleCount}: ${offenderName} 發射失誤 (1/2)`);
+            } else if (currentFouls >= 2) {
+                // 累積滿 2 次失誤：重置該玩家失誤，自動處罰給對手 +1 分 (重賽)
+                if (player === 1) foulsP1 = 0;
+                else if (player === 2) foulsP2 = 0;
+                else if (player === 3) foulsP3 = 0;
+
+                logs.unshift(`Round ${battleCount}: ${offenderName} 累積2次失誤 ➔ 對手 +1 分 (重賽)`);
+
+                if (matchMode === 'p3') {
+                    // 3人戰：其餘兩位未犯規玩家各 +1 分
+                    if (player !== 1) scoreP1 += 1;
+                    if (player !== 2) scoreP2 += 1;
+                    if (player !== 3) scoreP3 += 1;
+                } else {
+                    // 1v1 / Team Battle：對手 +1 分
+                    if (player === 1) scoreP2 += 1;
+                    else scoreP1 += 1;
+                }
+                battleCount++;
+            }
+
+            updateDisplay();
+            saveState();
+            checkWinner();
+        }
+
         function addDraw() {
             playBeep(300, 'sine', 0.1);
             history.push({
-                p1: scoreP1, p2: scoreP2, p3: scoreP3, teamP1: teamWinsP1, teamP2: teamWinsP2,
+                p1: scoreP1, p2: scoreP2, p3: scoreP3,
+                f1: foulsP1, f2: foulsP2, f3: foulsP3,
+                teamP1: teamWinsP1, teamP2: teamWinsP2,
                 battle: battleCount, logs: [...logs]
             });
-            logs.unshift(`Round ${battleCount}: DRAW (Replay / 重賽)`);
+            logs.unshift(`Round ${battleCount}: DRAW (平手重賽)`);
             battleCount++;
             updateDisplay();
             saveState();
         }
 
         function nextKOFRound() {
-            scoreP1 = 0; scoreP2 = 0; scoreP3 = 0; battleCount = 1;
+            scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
+            foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
+            battleCount = 1;
             updateDisplay();
             saveState();
         }
@@ -748,6 +820,7 @@
                 playBeep(300, 'sine', 0.1);
                 const last = history.pop();
                 scoreP1 = last.p1; scoreP2 = last.p2; scoreP3 = last.p3 || 0;
+                foulsP1 = last.f1 || 0; foulsP2 = last.f2 || 0; foulsP3 = last.f3 || 0;
                 teamWinsP1 = last.teamP1; teamWinsP2 = last.teamP2;
                 battleCount = last.battle; logs = last.logs;
                 updateDisplay();
@@ -758,6 +831,7 @@
         function resetMatch(askConfirm = true) {
             if (!askConfirm || confirm("Reset entire match/scores? / 確定重置賽事？")) {
                 scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
+                foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
                 teamWinsP1 = 0; teamWinsP2 = 0;
                 battleCount = 1;
                 history = []; logs = [];
@@ -770,6 +844,15 @@
             document.getElementById('score-p1').innerText = scoreP1;
             document.getElementById('score-p2').innerText = scoreP2;
             document.getElementById('score-p3').innerText = scoreP3;
+
+            // 更新失誤次數 Badge 與樣式 Highlight
+            document.getElementById('foul-badge-p1').innerText = `${foulsP1}/2`;
+            document.getElementById('foul-badge-p2').innerText = `${foulsP2}/2`;
+            document.getElementById('foul-badge-p3').innerText = `${foulsP3}/2`;
+
+            document.getElementById('btn-foul-p1').classList.toggle('active-foul', foulsP1 > 0);
+            document.getElementById('btn-foul-p2').classList.toggle('active-foul', foulsP2 > 0);
+            document.getElementById('btn-foul-p3').classList.toggle('active-foul', foulsP3 > 0);
 
             if (matchMode === '3v3') {
                 let currentBeyNum = ((battleCount - 1) % 3) + 1;
@@ -860,12 +943,17 @@
             document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
             document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
-            document.querySelectorAll('.txt-penalty').forEach(el => el.innerText = lang.penalty);
+
+            document.getElementById('txt-foul-p1').innerText = lang.foulTxt;
+            document.getElementById('txt-foul-p2').innerText = lang.foulTxt;
+            document.getElementById('txt-foul-p3').innerText = lang.foulTxt;
         }
 
         function saveState() {
             const state = {
-                scoreP1, scoreP2, scoreP3, teamWinsP1, teamWinsP2, battleCount, matchMode,
+                scoreP1, scoreP2, scoreP3,
+                foulsP1, foulsP2, foulsP3,
+                teamWinsP1, teamWinsP2, battleCount, matchMode,
                 p1Name: document.getElementById('p1-title').value,
                 p2Name: document.getElementById('p2-title').value,
                 p3Name: document.getElementById('p3-title').value,
@@ -882,6 +970,9 @@
                     scoreP1 = state.scoreP1 || 0;
                     scoreP2 = state.scoreP2 || 0;
                     scoreP3 = state.scoreP3 || 0;
+                    foulsP1 = state.foulsP1 || 0;
+                    foulsP2 = state.foulsP2 || 0;
+                    foulsP3 = state.foulsP3 || 0;
                     teamWinsP1 = state.teamWinsP1 || 0;
                     teamWinsP2 = state.teamWinsP2 || 0;
                     battleCount = state.battleCount || 1;
