@@ -435,9 +435,9 @@
     </div>
 
     <div class="controls">
-        <button class="ctrl-btn" onclick="undo()" id="btn-undo">Undo / 上一步</button>
+        <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原 (Undo)</button>
         <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局 (KOF 換人)</button>
-        <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">Reset / 重置賽事</button>
+        <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
     </div>
 
     <div class="log-panel">
@@ -506,9 +506,11 @@
                 spin: "旋轉收尾 (Spin)",
                 undo: "復原 (Undo)",
                 reset: "重置賽事",
+                nextKof: "下一局 (KOF 換人)",
                 reorderBtn: "重置順序",
-                p1: "選手 / 隊伍 A",
-                p2: "選手 / 隊伍 B",
+                logTitle: "⚡ 對局紀錄 (BATTLE LOG)",
+                p1Default: "PLAYER 1",
+                p2Default: "PLAYER 2",
                 winMsg: "率先達到目標分數，獲得本局勝利！",
                 teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
                 reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
@@ -544,9 +546,17 @@
                 rulesTag: "BEYBLADE X Regulations (Asia Version) 12th Ed",
                 rulesBtn: "Rules",
                 modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
-                xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish",
-                undo: "Undo", reset: "Reset Match", reorderBtn: "Reset Order",
-                p1: "Player / Team A", p2: "Player / Team B",
+                xtreme: "Xtreme Finish",
+                over: "Over Finish",
+                burst: "Burst Finish",
+                spin: "Spin Finish",
+                undo: "Undo",
+                reset: "Reset Match",
+                nextKof: "Next Round (KOF)",
+                reorderBtn: "Reset Order",
+                logTitle: "⚡ BATTLE LOG",
+                p1Default: "PLAYER 1",
+                p2Default: "PLAYER 2",
                 winMsg: "Reached target score and wins the match!",
                 teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
                 reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
@@ -668,7 +678,6 @@
             }
         }
 
-        /* 🛡️ 安全更新 DOM：防範 XSS 注入 */
         function updateDisplay() {
             document.getElementById('score-p1').innerText = scoreP1;
             document.getElementById('score-p2').innerText = scoreP2;
@@ -685,7 +694,6 @@
                 document.getElementById('team-wins-p2').innerText = `${name2}: ${teamWinsP2}`;
             }
 
-            // 安全渲染對局 Log（使用 textContent，防範 XSS 攻擊）
             const logList = document.getElementById('log-list');
             logList.innerHTML = '';
             logs.forEach(l => {
@@ -715,7 +723,7 @@
         }
 
         function showWinModal(winner) {
-            document.getElementById('winner-name').textContent = winner; // XSS Safe
+            document.getElementById('winner-name').textContent = winner;
             document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
             document.getElementById('win-modal').style.display = 'flex';
         }
@@ -725,11 +733,20 @@
             if (matchMode === 'team') nextKOFRound();
         }
 
-        function openRules() { document.getElementById('rules-modal').style.display = 'flex'; }
+        function openRules() { 
+            applyLanguage(); // 開啟時注入對應語系文案，防止空白
+            document.getElementById('rules-modal').style.display = 'flex'; 
+        }
         function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
 
         function toggleLanguage() {
             currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyLanguage();
+            saveState();
+        }
+
+        /* 🌐 統一全頁 UI 語言渲染，徹底消除雙語混雜 */
+        function applyLanguage() {
             const lang = i18n[currentLang];
 
             document.getElementById('rules-tag').innerText = lang.rulesTag;
@@ -737,7 +754,9 @@
             document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
             document.getElementById('btn-undo').innerText = lang.undo;
             document.getElementById('btn-reset').innerText = lang.reset;
+            document.getElementById('next-kof-btn').innerText = lang.nextKof;
             document.getElementById('reorder-btn').innerText = lang.reorderBtn;
+            document.getElementById('log-title').innerText = lang.logTitle;
             document.getElementById('disclaimer').innerText = lang.disclaimer;
             document.getElementById('privacy-notice').innerText = lang.privacyNotice;
             document.getElementById('modal-title').innerText = lang.modalTitle;
@@ -747,11 +766,8 @@
             document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
             document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
-
-            saveState();
         }
 
-        /* 💾 完整實作 LocalStorage 自動儲存 */
         function saveState() {
             const state = {
                 scoreP1, scoreP2, teamWinsP1, teamWinsP2, battleCount, matchMode,
@@ -762,7 +778,6 @@
             localStorage.setItem('bx_score_state', JSON.stringify(state));
         }
 
-        /* 💾 完整實作 LocalStorage 自動讀取復原 */
         function loadState() {
             const saved = localStorage.getItem('bx_score_state');
             if (saved) {
@@ -785,6 +800,7 @@
                     console.error("State restore failed:", e);
                 }
             }
+            applyLanguage();
         }
 
         if ('serviceWorker' in navigator) {
@@ -793,7 +809,6 @@
             });
         }
 
-        // 初始化載入狀態
         loadState();
     </script>
 </body>
