@@ -5,21 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BX Score Keeper | 爆旋賽事計分器</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap');
+
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-orange: #f97316;
-            --accent-yellow: #eab308;
-            --accent-blue: #38bdf8;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+            --bg-color: #080c14;
+            --panel-bg: #111827;
+            --card-bg: #1f293d;
+            --neon-blue: #00f0ff;
+            --neon-red: #ff0055;
+            --neon-orange: #ff7700;
+            --neon-yellow: #ffcc00;
+            --neon-green: #00ff66;
+            --text-main: #ffffff;
+            --text-sub: #8b9bb4;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(0, 240, 255, 0.15) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--text-main);
             margin: 0;
             padding: 16px;
@@ -27,6 +35,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            box-sizing: border-box;
         }
 
         header {
@@ -36,82 +45,106 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            border-bottom: 2px solid var(--neon-blue);
+            padding-bottom: 8px;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2);
         }
 
-        h1 { font-size: 1.25rem; margin: 0; }
-        .subtitle { font-size: 0.8rem; color: var(--text-sub); }
+        h1 {
+            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            font-style: italic;
+            margin: 0;
+            background: linear-gradient(90deg, #fff, var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .subtitle { font-size: 0.75rem; color: var(--text-sub); font-weight: bold; }
 
         .nav-btns { display: flex; gap: 8px; }
 
         .top-btn {
-            background: #334155;
-            color: #fff;
-            border: none;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
             padding: 6px 12px;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: bold;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.2s;
         }
 
-        /* Mode Selector Banner */
+        .top-btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* Banner */
         .mode-banner {
             width: 100%;
             max-width: 800px;
-            background: #1e293b;
-            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 6px;
             padding: 8px 12px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-sizing: border-box;
-            border: 1px solid #334155;
-            flex-wrap: wrap;
-            gap: 8px;
+            backdrop-filter: blur(5px);
         }
 
-        .mode-toggle { display: flex; gap: 6px; }
+        .mode-toggle { display: flex; gap: 8px; }
 
         .mode-btn {
             background: #0f172a;
             color: var(--text-sub);
             border: 1px solid #334155;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 6px 12px;
             font-size: 0.8rem;
-            font-weight: bold;
+            font-weight: 900;
+            cursor: pointer;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: all 0.2s;
         }
 
         .mode-btn.active {
-            background: var(--accent-blue);
-            color: #0f172a;
-            border-color: var(--accent-blue);
+            background: var(--neon-blue);
+            color: #000;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
         }
 
-        .deck-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .deck-controls { display: flex; align-items: center; gap: 10px; }
 
         .deck-indicator {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--accent-yellow);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 900;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 8px var(--neon-yellow);
         }
 
         .reorder-btn {
-            background: #334155;
-            color: #fff;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: rgba(255, 204, 0, 0.15);
+            color: var(--neon-yellow);
+            border: 1px solid var(--neon-yellow);
+            padding: 4px 10px;
             font-size: 0.75rem;
+            font-weight: bold;
             cursor: pointer;
+            border-radius: 4px;
         }
 
+        /* Scoreboard Layout */
         .scoreboard {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -121,81 +154,140 @@
         }
 
         .player-card {
-            background: var(--card-bg);
-            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(31, 41, 61, 0.9), rgba(17, 24, 39, 0.9));
+            border: 2px solid #2a3852;
+            border-radius: 8px;
             padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
         }
 
-        .player-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #fff;
+            text-transform: uppercase;
+        }
 
         .score-display {
-            font-size: 4rem;
-            font-weight: 800;
-            color: var(--accent-blue);
-            margin: 8px 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+            margin: 4px 0;
             line-height: 1;
         }
 
         .btn-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
         }
 
         button.score-btn {
             border: none;
-            border-radius: 8px;
-            padding: 12px 8px;
-            font-weight: bold;
+            padding: 12px 12px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 900;
             color: #fff;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: transform 0.1s, box-shadow 0.2s;
+            position: relative;
         }
 
-        button.score-btn:active { transform: scale(0.98); }
+        button.score-btn:active { transform: scale(0.96); }
 
-        .btn-xtreme { background-color: var(--accent-red); }
-        .btn-over { background-color: var(--accent-orange); }
-        .btn-burst { background-color: var(--accent-yellow); color: #000 !important; }
-        .btn-spin { background-color: var(--accent-green); }
+        .btn-xtreme {
+            background: linear-gradient(90deg, #800020, var(--neon-red));
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+            border-left: 4px solid var(--neon-red);
+        }
+
+        .btn-over {
+            background: linear-gradient(90deg, #803b00, var(--neon-orange));
+            box-shadow: 0 0 10px rgba(255, 119, 0, 0.4);
+            border-left: 4px solid var(--neon-orange);
+        }
+
+        .btn-burst {
+            background: linear-gradient(90deg, #806600, var(--neon-yellow));
+            color: #000 !important;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+            border-left: 4px solid var(--neon-yellow);
+        }
+
+        .btn-spin {
+            background: linear-gradient(90deg, #008033, var(--neon-green));
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+            border-left: 4px solid var(--neon-green);
+        }
+
+        .pts-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
 
         .controls { margin-top: 16px; display: flex; gap: 12px; }
 
         .ctrl-btn {
-            background: #334155;
-            color: var(--text-main);
-            border: none;
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #475569;
             padding: 10px 20px;
-            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
         }
 
-        .ctrl-btn.reset { background: #b91c1c; }
+        .ctrl-btn.reset {
+            background: rgba(255, 0, 85, 0.15);
+            color: var(--neon-red);
+            border-color: var(--neon-red);
+        }
+
+        .ctrl-btn.reset:hover {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 12px var(--neon-red);
+        }
 
         /* Battle Log Panel */
         .log-panel {
             width: 100%;
             max-width: 800px;
-            background: var(--card-bg);
-            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.85);
+            border-radius: 6px;
             margin-top: 16px;
             padding: 12px;
             box-sizing: border-box;
-            border: 1px solid #334155;
+            border: 1px solid #2a3852;
         }
 
-        .log-title { font-size: 0.9rem; font-weight: bold; color: var(--text-sub); margin-bottom: 8px; }
-        .log-list { list-style: none; padding: 0; margin: 0; max-height: 120px; overflow-y: auto; font-size: 0.85rem; }
-        .log-item { padding: 4px 0; border-bottom: 1px dashed #334155; display: flex; justify-content: space-between; }
+        .log-title { font-size: 0.85rem; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-bottom: 8px; }
+        .log-list { list-style: none; padding: 0; margin: 0; max-height: 100px; overflow-y: auto; font-size: 0.8rem; }
+        .log-item { padding: 4px 0; border-bottom: 1px dashed #2a3852; color: #cbd5e1; }
 
         /* Modal Styles */
         .modal {
@@ -203,14 +295,17 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
 
         .modal-content {
-            background: var(--card-bg);
-            border-radius: 12px;
+            background: #111827;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+            border-radius: 8px;
             padding: 24px;
             max-width: 600px;
             width: 90%;
@@ -223,7 +318,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid #2a3852;
             padding-bottom: 10px;
             margin-bottom: 12px;
         }
@@ -231,20 +326,28 @@
         .close-btn { background: transparent; border: none; color: var(--text-sub); font-size: 1.5rem; cursor: pointer; }
 
         .winner-box { text-align: center; padding: 20px 0; }
-        .winner-title { font-size: 2.2rem; color: #38bdf8; margin: 10px 0; font-weight: 800; }
+        .winner-title {
+            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+            font-size: 2.5rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+            margin: 10px 0;
+            font-weight: 900;
+            font-style: italic;
+        }
 
         footer {
             margin-top: auto;
             padding-top: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-sub);
             text-align: center;
             max-width: 600px;
         }
 
         @media (max-width: 480px) {
-            .score-display { font-size: 3rem; }
-            button.score-btn { font-size: 0.8rem; padding: 10px 6px; }
+            .score-display { font-size: 3.8rem; }
+            button.score-btn { font-size: 0.8rem; padding: 10px 8px; }
         }
     </style>
 </head>
@@ -252,8 +355,8 @@
 
     <header>
         <div>
-            <h1>BX Score Keeper</h1>
-            <div class="subtitle" id="rules-tag">Asia Regs v12 (Target: 4 pts)</div>
+            <h1>BX SCORE KEEPER</h1>
+            <div class="subtitle" id="rules-tag">ASIA REGS V12 (TARGET: 4 PTS)</div>
         </div>
         <div class="nav-btns">
             <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
@@ -269,48 +372,48 @@
             <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team')">Team Battle</button>
         </div>
         <div class="deck-controls" id="deck-box" style="display: none;">
-            <span class="deck-indicator" id="deck-status">Bey #1</span>
-            <button class="reorder-btn" onclick="resetBattleCounter()" id="reorder-btn">重新排陣</button>
+            <span class="deck-indicator" id="deck-status">BEY #1</span>
+            <button class="reorder-btn" onclick="resetBattleCounter()" id="reorder-btn">重置順序</button>
         </div>
     </div>
 
     <div class="scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
-            <div class="player-name" id="p1-title">Player 1</div>
+            <div class="player-name" id="p1-title">PLAYER 1</div>
             <div class="score-display" id="score-p1">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
-                    <span class="txt-xtreme">Xtreme Finish</span><span>+3</span>
+                    <span class="txt-xtreme">Xtreme Finish</span><span class="pts-badge">+3</span>
                 </button>
                 <button class="score-btn btn-over" onclick="addScore(1, 2, 'Over')">
-                    <span class="txt-over">Over Finish</span><span>+2</span>
+                    <span class="txt-over">Over Finish</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-burst" onclick="addScore(1, 2, 'Burst')">
-                    <span class="txt-burst">Burst Finish</span><span>+2</span>
+                    <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
-                    <span class="txt-spin">Spin Finish</span><span>+1</span>
+                    <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
             </div>
         </div>
 
         <!-- Player 2 -->
         <div class="player-card">
-            <div class="player-name" id="p2-title">Player 2</div>
+            <div class="player-name" id="p2-title">PLAYER 2</div>
             <div class="score-display" id="score-p2">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
-                    <span class="txt-xtreme">Xtreme Finish</span><span>+3</span>
+                    <span class="txt-xtreme">Xtreme Finish</span><span class="pts-badge">+3</span>
                 </button>
                 <button class="score-btn btn-over" onclick="addScore(2, 2, 'Over')">
-                    <span class="txt-over">Over Finish</span><span>+2</span>
+                    <span class="txt-over">Over Finish</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-burst" onclick="addScore(2, 2, 'Burst')">
-                    <span class="txt-burst">Burst Finish</span><span>+2</span>
+                    <span class="txt-burst">Burst Finish</span><span class="pts-badge">+2</span>
                 </button>
                 <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
-                    <span class="txt-spin">Spin Finish</span><span>+1</span>
+                    <span class="txt-spin">Spin Finish</span><span class="pts-badge">+1</span>
                 </button>
             </div>
         </div>
@@ -323,7 +426,7 @@
 
     <!-- Battle Log -->
     <div class="log-panel">
-        <div class="log-title" id="log-title">對局紀錄 (Battle Log)</div>
+        <div class="log-title" id="log-title">⚡ 對局紀錄 (BATTLE LOG)</div>
         <ul class="log-list" id="log-list"></ul>
     </div>
 
@@ -331,7 +434,7 @@
     <div class="modal" id="rules-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 style="margin:0; font-size:1.1rem;" id="modal-title">BEYBLADE X 亞洲版第 12 版規則摘要</h2>
+                <h2 style="margin:0; font-size:1.1rem; color:var(--neon-blue);" id="modal-title">BEYBLADE X 亞洲版第 12 版規則摘要</h2>
                 <button class="close-btn" onclick="closeRules()">&times;</button>
             </div>
             <div id="modal-body"></div>
@@ -342,10 +445,10 @@
     <div class="modal" id="win-modal">
         <div class="modal-content" style="text-align: center;">
             <div class="winner-box">
-                <div style="font-size: 3rem;">🎉</div>
-                <div class="winner-title" id="winner-name">Player 1</div>
-                <p style="font-size: 1.2rem; color: #fff;" id="win-msg">MATCH WINNER!</p>
-                <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px;">OK</button>
+                <div style="font-size: 3.5rem;">🏆</div>
+                <div class="winner-title" id="winner-name">PLAYER 1</div>
+                <p style="font-size: 1.2rem; color: #fff; font-weight: bold;" id="win-msg">MATCH WINNER!</p>
+                <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">OK</button>
             </div>
         </div>
     </div>
@@ -358,7 +461,7 @@
         let scoreP1 = 0;
         let scoreP2 = 0;
         let battleCount = 1;
-        let matchMode = 'std'; // 'std', '3v3', 'team'
+        let matchMode = 'std';
         let targetScore = 4;
         let history = [];
         let logs = [];
@@ -376,42 +479,34 @@
                 spin: "旋轉收尾 (Spin)",
                 undo: "復原 (Undo)",
                 reset: "重置比賽",
-                reorderBtn: "重新排陣",
+                reorderBtn: "重置順序",
                 p1: "選手 A (Player 1)",
                 p2: "選手 B (Player 2)",
                 winMsg: "率先達到目標分數，獲得最終勝利！",
                 reorderMsg: "3 個陀螺已全部登場，比分尚未達到 4 分！請雙方重新排列 3 個陀螺順序，從 Bey #1 繼續比賽。",
                 disclaimer: "本工具為玩家自製非官方應用，僅供對戰計分使用。BEYBLADE 及 爆旋陀螺 為 TAKARA TOMY 之註冊商標。",
                 rulesBody: `
-                    <div class="rule-section">
-                        <h3>1. 得分機制 (Points)</h3>
-                        <ul>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分機制 (Points)</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
                             <li><b>極致收尾 (Xtreme Finish) - 3分</b>：完全進入極限區 (Xtreme Zone) 且無法返回對戰區。</li>
                             <li><b>完工 / 超區 (Over Finish) - 2分</b>：完全進入超區 (Over Zone) 且無法返回對戰區。</li>
                             <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先一步分離。</li>
                             <li><b>旋轉收尾 (Spin Finish) - 1分</b>：對手陀螺在對戰區內先停止旋轉。</li>
                         </ul>
                     </div>
-                    <div class="rule-section">
-                        <h3>2. 3對3賽制 (3on3 Battle)</h3>
-                        <ul>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3對3賽制 (3on3 Battle)</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
                             <li>預先決定 3 個陀螺出場順序並進行 Bey Check。</li>
                             <li>打完 3 場若未有人累積滿 4 分，<b>得分保留，重新排列 3 個陀螺順序（由 Bey #1 重新開始）</b>繼續比賽。</li>
-                        </ul>
-                    </div>
-                    <div class="rule-section">
-                        <h3>3. 團隊戰 (Team Battle)</h3>
-                        <ul>
-                            <li>每局個人對戰採<b>先得 2 分制</b>。</li>
-                            <li>勝方留場繼續對戰，敗方由下一位隊員接替 (KOF模式)。</li>
-                            <li>換人時上一場分數不累積，新對戰比分重新由 0-0 開始。</li>
                         </ul>
                     </div>
                 `
             },
             en: {
-                rulesTag4: "Asia Regs v12 (First to 4 pts)",
-                rulesTag2: "Team Battle Regs (First to 2 pts)",
+                rulesTag4: "ASIA REGS V12 (FIRST TO 4 PTS)",
+                rulesTag2: "TEAM BATTLE REGS (FIRST TO 2 PTS)",
                 rulesBtn: "Rules",
                 modalTitle: "Asia Regs 12th Edition Summary (March 2026)",
                 xtreme: "Xtreme Finish",
@@ -421,34 +516,19 @@
                 undo: "Undo",
                 reset: "Reset Match",
                 reorderBtn: "Reset Order",
-                p1: "Player 1",
-                p2: "Player 2",
+                p1: "PLAYER 1",
+                p2: "PLAYER 2",
                 winMsg: "Reached target score and wins the match!",
                 reorderMsg: "All 3 Beys have battled, but no one reached 4 pts. Scores stay, rearrange your 3-Bey order and restart from Bey #1!",
                 disclaimer: "Unofficial fan-made tool for scoring purposes only. BEYBLADE is a registered trademark of TAKARA TOMY.",
                 rulesBody: `
-                    <div class="rule-section">
-                        <h3>1. Scoring Systems</h3>
-                        <ul>
+                    <div style="margin-bottom:12px;">
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
+                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
                             <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone and cannot return.</li>
                             <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone and cannot return.</li>
                             <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
                             <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
-                        </ul>
-                    </div>
-                    <div class="rule-section">
-                        <h3>2. 3on3 Battle Rules</h3>
-                        <ul>
-                            <li>Place 3 Beys in deck case in battle order for Bey Check.</li>
-                            <li>If no one reaches 4 pts after 3 battles, <b>scores stay, rearrange order and restart from Bey #1</b>.</li>
-                        </ul>
-                    </div>
-                    <div class="rule-section">
-                        <h3>3. Team Battle Outcomes</h3>
-                        <ul>
-                            <li>Each individual battle follows a <b>first-to-2-points rule</b>.</li>
-                            <li>Winning Blader stays, losing Blader replaced by next team member.</li>
-                            <li>Points do not carry over when a new opponent steps in.</li>
                         </ul>
                     </div>
                 `
@@ -470,7 +550,6 @@
         function addScore(player, pts, typeName) {
             if (scoreP1 >= targetScore || scoreP2 >= targetScore) return;
 
-            // Record History
             history.push({ p1: scoreP1, p2: scoreP2, battle: battleCount, logs: [...logs] });
 
             let pName = player === 1 ? i18n[currentLang].p1 : i18n[currentLang].p2;
@@ -482,15 +561,13 @@
             battleCount++;
             updateDisplay();
 
-            // Check Win Condition
             if (checkWinner()) return;
 
-            // 3on3 Mode: Every 3 battles logic
             if (matchMode === '3v3' && (battleCount - 1) % 3 === 0) {
                 if (scoreP1 < 4 && scoreP2 < 4) {
                     setTimeout(() => {
                         alert(i18n[currentLang].reorderMsg);
-                        battleCount = 1; // RESET battle counter to 1 for new deck round
+                        battleCount = 1;
                         updateDisplay();
                     }, 100);
                 }
@@ -532,12 +609,11 @@
 
             if (matchMode === '3v3') {
                 let currentBeyNum = ((battleCount - 1) % 3) + 1;
-                document.getElementById('deck-status').innerText = `Bey #${currentBeyNum}`;
+                document.getElementById('deck-status').innerText = `BEY #${currentBeyNum}`;
             }
 
-            // Update Logs
             const logList = document.getElementById('log-list');
-            logList.innerHTML = logs.map(l => `<li class="log-item"><span>${l}</span></li>`).join('');
+            logList.innerHTML = logs.map(l => `<li class="log-item">${l}</li>`).join('');
         }
 
         function checkWinner() {
@@ -558,10 +634,7 @@
             document.getElementById('win-modal').style.display = 'flex';
         }
 
-        function closeWinModal() {
-            document.getElementById('win-modal').style.display = 'none';
-        }
-
+        function closeWinModal() { document.getElementById('win-modal').style.display = 'none'; }
         function openRules() { document.getElementById('rules-modal').style.display = 'flex'; }
         function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
 
@@ -587,7 +660,6 @@
             document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
         }
 
-        // Init
         toggleLanguage();
     </script>
 </body>
