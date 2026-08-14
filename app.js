@@ -173,6 +173,7 @@ const i18n = {
     }
 };
 
+/* 修復 3-Player 顯隱死鎖 Bug */
 function setMatchMode(mode) {
     matchMode = mode;
     if (mode === 'team') targetScore = 2;
@@ -188,17 +189,19 @@ function setMatchMode(mode) {
     document.getElementById('team-tracker-bar').style.display = mode === 'team' ? 'flex' : 'none';
     document.getElementById('next-kof-btn').style.display = mode === 'team' ? 'inline-block' : 'none';
 
+    resetMatch(false); // 重置分數
+
+    // 關鍵修復：卡片顯隱放在 resetMatch 之後，絕不被蓋掉！
     const scoreboard = document.getElementById('main-scoreboard');
     const p3Card = document.getElementById('p3-card');
     if (mode === 'p3') {
         scoreboard.classList.add('p3-mode');
-        p3Card.style.display = 'flex';
+        if (p3Card) p3Card.style.display = 'flex';
     } else {
         scoreboard.classList.remove('p3-mode');
-        p3Card.style.display = 'none';
+        if (p3Card) p3Card.style.display = 'none';
     }
 
-    resetMatch(false);
     updatePlayerNamesForMode();
     applyLanguage();
 }
@@ -519,7 +522,6 @@ function checkWinner() {
     if (scoreP1 >= targetScore) {
         if (matchMode === 'team') teamWinsP1++;
         playBeep(880, 'triangle', 0.3);
-        // 如果是 1v1 或 3on3，達到 4 分即為總冠軍；如果是 Team 戰且對手全滅也為總冠軍
         let isFinal = matchMode !== 'team'; 
         showWinModal(name1, isFinal);
         return true;
@@ -537,17 +539,16 @@ function checkWinner() {
     return false;
 }
 
-/* 🏆 / ⚡ 區分：只有總冠軍才出 🏆 獎盃，單局獲勝顯示 ⚡ */
 function showWinModal(winner, isFinalTeamWin = false) {
     document.getElementById('winner-name').textContent = winner;
     const modalIcon = document.querySelector('#win-modal div[style*="font-size: 3rem;"]');
 
     if (isFinalTeamWin) {
         isFinalTeamWinActive = true;
-        if (modalIcon) modalIcon.innerText = "🏆"; // 總冠軍出獎盃
+        if (modalIcon) modalIcon.innerText = "🏆";
         document.getElementById('win-msg').innerText = i18n[currentLang].teamFinalWinMsg;
     } else {
-        if (modalIcon) modalIcon.innerText = "⚡"; // 一般單局勝出出閃電
+        if (modalIcon) modalIcon.innerText = "⚡";
         document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
     }
     document.getElementById('win-modal').style.display = 'flex';
