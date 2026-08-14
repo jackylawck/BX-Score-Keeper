@@ -1,5 +1,5 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Module (100% Bilingual & 15 Devices Max)
+ * 🌐 p2p.js - WebRTC PeerJS Module (Enhanced Android & STUN Compatibility)
  * ========================================================================= */
 
 const MAX_DEVICES = 15;
@@ -13,6 +13,17 @@ let pendingClientData = null;
 let occupiedSlots = { slot1: false, slot2: false, slot3: false };
 let isMatchLocked = false;
 let heartbeatTimer = null;
+
+// 🌐 加入 Google 公共 STUN 伺服器，解決跨電信商/跨 WiFi 穿透問題
+const PEER_CONFIG = {
+    config: {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+    }
+};
 
 function openP2PModal() { 
     applyLanguage();
@@ -55,10 +66,11 @@ function initP2PHost() {
     let randomNum = Math.floor(10000000 + Math.random() * 90000000).toString();
     currentRoomId = `bx-${randomNum}`;
 
-    peer = new Peer(currentRoomId);
+    peer = new Peer(currentRoomId, PEER_CONFIG);
     
     peer.on('open', (id) => {
         myPeerRole = 'host';
+        p2pConnMap = {}; // 清空舊連線表
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
         isMatchLocked = false;
         setUIPermissions();
@@ -74,6 +86,9 @@ function initP2PHost() {
     });
 
     peer.on('connection', (conn) => {
+        // 清理已關閉的無效連線，確保人數精準
+        cleanDeadConnections();
+
         let currentCount = Object.keys(p2pConnMap).length;
 
         if (currentCount >= MAX_DEVICES) {
@@ -97,7 +112,7 @@ function initP2PHost() {
                 teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
                 battleCount, matchMode,
                 logs: logs,
-                connectedCount: Object.keys(p2pConnMap).length
+                connectedCount: getActiveConnectionCount()
             });
             broadcastDeviceCount();
         });
@@ -115,17 +130,42 @@ function initP2PHost() {
             updateConnectedCount();
             broadcastDeviceCount();
         });
+
+        conn.on('error', () => {
+            delete p2pConnMap[conn.peer];
+            updateConnectedCount();
+            broadcastDeviceCount();
+        });
     });
 
     peer.on('error', (err) => {
-        alert("Peer Error: " + err.type);
+        if (err.type === 'unavailable-id') {
+            initP2PHost(); // 若極低機率撞號，自動重抽
+        } else {
+            console.error("Peer Error:", err);
+        }
     });
+}
+
+function cleanDeadConnections() {
+    Object.keys(p2pConnMap).forEach(key => {
+        let c = p2pConnMap[key];
+        if (!c || !c.open) {
+            delete p2pConnMap[key];
+        }
+    });
+}
+
+function getActiveConnectionCount() {
+    cleanDeadConnections();
+    return Object.keys(p2pConnMap).length;
 }
 
 function startHeartbeat() {
     if (heartbeatTimer) clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(() => {
         if (myPeerRole === 'host') {
+            cleanDeadConnections();
             broadcastToClients({ type: 'PING' });
         } else if (hostConn && hostConn.open) {
             hostConn.send({ type: 'PING' });
@@ -134,7 +174,7 @@ function startHeartbeat() {
 }
 
 function updateConnectedCount(overrideCount = null) {
-    let count = overrideCount !== null ? overrideCount : Object.keys(p2pConnMap).length;
+    let count = overrideCount !== null ? overrideCount : getActiveConnectionCount();
     let remaining = Math.max(0, MAX_DEVICES - count);
     let displayTxt = `${count} / ${MAX_DEVICES} (${currentLang === 'zh' ? '名額剩餘' : 'Left'}: ${remaining})`;
     
@@ -143,7 +183,7 @@ function updateConnectedCount(overrideCount = null) {
 }
 
 function broadcastDeviceCount() {
-    let count = Object.keys(p2pConnMap).length;
+    let count = getActiveConnectionCount();
     broadcastToClients({ type: 'DEVICE_COUNT_SYNC', count });
 }
 
@@ -192,7 +232,6 @@ function applyLobbyLayout() {
     }
 }
 
-/* 🎯 關鍵修復：大廳輸入框 100% 依語言載入 Player / Team / Bey / Vanguard */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -378,12 +417,12 @@ function joinP2PRoom(roleType) {
     }
 
     if (peer) peer.destroy();
-    peer = new Peer();
+    peer = new Peer(PEER_CONFIG);
 
     peer.on('open', () => {
         myPeerRole = roleType;
         let targetPeerId = `bx-${inputId}`;
-        hostConn = peer.connect(targetPeerId);
+        hostConn = peer.connect(targetPeerId, { reliable: true });
 
         hostConn.on('open', () => {
             currentRoomId = inputId;
@@ -416,7 +455,7 @@ function joinP2PRoom(roleType) {
 
         hostConn.on('error', (err) => {
             if (err.type === 'peer-unavailable') {
-                alert(currentLang === 'zh' ? "⚠️ 連線失敗：找不到此對戰房間！請確認裁判已建立房間且 8 位數 ID 正確。" : "⚠️ Connection Failed: Room not found! Please check Room ID.");
+                alert(currentLang === 'zh' ? "⚠️ 連線失敗：找不到此房間！請確認裁判已建立房間且 8 位數 ID 正確。" : "⚠️ Connection Failed: Room not found! Please check Room ID.");
             } else {
                 alert("Connection Error: " + err.type);
             }
@@ -455,7 +494,7 @@ function setUIPermissions() {
 
 function sendClientDeckToHost() {
     if (!hostConn || !hostConn.open) {
-        alert(currentLang === 'zh' ? "未連線至裁判端！" : "Not connected to Referee!");
+        alert(currentLang === 'zh' ? "未連線至裁判端！請重新點擊「選手連線」。" : "Not connected to Referee! Please re-click 'Join as Player'.");
         return;
     }
 
@@ -659,6 +698,7 @@ function applyStateSync(data) {
 
 function broadcastToClients(payload) {
     if (myPeerRole !== 'host') return;
+    cleanDeadConnections();
     Object.values(p2pConnMap).forEach(conn => {
         if (conn && conn.open) {
             conn.send(payload);
