@@ -1,8 +1,8 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Module (Max 15 Devices & Smart 3-Slot Receiver)
+ * 🌐 p2p.js - WebRTC PeerJS Module (100% Bilingual & 15 Devices Max)
  * ========================================================================= */
 
-const MAX_DEVICES = 15; // 🛡️ 連線硬上限為 15 人
+const MAX_DEVICES = 15;
 
 let peer = null;
 let p2pConnMap = {}; 
@@ -34,9 +34,9 @@ function updateP2PFormFields() {
     } else if (mode === '3v3') {
         if (extraBox) extraBox.style.display = 'block';
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
-        safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '陀螺 1 號 (ITEM #1)' : 'Bey #1 (ITEM #1)');
-        safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '陀螺 2 號 (ITEM #2)' : 'Bey #2 (ITEM #2)');
-        safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '陀螺 3 號 (ITEM #3)' : 'Bey #3 (ITEM #3)');
+        safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '陀螺 1 號' : 'Bey #1');
+        safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '陀螺 2 號' : 'Bey #2');
+        safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '陀螺 3 號' : 'Bey #3');
     } else if (mode === 'team') {
         if (extraBox) extraBox.style.display = 'block';
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 Daddy)' : 'Team Name (e.g. Daddy)';
@@ -192,41 +192,66 @@ function applyLobbyLayout() {
     }
 }
 
+/* 🎯 關鍵修復：大廳輸入框 100% 依語言載入 Player / Team / Bey / Vanguard */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
     let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
+    let defT1 = currentLang === 'zh' ? '隊伍 A' : 'Team A';
+    let defT2 = currentLang === 'zh' ? '隊伍 B' : 'Team B';
 
-    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B';
+    let defD1 = matchMode === 'team' ? (currentLang === 'zh' ? '先鋒' : '1st Vanguard') : (currentLang === 'zh' ? '陀螺 1號' : 'Bey 1');
+    let defD2 = matchMode === 'team' ? (currentLang === 'zh' ? '中堅' : '2nd Middle') : (currentLang === 'zh' ? '陀螺 2號' : 'Bey 2');
+    let defD3 = matchMode === 'team' ? (currentLang === 'zh' ? '大將' : '3rd General') : (currentLang === 'zh' ? '陀螺 3號' : 'Bey 3');
 
-    safeSetInputValue('lobby-p1-name', isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1));
-    safeSetInputValue('lobby-p2-name', isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2));
+    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B' && val !== 'Team A' && val !== 'Team B' && !val.startsWith('選手') && !val.startsWith('Player');
+    let isRealDeck = (val) => val && val !== '1' && val !== '2' && val !== '3' && val !== 'A' && val !== 'B' && val !== 'C' && !val.startsWith('陀螺') && !val.startsWith('Bey') && val !== '先鋒' && val !== '中堅' && val !== '大將' && !val.includes('Vanguard') && !val.includes('Middle') && !val.includes('General');
+
+    if (matchMode === 'team') {
+        safeSetInputValue('lobby-p1-name', isReal(roster.t1Name) ? roster.t1Name : defT1);
+        safeSetInputValue('lobby-p2-name', isReal(roster.t2Name) ? roster.t2Name : defT2);
+    } else {
+        safeSetInputValue('lobby-p1-name', isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1));
+        safeSetInputValue('lobby-p2-name', isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2));
+    }
     safeSetInputValue('lobby-p3-name', isReal(roster.t3Name) ? roster.t3Name : defP3);
 
-    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || '1');
-    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || '2');
-    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || '3');
+    safeSetInputValue('lobby-p1-d1', (roster.t1 && isRealDeck(roster.t1[0])) ? roster.t1[0] : defD1);
+    safeSetInputValue('lobby-p1-d2', (roster.t1 && isRealDeck(roster.t1[1])) ? roster.t1[1] : defD2);
+    safeSetInputValue('lobby-p1-d3', (roster.t1 && isRealDeck(roster.t1[2])) ? roster.t1[2] : defD3);
 
-    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || 'A');
-    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || 'B');
-    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
+    safeSetInputValue('lobby-p2-d1', (roster.t2 && isRealDeck(roster.t2[0])) ? roster.t2[0] : defD1);
+    safeSetInputValue('lobby-p2-d2', (roster.t2 && isRealDeck(roster.t2[1])) ? roster.t2[1] : defD2);
+    safeSetInputValue('lobby-p2-d3', (roster.t2 && isRealDeck(roster.t2[2])) ? roster.t2[2] : defD3);
 }
 
 function clearLobbySlot(slotNum) {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
     let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
+    let defT1 = currentLang === 'zh' ? '隊伍 A' : 'Team A';
+    let defT2 = currentLang === 'zh' ? '隊伍 B' : 'Team B';
+
+    let defD1 = matchMode === 'team' ? (currentLang === 'zh' ? '先鋒' : '1st Vanguard') : (currentLang === 'zh' ? '陀螺 1號' : 'Bey 1');
+    let defD2 = matchMode === 'team' ? (currentLang === 'zh' ? '中堅' : '2nd Middle') : (currentLang === 'zh' ? '陀螺 2號' : 'Bey 2');
+    let defD3 = matchMode === 'team' ? (currentLang === 'zh' ? '大將' : '3rd General') : (currentLang === 'zh' ? '陀螺 3號' : 'Bey 3');
 
     if (slotNum === 1) {
         occupiedSlots.slot1 = false;
-        roster.t1Name = defP1;
-        roster.t1 = ['選手一', '陀螺二', '陀螺三'];
-        safeSetInputValue('lobby-p1-name', defP1);
+        roster.t1Name = matchMode === 'team' ? defT1 : defP1;
+        roster.t1 = [defD1, defD2, defD3];
+        safeSetInputValue('lobby-p1-name', roster.t1Name);
+        safeSetInputValue('lobby-p1-d1', defD1);
+        safeSetInputValue('lobby-p1-d2', defD2);
+        safeSetInputValue('lobby-p1-d3', defD3);
     } else if (slotNum === 2) {
         occupiedSlots.slot2 = false;
-        roster.t2Name = defP2;
-        roster.t2 = ['選手二', '陀螺二', '陀螺三'];
-        safeSetInputValue('lobby-p2-name', defP2);
+        roster.t2Name = matchMode === 'team' ? defT2 : defP2;
+        roster.t2 = [defD1, defD2, defD3];
+        safeSetInputValue('lobby-p2-name', roster.t2Name);
+        safeSetInputValue('lobby-p2-d1', defD1);
+        safeSetInputValue('lobby-p2-d2', defD2);
+        safeSetInputValue('lobby-p2-d3', defD3);
     } else if (slotNum === 3) {
         occupiedSlots.slot3 = false;
         roster.t3Name = defP3;
@@ -277,7 +302,6 @@ function swapLobbySides() {
     }
 }
 
-/* 🎯 鎖定開賽：支持 3-Player 登場動畫 XX vs YY vs ZZ */
 function startMatchFromLobby() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -519,13 +543,13 @@ function autoAcceptClientSubmission() {
     if (targetSlot === 1) {
         roster.t1Name = data.name;
         if (data.items && data.items.length) roster.t1 = [...data.items];
-        else roster.t1 = [data.name, '陀螺二', '陀螺三'];
+        else roster.t1 = [data.name, '2', '3'];
         occupiedSlots.slot1 = true;
         safeSetInputValue('lobby-p1-name', data.name);
     } else if (targetSlot === 2) {
         roster.t2Name = data.name;
         if (data.items && data.items.length) roster.t2 = [...data.items];
-        else roster.t2 = [data.name, '陀螺二', '陀螺三'];
+        else roster.t2 = [data.name, '2', '3'];
         occupiedSlots.slot2 = true;
         safeSetInputValue('lobby-p2-name', data.name);
     } else if (targetSlot === 3) {
@@ -607,7 +631,6 @@ function handleClientReceivedData(data) {
     }
 }
 
-/* 🎯 關鍵修復：保證 3-Player 模式在所有連線手機上完整展開 3 張卡片 */
 function applyStateSync(data) {
     if (data.roster) roster = data.roster;
     scoreP1 = data.scoreP1 || 0;
