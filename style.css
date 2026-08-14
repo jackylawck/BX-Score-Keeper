@@ -35,19 +35,10 @@ body {
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 100% 100%, 30px 30px, 30px 30px;
     color: var(--text-main);
-    padding: 8px 12px;
+    padding: 10px 16px;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-}
-
-/* 🖥️ 寬螢幕/電腦版專屬置中容器：徹底防止橫向拉扯變形 */
-.app-container {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
     flex-direction: column;
-    margin: 0 auto;
 }
 
 header {
@@ -56,12 +47,12 @@ header {
     align-items: center;
     border-bottom: 1px solid rgba(0, 240, 255, 0.2);
     padding-bottom: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 900;
     color: var(--neon-blue);
     letter-spacing: 1px;
@@ -83,9 +74,9 @@ h1 {
     background: rgba(18, 24, 38, 0.8);
     border: 1px solid var(--neon-blue);
     color: var(--neon-blue);
-    padding: 4px 8px;
+    padding: 5px 10px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     cursor: pointer;
     font-weight: bold;
     transition: all 0.2s;
@@ -101,8 +92,8 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 10px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
 }
 
@@ -110,10 +101,10 @@ h1 {
     display: flex;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 8px;
-    padding: 3px;
+    padding: 4px;
     border: 1px solid var(--card-border);
     flex: 1;
-    min-width: 280px;
+    min-width: 320px;
 }
 
 .mode-btn {
@@ -121,9 +112,9 @@ h1 {
     background: transparent;
     border: none;
     color: var(--text-sub);
-    padding: 6px 4px;
+    padding: 8px 6px;
     border-radius: 6px;
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
@@ -134,7 +125,7 @@ h1 {
     background: var(--neon-blue);
     color: #000;
     font-weight: 900;
-    box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
 }
 
 .shoot-btn {
@@ -142,11 +133,11 @@ h1 {
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
+    padding: 8px 16px;
+    font-size: 0.9rem;
     font-weight: 900;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
     transition: all 0.2s;
     white-space: nowrap;
 }
@@ -160,12 +151,12 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     background: rgba(18, 24, 38, 0.9);
     border: 1px solid var(--card-border);
     border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.85rem;
+    padding: 6px 16px;
+    font-size: 0.9rem;
     font-weight: bold;
     width: 100%;
 }
@@ -173,8 +164,9 @@ h1 {
 .scoreboard {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex: 1;
 }
 
 .scoreboard.p3-mode {
@@ -184,11 +176,11 @@ h1 {
 .player-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 12px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
 }
@@ -199,7 +191,7 @@ h1 {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 4px;
     background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
 }
 
@@ -215,13 +207,13 @@ h1 {
     width: 100%;
     background: transparent;
     border: none;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
     color: #fff;
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     font-weight: 900;
     text-align: center;
     padding-bottom: 4px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     outline: none;
     letter-spacing: 0.5px;
 }
@@ -232,30 +224,31 @@ h1 {
 
 .score-display {
     font-family: 'Orbitron', monospace;
-    font-size: 3rem;
+    font-size: 3.2rem;
     font-weight: 900;
     color: var(--neon-blue);
     text-align: center;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
 }
 
 .btn-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 5px;
+    flex: 1;
 }
 
 .score-btn {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border: none;
     border-radius: 6px;
     font-weight: 900;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     cursor: pointer;
     color: #fff;
     transition: all 0.15s;
@@ -283,16 +276,16 @@ h1 {
 
 .pts-badge {
     background: rgba(0, 0, 0, 0.35);
-    padding: 1px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
     font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .controls {
     display: flex;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .ctrl-btn {
@@ -300,10 +293,10 @@ h1 {
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid var(--card-border);
     color: var(--text-main);
-    padding: 8px 10px;
-    border-radius: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
@@ -328,29 +321,29 @@ h1 {
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--card-border);
     border-radius: 8px;
-    padding: 8px;
-    max-height: 120px;
+    padding: 10px;
+    max-height: 130px;
     overflow-y: auto;
     margin-top: 4px;
 }
 
 .log-title {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 900;
     color: var(--neon-yellow);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .log-list {
     list-style: none;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #cbd5e1;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .log-item {
     border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
-    padding: 2px 0;
+    padding: 3px 0;
 }
 
 .modal {
@@ -390,7 +383,7 @@ h1 {
     border: 1px solid #334155;
     border-radius: 6px;
     color: #fff;
-    padding: 6px 10px;
+    padding: 8px 10px;
     font-size: 0.9rem;
     outline: none;
     margin-bottom: 6px;
@@ -400,10 +393,9 @@ h1 {
     border-color: var(--neon-blue);
 }
 
-/* 🗑️ 大廳卡片與清空按鈕美化對齊 */
 .lobby-card {
     border-radius: 6px;
-    padding: 8px;
+    padding: 8px 10px;
     margin-bottom: 8px;
 }
 
@@ -466,9 +458,9 @@ h1 {
 
 footer {
     text-align: center;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     color: var(--text-sub);
-    margin-top: 8px;
+    margin-top: 10px;
     padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -487,10 +479,6 @@ footer {
     body {
         padding: 4px 8px !important;
         overflow-y: auto;
-    }
-
-    .app-container {
-        max-width: 100% !important;
     }
 
     .scoreboard {
