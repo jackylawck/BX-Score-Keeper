@@ -58,9 +58,9 @@
     <!-- P2P 連線狀態顯示條 (支援離房按鈕) -->
     <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 6px 12px; margin: 8px auto; max-width: 650px; text-align: center; font-size: 0.85rem; color: #fff;">
         <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
-        房間 ID: <strong id="p2p-current-room" style="color: var(--neon-yellow);">----</strong> | 
-        已連線設備: <strong id="p2p-connected-count" style="color: var(--neon-green);">0</strong>
-        <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 2px 8px; margin-left: 10px; background: #ef4444; color: #fff;">🚪 離開房間</button>
+        <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow);">----</strong> | 
+        <span id="p2p-lbl-connected">已連線設備</span>: <strong id="p2p-connected-count" style="color: var(--neon-green);">0</strong>
+        <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 2px 8px; margin-left: 10px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
     </div>
 
     <!-- 3on3 Status Box -->
@@ -160,42 +160,49 @@
         <ul class="log-list" id="log-list"></ul>
     </div>
 
-    <!-- 🌐 WebRTC P2P 跨機對戰 Modal (支援選手與觀眾選擇) -->
+    <!-- 🌐 WebRTC P2P 跨機對戰 Modal (含詳細中/英文教學與說明) -->
     <div class="modal" id="p2p-modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
-                <h2 style="margin:0; font-size:1.1rem; color:var(--neon-blue);">🌐 WebRTC P2P 跨機連線</h2>
+                <h2 style="margin:0; font-size:1.1rem; color:var(--neon-blue);" id="p2p-modal-title">🌐 WebRTC P2P 跨機連線</h2>
                 <button style="background:transparent; border:none; color:var(--text-sub); font-size:1.5rem; cursor:pointer;" onclick="closeP2PModal()">&times;</button>
             </div>
             
-            <div style="margin-top:15px; text-align: center;">
-                <div style="margin-bottom: 15px;">
-                    <button class="ctrl-btn" onclick="initP2PHost()" style="background: var(--neon-blue); color: #000; font-weight: bold; width: 100%; margin-bottom: 10px;">👑 建立對戰房間 (裁判主機)</button>
-                    <p style="font-size: 0.8rem; color: #cbd5e1;">建立房間後，將 8 位數 ID 告知對手與現場觀眾。</p>
+            <div style="margin-top:12px; text-align: center;">
+                <!-- 👑 裁判端建立 -->
+                <div style="margin-bottom: 12px;">
+                    <button class="ctrl-btn" onclick="initP2PHost()" style="background: var(--neon-blue); color: #000; font-weight: bold; width: 100%; margin-bottom: 6px;" id="btn-create-host">👑 建立對戰房間 (裁判主機)</button>
+                    <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0;" id="txt-host-desc">建立房間後，將 8 位數 ID 告知對手與現場觀眾。</p>
                 </div>
 
-                <div style="border-top: 1px dashed #2a3852; padding-top: 15px;">
+                <!-- 🎮 / 👁️ 加入房間 -->
+                <div style="border-top: 1px dashed #2a3852; padding-top: 12px;">
                     <input type="text" id="p2p-input-room" class="roster-input" placeholder="輸入 8 位數房間 ID" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
                     
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button class="ctrl-btn" onclick="joinP2PRoom('player')" style="background: var(--neon-green); color: #000; font-weight: bold; flex: 1;">🎮 選手連線</button>
-                        <button class="ctrl-btn" onclick="joinP2PRoom('spectator')" style="background: var(--neon-yellow); color: #000; font-weight: bold; flex: 1;">👁️ 觀眾觀戰</button>
+                        <button class="ctrl-btn" onclick="joinP2PRoom('player')" style="background: var(--neon-green); color: #000; font-weight: bold; flex: 1;" id="btn-join-player">🎮 選手連線</button>
+                        <button class="ctrl-btn" onclick="joinP2PRoom('spectator')" style="background: var(--neon-yellow); color: #000; font-weight: bold; flex: 1;" id="btn-join-spectator">👁️ 觀眾觀戰</button>
                     </div>
                 </div>
 
+                <!-- 📖 全中/全英 連線操作指南說明卡片 -->
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-top: 14px; text-align: left; font-size: 0.8rem; line-height: 1.45;" id="p2p-guide-box">
+                    <!-- 由 JavaScript 動態依語言渲染內容 -->
+                </div>
+
                 <!-- 選手專用動態提交區 -->
-                <div id="p2p-client-submit-box" style="display: none; margin-top: 20px; border-top: 2px solid var(--neon-yellow); padding-top: 15px; text-align: left;">
-                    <h4 style="color: var(--neon-yellow); margin-bottom: 8px;">📩 提交個人 / 隊伍排陣名單</h4>
+                <div id="p2p-client-submit-box" style="display: none; margin-top: 15px; border-top: 2px solid var(--neon-yellow); padding-top: 12px; text-align: left;">
+                    <h4 style="color: var(--neon-yellow); margin-bottom: 8px;" id="lbl-submit-title">📩 提交個人 / 隊伍排陣名單</h4>
                     
-                    <label style="font-size: 0.8rem; color: #cbd5e1;">選擇欲提交的賽制模式：</label>
-                    <select id="p2p-form-type" class="roster-input" style="margin-bottom: 10px;" onchange="updateP2PFormFields()">
-                        <option value="std">1v1 Standard (僅輸入名字)</option>
-                        <option value="3v3">3on3 Battle (姓名 + 3隻陀螺順序)</option>
-                        <option value="team">Team Battle (隊名 + 3位隊員順序)</option>
-                        <option value="p3">3-Player (僅輸入個人名)</option>
+                    <label style="font-size: 0.8rem; color: #cbd5e1;" id="lbl-select-mode">選擇欲提交的賽制模式：</label>
+                    <select id="p2p-form-type" class="roster-input" style="margin-bottom: 8px;" onchange="updateP2PFormFields()">
+                        <option value="std">1v1 Standard</option>
+                        <option value="3v3">3on3 Battle</option>
+                        <option value="team">Team Battle</option>
+                        <option value="p3">3-Player (5-pt)</option>
                     </select>
 
-                    <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 BB)" style="margin-bottom: 6px;">
+                    <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 Daddy)" style="margin-bottom: 6px;">
                     
                     <div id="p2p-extra-items">
                         <input type="text" id="p2p-item-1" class="roster-input" placeholder="先鋒 / 陀螺 1號" style="margin-bottom: 6px;">
@@ -203,7 +210,7 @@
                         <input type="text" id="p2p-item-3" class="roster-input" placeholder="大將 / 陀螺 3號" style="margin-bottom: 10px;">
                     </div>
 
-                    <button class="ctrl-btn" onclick="sendClientDeckToHost()" style="background: var(--neon-yellow); color: #000; font-weight: bold; width: 100%;">🔒 私密送出給裁判審核</button>
+                    <button class="ctrl-btn" onclick="sendClientDeckToHost()" style="background: var(--neon-yellow); color: #000; font-weight: bold; width: 100%;" id="btn-submit-deck">🔒 私密送出給裁判審核</button>
                 </div>
             </div>
         </div>
@@ -216,10 +223,10 @@
             <h3 style="color: var(--neon-blue); margin: 8px 0;" id="p2p-request-title">收到選手排陣提交</h3>
             <div id="p2p-request-body" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; text-align: left; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;"></div>
             
-            <p style="font-size: 0.85rem; color: var(--neon-yellow); margin-bottom: 8px; font-weight: bold;">請選擇放入畫面的位置並同步開賽：</p>
+            <p style="font-size: 0.85rem; color: var(--neon-yellow); margin-bottom: 8px; font-weight: bold;" id="lbl-choose-pos">請選擇放入畫面的位置並同步開賽：</p>
             <div style="display: flex; gap: 6px; justify-content: center;">
-                <button class="ctrl-btn" onclick="acceptClientSubmission(1)" style="background: var(--neon-blue); color: #000; font-weight: bold; flex: 1;">👈 放左邊 (Player 1)</button>
-                <button class="ctrl-btn" onclick="acceptClientSubmission(2)" style="background: var(--neon-red); color: #fff; font-weight: bold; flex: 1;">👉 放右邊 (Player 2)</button>
+                <button class="ctrl-btn" onclick="acceptClientSubmission(1)" style="background: var(--neon-blue); color: #000; font-weight: bold; flex: 1;" id="btn-slot1">👈 放左邊 (Player 1)</button>
+                <button class="ctrl-btn" onclick="acceptClientSubmission(2)" style="background: var(--neon-red); color: #fff; font-weight: bold; flex: 1;" id="btn-slot2">👉 放右邊 (Player 2)</button>
                 <button class="ctrl-btn" id="p2p-slot3-btn" onclick="acceptClientSubmission(3)" style="background: var(--neon-yellow); color: #000; font-weight: bold; flex: 1; display: none;">👆 放中間 (Player 3)</button>
             </div>
         </div>
