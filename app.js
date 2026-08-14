@@ -1,7 +1,7 @@
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
 let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
 let teamWinsP1 = 0, teamWinsP2 = 0;
-let kofIndexP1 = 0, kofIndexP2 = 0; // 追蹤隊員登場位置 (0 = 先鋒, 1 = 中堅, 2 = 大將)
+let kofIndexP1 = 0, kofIndexP2 = 0; // 0 = 先鋒, 1 = 中堅, 2 = 大將
 let battleCount = 1;
 let matchMode = 'std';
 let targetScore = 4;
@@ -243,6 +243,22 @@ function openRosterModal() {
 }
 function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
 
+/* ⬆️ ⬇️ 上下箭頭搬動隊員順序 */
+function moveRosterItem(teamKey, fromIdx, toIndex) {
+    let p1 = document.getElementById(`roster-${teamKey}-p1`);
+    let p2 = document.getElementById(`roster-${teamKey}-p2`);
+    let p3 = document.getElementById(`roster-${teamKey}-p3`);
+
+    let list = [p1.value, p2.value, p3.value];
+    let temp = list[fromIdx];
+    list[fromIdx] = list[toIndex];
+    list[toIndex] = temp;
+
+    p1.value = list[0];
+    p2.value = list[1];
+    p3.value = list[2];
+}
+
 function saveRoster() {
     roster.t1Name = document.getElementById('roster-t1-name').value.trim() || 'Team A';
     roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || '1';
@@ -381,22 +397,15 @@ function addDraw() {
     saveState();
 }
 
-/* 👥 Team KOF 正確輪換與全滅判定 */
+/* 👥 Team KOF 精確全滅判定 (不重複換人) */
 function nextKOFRound() {
-    // 檢查是否有隊伍已經淘汰滿 3 人 (全滅)
-    if (teamWinsP1 >= 3 || teamWinsP2 >= 3) {
-        return; // 整場 Team Battle 已經結束
-    }
-
     if (scoreP1 >= targetScore) {
-        // P1 贏，P2 隊伍換下一個隊員
-        kofIndexP2++;
+        kofIndexP2++; // P2 隊員被淘汰
     } else if (scoreP2 >= targetScore) {
-        // P2 贏，P1 隊伍換下一個隊員
-        kofIndexP1++;
+        kofIndexP1++; // P1 隊員被淘汰
     }
 
-    // 若某隊 3 人全部被淘汰，判定整場賽事總勝負
+    // 正確判定：某一隊 3 人全滅時，直接宣佈總勝負
     if (kofIndexP1 >= 3) {
         let winnerTeam = roster.t2Name || 'Team B';
         showWinModal(`🏆 ${winnerTeam}`, true);
