@@ -173,30 +173,47 @@ const i18n = {
     }
 };
 
+/* 安全設定元素樣式 */
+function safeSetDisplay(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = val;
+}
+
+/* 安全設定元素文字 */
+function safeSetText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+}
+
 function setMatchMode(mode) {
     matchMode = mode;
     if (mode === 'team') targetScore = 2;
     else if (mode === 'p3') targetScore = 5;
     else targetScore = 4;
 
-    document.getElementById('mode-std-btn').classList.toggle('active', mode === 'std');
-    document.getElementById('mode-3v3-btn').classList.toggle('active', mode === '3v3');
-    document.getElementById('mode-team-btn').classList.toggle('active', mode === 'team');
-    document.getElementById('mode-p3-btn').classList.toggle('active', mode === 'p3');
+    const stdBtn = document.getElementById('mode-std-btn');
+    const btn3v3 = document.getElementById('mode-3v3-btn');
+    const teamBtn = document.getElementById('mode-team-btn');
+    const p3Btn = document.getElementById('mode-p3-btn');
 
-    document.getElementById('deck-box').style.display = mode === '3v3' ? 'flex' : 'none';
-    document.getElementById('team-tracker-bar').style.display = mode === 'team' ? 'flex' : 'none';
-    document.getElementById('next-kof-btn').style.display = mode === 'team' ? 'inline-block' : 'none';
+    if (stdBtn) stdBtn.classList.toggle('active', mode === 'std');
+    if (btn3v3) btn3v3.classList.toggle('active', mode === '3v3');
+    if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
+    if (p3Btn) p3Btn.classList.toggle('active', mode === 'p3');
+
+    safeSetDisplay('deck-box', mode === '3v3' ? 'flex' : 'none');
+    safeSetDisplay('team-tracker-bar', mode === 'team' ? 'flex' : 'none');
+    safeSetDisplay('next-kof-btn', mode === 'team' ? 'inline-block' : 'none');
 
     resetMatch(false);
 
     const scoreboard = document.getElementById('main-scoreboard');
     const p3Card = document.getElementById('p3-card');
     if (mode === 'p3') {
-        scoreboard.classList.add('p3-mode');
+        if (scoreboard) scoreboard.classList.add('p3-mode');
         if (p3Card) p3Card.style.display = 'flex';
     } else {
-        scoreboard.classList.remove('p3-mode');
+        if (scoreboard) scoreboard.classList.remove('p3-mode');
         if (p3Card) p3Card.style.display = 'none';
     }
 
@@ -205,6 +222,10 @@ function setMatchMode(mode) {
 }
 
 function updatePlayerNamesForMode() {
+    const p1Title = document.getElementById('p1-title');
+    const p2Title = document.getElementById('p2-title');
+    const p3Title = document.getElementById('p3-title');
+
     if (matchMode === 'team') {
         let t1Name = roster.t1Name || 'Team A';
         let t2Name = roster.t2Name || 'Team B';
@@ -213,44 +234,46 @@ function updatePlayerNamesForMode() {
         let p1Name = roster.t1[idx1] || `${idx1 + 1}`;
         let p2Name = roster.t2[idx2] || `${String.fromCharCode(65 + idx2)}`;
         
-        document.getElementById('p1-title').value = `${p1Name} (${t1Name})`;
-        document.getElementById('p2-title').value = `${p2Name} (${t2Name})`;
+        if (p1Title) p1Title.value = `${p1Name} (${t1Name})`;
+        if (p2Title) p2Title.value = `${p2Name} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        document.getElementById('p1-title').value = roster.t1[0] || '1';
-        document.getElementById('p2-title').value = roster.t2[0] || 'A';
+        if (p1Title) p1Title.value = roster.t1[0] || '1';
+        if (p2Title) p2Title.value = roster.t2[0] || 'A';
     } else if (matchMode === 'p3') {
-        document.getElementById('p1-title').value = roster.t1[0] || '1';
-        document.getElementById('p2-title').value = roster.t2[0] || 'A';
-        document.getElementById('p3-title').value = 'PLAYER 3';
+        if (p1Title) p1Title.value = roster.t1[0] || '1';
+        if (p2Title) p2Title.value = roster.t2[0] || 'A';
+        if (p3Title) p3Title.value = 'PLAYER 3';
     }
 }
 
 function triggerVersusAnimation(p1, p2) {
-    document.getElementById('vs-player-names').innerText = `${p1} VS ${p2}`;
-    document.getElementById('versus-modal').style.display = 'flex';
+    safeSetText('vs-player-names', `${p1} VS ${p2}`);
+    safeSetDisplay('versus-modal', 'flex');
     playBeep(700, 'triangle', 0.2);
 }
-function closeVersusModal() { document.getElementById('versus-modal').style.display = 'none'; }
+function closeVersusModal() { safeSetDisplay('versus-modal', 'none'); }
 
 function openRosterModal() { 
-    document.getElementById('roster-t1-name').value = roster.t1Name || '';
-    document.getElementById('roster-t1-p1').value = roster.t1[0] || '';
-    document.getElementById('roster-t1-p2').value = roster.t1[1] || '';
-    document.getElementById('roster-t1-p3').value = roster.t1[2] || '';
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setVal('roster-t1-name', roster.t1Name || '');
+    setVal('roster-t1-p1', roster.t1[0] || '');
+    setVal('roster-t1-p2', roster.t1[1] || '');
+    setVal('roster-t1-p3', roster.t1[2] || '');
 
-    document.getElementById('roster-t2-name').value = roster.t2Name || '';
-    document.getElementById('roster-t2-p1').value = roster.t2[0] || '';
-    document.getElementById('roster-t2-p2').value = roster.t2[1] || '';
-    document.getElementById('roster-t2-p3').value = roster.t2[2] || '';
+    setVal('roster-t2-name', roster.t2Name || '');
+    setVal('roster-t2-p1', roster.t2[0] || '');
+    setVal('roster-t2-p2', roster.t2[1] || '');
+    setVal('roster-t2-p3', roster.t2[2] || '');
 
-    document.getElementById('roster-modal').style.display = 'flex'; 
+    safeSetDisplay('roster-modal', 'flex'); 
 }
-function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
+function closeRosterModal() { safeSetDisplay('roster-modal', 'none'); }
 
 function moveRosterItem(teamKey, fromIdx, toIndex) {
     let p1 = document.getElementById(`roster-${teamKey}-p1`);
     let p2 = document.getElementById(`roster-${teamKey}-p2`);
     let p3 = document.getElementById(`roster-${teamKey}-p3`);
+    if (!p1 || !p2 || !p3) return;
 
     let list = [p1.value, p2.value, p3.value];
     let temp = list[fromIdx];
@@ -263,15 +286,16 @@ function moveRosterItem(teamKey, fromIdx, toIndex) {
 }
 
 function saveRoster() {
-    roster.t1Name = document.getElementById('roster-t1-name').value.trim() || 'Team A';
-    roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || '1';
-    roster.t1[1] = document.getElementById('roster-t1-p2').value.trim() || '2';
-    roster.t1[2] = document.getElementById('roster-t1-p3').value.trim() || '3';
+    const getVal = (id, def) => { const el = document.getElementById(id); return el && el.value.trim() ? el.value.trim() : def; };
+    roster.t1Name = getVal('roster-t1-name', 'Team A');
+    roster.t1[0] = getVal('roster-t1-p1', '1');
+    roster.t1[1] = getVal('roster-t1-p2', '2');
+    roster.t1[2] = getVal('roster-t1-p3', '3');
 
-    roster.t2Name = document.getElementById('roster-t2-name').value.trim() || 'Team B';
-    roster.t2[0] = document.getElementById('roster-t2-p1').value.trim() || 'A';
-    roster.t2[1] = document.getElementById('roster-t2-p2').value.trim() || 'B';
-    roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'C';
+    roster.t2Name = getVal('roster-t2-name', 'Team B');
+    roster.t2[0] = getVal('roster-t2-p1', 'A');
+    roster.t2[1] = getVal('roster-t2-p2', 'B');
+    roster.t2[2] = getVal('roster-t2-p3', 'C');
 
     kofIndexP1 = 0;
     kofIndexP2 = 0;
@@ -297,9 +321,10 @@ function addScore(player, pts, typeName) {
         battle: battleCount, logs: [...logs]
     });
 
-    let name1 = document.getElementById('p1-title').value;
-    let name2 = document.getElementById('p2-title').value;
-    let name3 = document.getElementById('p3-title').value;
+    const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+    let name1 = getVal('p1-title');
+    let name2 = getVal('p2-title');
+    let name3 = getVal('p3-title');
 
     let pName = player === 1 ? name1 : (player === 2 ? name2 : name3);
     let displayType = typeName;
@@ -348,9 +373,10 @@ function addFoul(player) {
         battle: battleCount, logs: [...logs]
     });
 
-    let name1 = document.getElementById('p1-title').value;
-    let name2 = document.getElementById('p2-title').value;
-    let name3 = document.getElementById('p3-title').value;
+    const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+    let name1 = getVal('p1-title');
+    let name2 = getVal('p2-title');
+    let name3 = getVal('p3-title');
     let offenderName = player === 1 ? name1 : (player === 2 ? name2 : name3);
 
     if (player === 1) foulsP1++;
@@ -475,28 +501,28 @@ function resetMatch(askConfirm = true) {
 }
 
 function updateDisplay() {
-    document.getElementById('score-p1').innerText = scoreP1;
-    document.getElementById('score-p2').innerText = scoreP2;
-    document.getElementById('score-p3').innerText = scoreP3;
+    safeSetText('score-p1', scoreP1);
+    safeSetText('score-p2', scoreP2);
+    safeSetText('score-p3', scoreP3);
 
-    document.getElementById('foul-badge-p1').innerText = `${foulsP1}/2`;
-    document.getElementById('foul-badge-p2').innerText = `${foulsP2}/2`;
-    document.getElementById('foul-badge-p3').innerText = `${foulsP3}/2`;
+    safeSetText('foul-badge-p1', `${foulsP1}/2`);
+    safeSetText('foul-badge-p2', `${foulsP2}/2`);
+    safeSetText('foul-badge-p3', `${foulsP3}/2`);
 
-    document.getElementById('btn-foul-p1').classList.toggle('active-foul', foulsP1 > 0);
-    document.getElementById('btn-foul-p2').classList.toggle('active-foul', foulsP2 > 0);
-    document.getElementById('btn-foul-p3').classList.toggle('active-foul', foulsP3 > 0);
+    const f1 = document.getElementById('btn-foul-p1'); if (f1) f1.classList.toggle('active-foul', foulsP1 > 0);
+    const f2 = document.getElementById('btn-foul-p2'); if (f2) f2.classList.toggle('active-foul', foulsP2 > 0);
+    const f3 = document.getElementById('btn-foul-p3'); if (f3) f3.classList.toggle('active-foul', foulsP3 > 0);
 
     if (matchMode === '3v3') {
         let currentBeyNum = ((battleCount - 1) % 3) + 1;
-        document.getElementById('deck-status').innerText = `ITEM #${currentBeyNum}`;
+        safeSetText('deck-status', `ITEM #${currentBeyNum}`);
     }
 
     if (matchMode === 'team') {
         let t1Label = roster.t1Name || 'Team A';
         let t2Label = roster.t2Name || 'Team B';
-        document.getElementById('team-wins-p1').innerText = `${t1Label}: ${teamWinsP1}`;
-        document.getElementById('team-wins-p2').innerText = `${t2Label}: ${teamWinsP2}`;
+        safeSetText('team-wins-p1', `${t1Label}: ${teamWinsP1}`);
+        safeSetText('team-wins-p2', `${t2Label}: ${teamWinsP2}`);
     }
 
     const logList = document.getElementById('log-list');
@@ -513,9 +539,10 @@ function updateDisplay() {
 }
 
 function checkWinner() {
-    let name1 = document.getElementById('p1-title').value;
-    let name2 = document.getElementById('p2-title').value;
-    let name3 = document.getElementById('p3-title').value;
+    const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+    let name1 = getVal('p1-title');
+    let name2 = getVal('p2-title');
+    let name3 = getVal('p3-title');
 
     if (scoreP1 >= targetScore) {
         if (matchMode === 'team') teamWinsP1++;
@@ -538,22 +565,22 @@ function checkWinner() {
 }
 
 function showWinModal(winner, isFinalTeamWin = false) {
-    document.getElementById('winner-name').textContent = winner;
+    safeSetText('winner-name', winner);
     const modalIcon = document.querySelector('#win-modal div[style*="font-size: 3rem;"]');
 
     if (isFinalTeamWin) {
         isFinalTeamWinActive = true;
         if (modalIcon) modalIcon.innerText = "🏆";
-        document.getElementById('win-msg').innerText = i18n[currentLang].teamFinalWinMsg;
+        safeSetText('win-msg', i18n[currentLang].teamFinalWinMsg);
     } else {
         if (modalIcon) modalIcon.innerText = "⚡";
-        document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
+        safeSetText('win-msg', matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg);
     }
-    document.getElementById('win-modal').style.display = 'flex';
+    safeSetDisplay('win-modal', 'flex');
 }
 
 function closeWinModal() {
-    document.getElementById('win-modal').style.display = 'none';
+    safeSetDisplay('win-modal', 'none');
     if (matchMode === 'team') {
         if (isFinalTeamWinActive) {
             kofIndexP1 = 0;
@@ -566,9 +593,9 @@ function closeWinModal() {
 
 function openRules() { 
     applyLanguage();
-    document.getElementById('rules-modal').style.display = 'flex'; 
+    safeSetDisplay('rules-modal', 'flex'); 
 }
-function closeRules() { document.getElementById('rules-modal').style.display = 'none'; }
+function closeRules() { safeSetDisplay('rules-modal', 'none'); }
 
 function toggleLanguage() {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
@@ -579,47 +606,49 @@ function toggleLanguage() {
 function applyLanguage() {
     const lang = i18n[currentLang];
 
-    document.getElementById('rules-tag').innerText = lang.rulesTag;
-    document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
-    document.getElementById('btn-roster-txt').innerText = lang.rosterBtn;
-    let refreshTxt = document.getElementById('btn-refresh-txt');
-    if (refreshTxt) refreshTxt.innerText = lang.refreshBtn;
-    document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
-    document.getElementById('btn-undo').innerText = lang.undo;
-    document.getElementById('btn-draw').innerText = lang.drawBtn;
-    document.getElementById('btn-reset').innerText = lang.reset;
-    document.getElementById('next-kof-btn').innerText = lang.nextKof;
-    document.getElementById('reorder-btn').innerText = lang.reorderBtn;
-    document.getElementById('log-title').innerText = lang.logTitle;
-    document.getElementById('disclaimer').innerText = lang.disclaimer;
-    document.getElementById('privacy-notice').innerText = lang.privacyNotice;
-    document.getElementById('modal-title').innerText = lang.modalTitle;
-    document.getElementById('modal-body').innerHTML = lang.rulesBody;
+    safeSetText('rules-tag', lang.rulesTag);
+    safeSetText('btn-rules-txt', lang.rulesBtn);
+    safeSetText('btn-roster-txt', lang.rosterBtn);
+    safeSetText('btn-refresh-txt', lang.refreshBtn);
+    safeSetText('lang-btn', currentLang === 'zh' ? 'EN' : '中文');
+    safeSetText('btn-undo', lang.undo);
+    safeSetText('btn-draw', lang.drawBtn);
+    safeSetText('btn-reset', lang.reset);
+    safeSetText('next-kof-btn', lang.nextKof);
+    safeSetText('reorder-btn', lang.reorderBtn);
+    safeSetText('log-title', lang.logTitle);
+    safeSetText('disclaimer', lang.disclaimer);
+    safeSetText('privacy-notice', lang.privacyNotice);
+    safeSetText('modal-title', lang.modalTitle);
+    
+    const modalBody = document.getElementById('modal-body');
+    if (modalBody) modalBody.innerHTML = lang.rulesBody;
 
-    document.getElementById('roster-modal-title').innerText = lang.rosterModalTitle;
-    document.getElementById('btn-save-roster').innerText = lang.saveRosterBtn;
-    document.getElementById('vs-sub-msg').innerText = lang.vsSubMsg;
-    document.getElementById('btn-start-vs').innerText = lang.btnStartVs;
+    safeSetText('roster-modal-title', lang.rosterModalTitle);
+    safeSetText('btn-save-roster', lang.saveRosterBtn);
+    safeSetText('vs-sub-msg', lang.vsSubMsg);
+    safeSetText('btn-start-vs', lang.btnStartVs);
 
     document.querySelectorAll('.txt-xtreme').forEach(el => el.innerText = lang.xtreme);
     document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
     document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
     document.querySelectorAll('.txt-spin').forEach(el => el.innerText = lang.spin);
 
-    document.getElementById('txt-foul-p1').innerText = lang.foulTxt;
-    document.getElementById('txt-foul-p2').innerText = lang.foulTxt;
-    document.getElementById('txt-foul-p3').innerText = lang.foulTxt;
+    safeSetText('txt-foul-p1', lang.foulTxt);
+    safeSetText('txt-foul-p2', lang.foulTxt);
+    safeSetText('txt-foul-p3', lang.foulTxt);
 }
 
 function saveState() {
+    const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
     const state = {
         scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
         teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
         battleCount, matchMode, roster, isFinalTeamWinActive,
-        p1Name: document.getElementById('p1-title').value,
-        p2Name: document.getElementById('p2-title').value,
-        p3Name: document.getElementById('p3-title').value,
+        p1Name: getVal('p1-title'),
+        p2Name: getVal('p2-title'),
+        p3Name: getVal('p3-title'),
         logs, currentLang
     };
     localStorage.setItem('bx_score_state', JSON.stringify(state));
@@ -648,9 +677,10 @@ function loadState() {
 
             if (state.roster) roster = state.roster;
 
-            if (state.p1Name) document.getElementById('p1-title').value = state.p1Name;
-            if (state.p2Name) document.getElementById('p2-title').value = state.p2Name;
-            if (state.p3Name) document.getElementById('p3-title').value = state.p3Name;
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            if (state.p1Name) setVal('p1-title', state.p1Name);
+            if (state.p2Name) setVal('p2-title', state.p2Name);
+            if (state.p3Name) setVal('p3-title', state.p3Name);
 
             setMatchMode(matchMode);
         } catch(e) {
