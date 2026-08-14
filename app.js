@@ -13,9 +13,10 @@ let targetScore = 4;
 let history = [], logs = [];
 let currentLang = 'zh';
 
+// 🎯 全面標準化預設陣容
 let roster = {
-    t1Name: '隊伍 A', t1: ['1', '2', '3'],
-    t2Name: '隊伍 B', t2: ['A', 'B', 'C'],
+    t1Name: '隊伍 A', t1: ['選手一', '陀螺二', '陀螺三'],
+    t2Name: '隊伍 B', t2: ['選手二', '陀螺二', '陀螺三'],
     t3Name: '選手三'
 };
 
@@ -160,6 +161,7 @@ function setMatchMode(mode, shouldReset = false) {
     }
 }
 
+/* 🎯 關鍵修復：乾淨統一所有賽制的名稱顯示 */
 function updatePlayerNamesForMode() {
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
@@ -169,22 +171,39 @@ function updatePlayerNamesForMode() {
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
     let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
 
+    let rolesZh = ['先鋒', '中堅', '大將'];
+    let rolesEn = ['1st Vanguard', '2nd Middle', '3rd General'];
+
     if (matchMode === 'team') {
         let t1Name = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
         let t2Name = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         let idx1 = Math.min(kofIndexP1, 2);
         let idx2 = Math.min(kofIndexP2, 2);
-        let p1Name = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : `1`;
-        let p2Name = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : `A`;
+
+        // 如果隊員名字還是 1 或 選手一 等預設名，直接展示標準角色 (先鋒 / 中堅 / 大將)
+        let rawP1 = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : '';
+        let rawP2 = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : '';
+
+        let isDefault1 = (!rawP1 || rawP1 === '1' || rawP1 === '2' || rawP1 === '3' || rawP1.startsWith('選手'));
+        let isDefault2 = (!rawP2 || rawP2 === 'A' || rawP2 === 'B' || rawP2 === 'C' || rawP2.startsWith('選手'));
+
+        let p1Display = isDefault1 ? (currentLang === 'zh' ? rolesZh[idx1] : rolesEn[idx1]) : rawP1;
+        let p2Display = isDefault2 ? (currentLang === 'zh' ? rolesZh[idx2] : rolesEn[idx2]) : rawP2;
         
-        if (p1Title) p1Title.value = `${p1Name} (${t1Name})`;
-        if (p2Title) p2Title.value = `${p2Name} (${t2Name})`;
+        if (p1Title) p1Title.value = `${p1Display} (${t1Name})`;
+        if (p2Title) p2Title.value = `${p2Display} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || defP1);
-        if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || defP2);
+        let rawP1 = (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || '');
+        let rawP2 = (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || '');
+
+        if (p1Title) p1Title.value = (rawP1 && rawP1 !== '1') ? rawP1 : defP1;
+        if (p2Title) p2Title.value = (rawP2 && rawP2 !== 'A') ? rawP2 : defP2;
     } else if (matchMode === 'p3') {
-        if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : defP1;
-        if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : defP2;
+        let rawP1 = (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || '');
+        let rawP2 = (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || '');
+
+        if (p1Title) p1Title.value = (rawP1 && rawP1 !== '1') ? rawP1 : defP1;
+        if (p2Title) p2Title.value = (rawP2 && rawP2 !== 'A') ? rawP2 : defP2;
         if (p3Title) p3Title.value = roster.t3Name || defP3;
     }
 }
@@ -248,14 +267,14 @@ function moveRosterItem(teamKey, fromIdx, toIndex) {
 function saveRoster() {
     const getVal = (id, def) => { const el = document.getElementById(id); return el && el.value.trim() ? el.value.trim() : def; };
     roster.t1Name = getVal('roster-t1-name', currentLang === 'zh' ? '隊伍 A' : 'Team A');
-    roster.t1[0] = getVal('roster-t1-p1', '1');
-    roster.t1[1] = getVal('roster-t1-p2', '2');
-    roster.t1[2] = getVal('roster-t1-p3', '3');
+    roster.t1[0] = getVal('roster-t1-p1', currentLang === 'zh' ? '先鋒' : '1st Vanguard');
+    roster.t1[1] = getVal('roster-t1-p2', currentLang === 'zh' ? '中堅' : '2nd Middle');
+    roster.t1[2] = getVal('roster-t1-p3', currentLang === 'zh' ? '大將' : '3rd General');
 
     roster.t2Name = getVal('roster-t2-name', currentLang === 'zh' ? '隊伍 B' : 'Team B');
-    roster.t2[0] = getVal('roster-t2-p1', 'A');
-    roster.t2[1] = getVal('roster-t2-p2', 'B');
-    roster.t2[2] = getVal('roster-t2-p3', 'C');
+    roster.t2[0] = getVal('roster-t2-p1', currentLang === 'zh' ? '先鋒' : '1st Vanguard');
+    roster.t2[1] = getVal('roster-t2-p2', currentLang === 'zh' ? '中堅' : '2nd Middle');
+    roster.t2[2] = getVal('roster-t2-p3', currentLang === 'zh' ? '大將' : '3rd General');
 
     kofIndexP1 = 0;
     kofIndexP2 = 0;
