@@ -124,12 +124,23 @@ function handleLobbyModeChange() {
 
 function applyLobbyLayout() {
     let is3v3OrTeam = (matchMode === '3v3' || matchMode === 'team');
+    let isP3 = (matchMode === 'p3');
+
     safeSetDisplay('lobby-p1-deck-box', is3v3OrTeam ? 'block' : 'none');
     safeSetDisplay('lobby-p2-deck-box', is3v3OrTeam ? 'block' : 'none');
-    safeSetDisplay('lobby-p3-box', (matchMode === 'p3') ? 'block' : 'none');
+    safeSetDisplay('lobby-p3-box', isP3 ? 'block' : 'none');
+
+    // 🎯 3人模式顯示輪調，雙人模式顯示對調
+    const swapBtn = document.getElementById('btn-swap-sides');
+    if (swapBtn) {
+        if (isP3) {
+            swapBtn.innerText = currentLang === 'zh' ? '🔄 三人輪調 (1➔2➔3)' : '🔄 Rotate (1➔2➔3)';
+        } else {
+            swapBtn.innerText = currentLang === 'zh' ? '⇄ 左右對調' : '⇄ Swap Sides';
+        }
+    }
 }
 
-/* 🎯 關鍵修復：正確將隊伍名 / 選手名填入大廳欄位，不再被預設數值覆蓋！ */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -144,41 +155,56 @@ function syncRosterToLobbyUI() {
     }
     safeSetInputValue('lobby-p3-name', roster.t3Name || defP3);
 
-    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || (currentLang === 'zh' ? '1' : '1'));
-    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || (currentLang === 'zh' ? '2' : '2'));
-    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || (currentLang === 'zh' ? '3' : '3'));
+    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || '1');
+    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || '2');
+    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || '3');
 
-    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || (currentLang === 'zh' ? 'A' : 'A'));
-    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || (currentLang === 'zh' ? 'B' : 'B'));
-    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || (currentLang === 'zh' ? 'C' : 'C'));
+    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || 'A');
+    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || 'B');
+    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
 }
 
-/* ⇄ 左右一鍵對調功能 (Swap Sides) */
+/* 🎯 支援 2 人對調 與 3 人順時針輪調 (Rotate 1➔2➔3➔1) */
 function swapLobbySides() {
     let p1Name = document.getElementById('lobby-p1-name').value;
     let p2Name = document.getElementById('lobby-p2-name').value;
-    document.getElementById('lobby-p1-name').value = p2Name;
-    document.getElementById('lobby-p2-name').value = p1Name;
+    let p3Name = document.getElementById('lobby-p3-name').value;
 
-    let p1d1 = document.getElementById('lobby-p1-d1').value;
-    let p1d2 = document.getElementById('lobby-p1-d2').value;
-    let p1d3 = document.getElementById('lobby-p1-d3').value;
+    if (matchMode === 'p3') {
+        // 三人順時針輪替: 1 ➔ 2, 2 ➔ 3, 3 ➔ 1
+        document.getElementById('lobby-p1-name').value = p3Name;
+        document.getElementById('lobby-p2-name').value = p1Name;
+        document.getElementById('lobby-p3-name').value = p2Name;
 
-    let p2d1 = document.getElementById('lobby-p2-d1').value;
-    let p2d2 = document.getElementById('lobby-p2-d2').value;
-    let p2d3 = document.getElementById('lobby-p2-d3').value;
+        let tempOcc = occupiedSlots.slot3;
+        occupiedSlots.slot3 = occupiedSlots.slot2;
+        occupiedSlots.slot2 = occupiedSlots.slot1;
+        occupiedSlots.slot1 = tempOcc;
+    } else {
+        // 雙人左右對調
+        document.getElementById('lobby-p1-name').value = p2Name;
+        document.getElementById('lobby-p2-name').value = p1Name;
 
-    document.getElementById('lobby-p1-d1').value = p2d1;
-    document.getElementById('lobby-p1-d2').value = p2d2;
-    document.getElementById('lobby-p1-d3').value = p2d3;
+        let p1d1 = document.getElementById('lobby-p1-d1').value;
+        let p1d2 = document.getElementById('lobby-p1-d2').value;
+        let p1d3 = document.getElementById('lobby-p1-d3').value;
 
-    document.getElementById('lobby-p2-d1').value = p1d1;
-    document.getElementById('lobby-p2-d2').value = p1d2;
-    document.getElementById('lobby-p2-d3').value = p1d3;
+        let p2d1 = document.getElementById('lobby-p2-d1').value;
+        let p2d2 = document.getElementById('lobby-p2-d2').value;
+        let p2d3 = document.getElementById('lobby-p2-d3').value;
 
-    let tempOcc = occupiedSlots.slot1;
-    occupiedSlots.slot1 = occupiedSlots.slot2;
-    occupiedSlots.slot2 = tempOcc;
+        document.getElementById('lobby-p1-d1').value = p2d1;
+        document.getElementById('lobby-p1-d2').value = p2d2;
+        document.getElementById('lobby-p1-d3').value = p2d3;
+
+        document.getElementById('lobby-p2-d1').value = p1d1;
+        document.getElementById('lobby-p2-d2').value = p1d2;
+        document.getElementById('lobby-p2-d3').value = p1d3;
+
+        let tempOcc = occupiedSlots.slot1;
+        occupiedSlots.slot1 = occupiedSlots.slot2;
+        occupiedSlots.slot2 = tempOcc;
+    }
 }
 
 function startMatchFromLobby() {
@@ -372,12 +398,11 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 🎯 全新：由左至右自動分配進大廳 Slot 1 或 Slot 2 */
+/* 🎯 裁判接受選手提交（完全保留裁判原本設定的賽制，不被選手篡改） */
 function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
     let data = pendingClientData;
-    setMatchMode(data.formMode);
 
     let targetSlot = 1;
     if (!occupiedSlots.slot1) {
@@ -387,7 +412,7 @@ function autoAcceptClientSubmission() {
     } else if (matchMode === 'p3' && !occupiedSlots.slot3) {
         targetSlot = 3;
     } else {
-        targetSlot = 1; // 預設覆蓋第一位
+        targetSlot = 1;
     }
 
     if (targetSlot === 1) {
@@ -405,6 +430,12 @@ function autoAcceptClientSubmission() {
 
     safeSetDisplay('p2p-confirm-modal', 'none');
     openLobbyModal();
+}
+
+/* 🎯 裁判拒絕 / 忽略選手提交 */
+function rejectClientSubmission() {
+    pendingClientData = null;
+    safeSetDisplay('p2p-confirm-modal', 'none');
 }
 
 function handleClientReceivedData(data) {
