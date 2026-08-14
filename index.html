@@ -55,7 +55,7 @@
         <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
     </div>
 
-    <!-- P2P 連線狀態顯示條 (支援大廳按鈕與離房按鈕) -->
+    <!-- P2P 連線狀態顯示條 -->
     <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 6px 12px; margin: 8px auto; max-width: 700px; text-align: center; font-size: 0.85rem; color: #fff;">
         <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
         <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow); font-size: 1.1rem; letter-spacing: 1px;">----</strong> | 
@@ -73,15 +73,15 @@
     <!-- Team Battle Tracker Bar -->
     <div class="team-tracker-bar" id="team-tracker-bar" style="display: none;">
         <span>TEAM WINS:</span>
-        <span style="color: var(--neon-blue);" id="team-wins-p1">Team A: 0</span>
+        <span style="color: var(--neon-blue);" id="team-wins-p1">隊伍 A: 0</span>
         <span>vs</span>
-        <span style="color: var(--neon-red);" id="team-wins-p2">Team B: 0</span>
+        <span style="color: var(--neon-red);" id="team-wins-p2">隊伍 B: 0</span>
     </div>
 
     <div class="scoreboard" id="main-scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
-            <input type="text" class="player-name-input" id="p1-title" value="1" onchange="handleManualNameChange(1)">
+            <input type="text" class="player-name-input" id="p1-title" value="選手一" onchange="handleManualNameChange(1)">
             <div class="score-display" id="score-p1">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
@@ -104,7 +104,7 @@
 
         <!-- Player 2 -->
         <div class="player-card">
-            <input type="text" class="player-name-input" id="p2-title" value="A" onchange="handleManualNameChange(2)">
+            <input type="text" class="player-name-input" id="p2-title" value="選手二" onchange="handleManualNameChange(2)">
             <div class="score-display" id="score-p2">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
@@ -127,7 +127,7 @@
 
         <!-- Player 3 -->
         <div class="player-card" id="p3-card" style="display: none;">
-            <input type="text" class="player-name-input" id="p3-title" value="PLAYER 3" onchange="handleManualNameChange(3)">
+            <input type="text" class="player-name-input" id="p3-title" value="選手三" onchange="handleManualNameChange(3)">
             <div class="score-display" id="score-p3">0</div>
             <div class="btn-grid">
                 <button class="score-btn btn-xtreme" onclick="addScore(3, 3, 'Xtreme')">
@@ -198,7 +198,7 @@
                         <option value="p3">3-Player (5-pt)</option>
                     </select>
 
-                    <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 Daddy)" style="margin-bottom: 6px;">
+                    <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 選手一)" style="margin-bottom: 6px;">
                     
                     <div id="p2p-extra-items">
                         <input type="text" id="p2p-item-1" class="roster-input" placeholder="先鋒 / 陀螺 1號" style="margin-bottom: 6px;">
@@ -241,36 +241,36 @@
                     </select>
                 </div>
 
-                <!-- 雙方即時排陣檢視與手動補填區 -->
+                <!-- 雙方即時排陣檢視與手動補填區 (Default 選手一 / 選手二) -->
                 <div style="text-align: left; margin-bottom: 12px;">
                     <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px;" id="lbl-lobby-slots-tip">選手連線送出後將自動填入，裁判亦可直接手動修改：</div>
                     
                     <!-- Side 1 -->
                     <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (Player 1 / Team A)</strong>
-                        <input type="text" id="lobby-p1-name" class="roster-input" style="margin-top:4px;" placeholder="Player 1 Name" value="1">
+                        <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
+                        <input type="text" id="lobby-p1-name" class="roster-input" style="margin-top:4px;" placeholder="選手一名稱" value="選手一">
                         <div id="lobby-p1-deck-box" style="display:none; margin-top:4px;">
-                            <input type="text" id="lobby-p1-d1" class="roster-input" style="margin-bottom:3px;" placeholder="Item 1" value="1">
-                            <input type="text" id="lobby-p1-d2" class="roster-input" style="margin-bottom:3px;" placeholder="Item 2" value="2">
-                            <input type="text" id="lobby-p1-d3" class="roster-input" style="margin-bottom:3px;" placeholder="Item 3" value="3">
+                            <input type="text" id="lobby-p1-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="陀螺一">
+                            <input type="text" id="lobby-p1-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="陀螺二">
+                            <input type="text" id="lobby-p1-d3" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 3號" value="陀螺三">
                         </div>
                     </div>
 
                     <!-- Side 2 -->
                     <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid var(--neon-red); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (Player 2 / Team B)</strong>
-                        <input type="text" id="lobby-p2-name" class="roster-input" style="margin-top:4px;" placeholder="Player 2 Name" value="A">
+                        <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
+                        <input type="text" id="lobby-p2-name" class="roster-input" style="margin-top:4px;" placeholder="選手二名稱" value="選手二">
                         <div id="lobby-p2-deck-box" style="display:none; margin-top:4px;">
-                            <input type="text" id="lobby-p2-d1" class="roster-input" style="margin-bottom:3px;" placeholder="Item 1" value="A">
-                            <input type="text" id="lobby-p2-d2" class="roster-input" style="margin-bottom:3px;" placeholder="Item 2" value="B">
-                            <input type="text" id="lobby-p2-d3" class="roster-input" style="margin-bottom:3px;" placeholder="Item 3" value="C">
+                            <input type="text" id="lobby-p2-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="陀螺一">
+                            <input type="text" id="lobby-p2-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="陀螺二">
+                            <input type="text" id="lobby-p2-d3" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 3號" value="陀螺三">
                         </div>
                     </div>
 
                     <!-- Side 3 (3-Player) -->
                     <div id="lobby-p3-box" style="display:none; background: rgba(234, 179, 8, 0.05); border: 1px solid var(--neon-yellow); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (Player 3)</strong>
-                        <input type="text" id="lobby-p3-name" class="roster-input" style="margin-top:4px;" placeholder="Player 3 Name" value="PLAYER 3">
+                        <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (選手三)</strong>
+                        <input type="text" id="lobby-p3-name" class="roster-input" style="margin-top:4px;" placeholder="選手三名稱" value="選手三">
                     </div>
                 </div>
 
@@ -289,9 +289,9 @@
             
             <p style="font-size: 0.85rem; color: var(--neon-yellow); margin-bottom: 8px; font-weight: bold;" id="lbl-choose-pos">請選擇放入大廳的位置：</p>
             <div style="display: flex; gap: 6px; justify-content: center;">
-                <button class="ctrl-btn" onclick="acceptClientSubmission(1)" style="background: var(--neon-blue); color: #000; font-weight: bold; flex: 1;" id="btn-slot1">👈 放左邊 (Player 1)</button>
-                <button class="ctrl-btn" onclick="acceptClientSubmission(2)" style="background: var(--neon-red); color: #fff; font-weight: bold; flex: 1;" id="btn-slot2">👉 放右邊 (Player 2)</button>
-                <button class="ctrl-btn" id="p2p-slot3-btn" onclick="acceptClientSubmission(3)" style="background: var(--neon-yellow); color: #000; font-weight: bold; flex: 1; display: none;">👆 放中間 (Player 3)</button>
+                <button class="ctrl-btn" onclick="acceptClientSubmission(1)" style="background: var(--neon-blue); color: #000; font-weight: bold; flex: 1;" id="btn-slot1">👈 放左邊 (選手一)</button>
+                <button class="ctrl-btn" onclick="acceptClientSubmission(2)" style="background: var(--neon-red); color: #fff; font-weight: bold; flex: 1;" id="btn-slot2">👉 放右邊 (選手二)</button>
+                <button class="ctrl-btn" id="p2p-slot3-btn" onclick="acceptClientSubmission(3)" style="background: var(--neon-yellow); color: #000; font-weight: bold; flex: 1; display: none;">👆 放中間 (選手三)</button>
             </div>
         </div>
     </div>
@@ -304,8 +304,8 @@
                 <button style="background:transparent; border:none; color:var(--text-sub); font-size:1.5rem; cursor:pointer;" onclick="closeRosterModal()">&times;</button>
             </div>
             <div style="margin-top:10px;">
-                <h4 style="color:var(--neon-blue); margin-bottom:4px;" id="lbl-t1-header">TEAM A (隊伍 1)</h4>
-                <input type="text" id="roster-t1-name" class="roster-input" placeholder="隊伍名稱 (預設 Team A)">
+                <h4 style="color:var(--neon-blue); margin-bottom:4px;" id="lbl-t1-header">隊伍 A</h4>
+                <input type="text" id="roster-t1-name" class="roster-input" placeholder="隊伍名稱 (預設 隊伍 A)">
                 
                 <div style="display:flex; gap:4px; margin-bottom:4px;">
                     <input type="text" id="roster-t1-p1" class="roster-input" style="margin:0;" placeholder="先鋒 1號">
@@ -321,8 +321,8 @@
                     <button class="ctrl-btn" onclick="moveRosterItem('t1', 2, 1)">⬆️</button>
                 </div>
 
-                <h4 style="color:var(--neon-red); margin-bottom:4px;" id="lbl-t2-header">TEAM B (隊伍 2)</h4>
-                <input type="text" id="roster-t2-name" class="roster-input" placeholder="隊伍名稱 (預設 Team B)">
+                <h4 style="color:var(--neon-red); margin-bottom:4px;" id="lbl-t2-header">隊伍 B</h4>
+                <input type="text" id="roster-t2-name" class="roster-input" placeholder="隊伍名稱 (預設 隊伍 B)">
                 
                 <div style="display:flex; gap:4px; margin-bottom:4px;">
                     <input type="text" id="roster-t2-p1" class="roster-input" style="margin:0;" placeholder="先鋒 1號">
@@ -347,7 +347,7 @@
     <div class="modal" id="versus-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 1.2rem; color: var(--neon-yellow); font-family:'Orbitron';" id="vs-round-tag">ROUND 1</div>
-            <div class="versus-title" id="vs-player-names">PLAYER 1 VS PLAYER 2</div>
+            <div class="versus-title" id="vs-player-names">選手一 VS 選手二</div>
             <p style="font-size: 0.9rem; color: #cbd5e1;" id="vs-sub-msg">對決準備！</p>
             <button class="ctrl-btn" onclick="closeVersusModal()" id="btn-start-vs" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">開始對戰</button>
         </div>
@@ -368,7 +368,7 @@
     <div class="modal" id="win-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 3rem;">⚡</div>
-            <div class="winner-title" id="winner-name">PLAYER 1</div>
+            <div class="winner-title" id="winner-name">選手一</div>
             <p style="font-size: 1.1rem; color: #fff; font-weight: bold;" id="win-msg">獲得本局勝利！</p>
             <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">確定</button>
         </div>
