@@ -7,8 +7,8 @@
     <!-- Google 網站驗證 -->
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
 
-    <!-- Content Security Policy (CSP) 防護 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.peerjs.com wss://*.peerjs.com https://0.peerjs.com; img-src 'self' data:;">
+    <!-- Content Security Policy (CSP) 防護 (包含 PeerJS / unpkg .map 資源連線權限) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.peerjs.com wss://*.peerjs.com https://0.peerjs.com https://unpkg.com; img-src 'self' data:;">
 
     <title>BX Score Keeper | 爆旋計分器</title>
     <meta name="description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的免費對戰計分器 Web App / PWA。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
@@ -178,7 +178,6 @@
                     <button class="ctrl-btn" onclick="joinP2PRoom()" style="background: var(--neon-green); color: #000; font-weight: bold; width: 100%; margin-top: 8px;">🎮 加入對戰房間 (選手端)</button>
                 </div>
 
-                <!-- 選手專用提交區 (不用選位置，交由裁判決定) -->
                 <div id="p2p-client-submit-box" style="display: none; margin-top: 20px; border-top: 2px solid var(--neon-yellow); padding-top: 15px; text-align: left;">
                     <h4 style="color: var(--neon-yellow); margin-bottom: 8px;">📩 提交選手 / 隊伍排陣名單</h4>
                     <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 BB)" style="margin-bottom: 6px;">
@@ -191,7 +190,7 @@
         </div>
     </div>
 
-    <!-- 📩 裁判審核 Modal (由裁判指定左/右/中位置) -->
+    <!-- 📩 裁判審核 Modal -->
     <div class="modal" id="p2p-confirm-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 2rem; color: var(--neon-yellow);">📩</div>
