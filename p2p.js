@@ -76,7 +76,7 @@ function initP2PHost() {
     peer.on('connection', (conn) => {
         let currentCount = Object.keys(p2pConnMap).length;
 
-        // 🛡️ 15 人硬上限防護
+        // 🛡️ 15 人硬上限
         if (currentCount >= MAX_DEVICES) {
             conn.on('open', () => {
                 conn.send({ type: 'ROOM_CAPACITY_FULL' });
@@ -193,7 +193,7 @@ function applyLobbyLayout() {
     }
 }
 
-/* 🎯 關鍵修復：大廳名字絕不被 1 或 A 覆蓋 */
+/* 🎯 關鍵修復：大廳名字完全忠於使用者輸入的 Daddy / BB，絕不被覆蓋為 A 或 1 */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -458,7 +458,6 @@ function sendClientDeckToHost() {
     alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並排入大廳！" : "Submitted! Waiting for Referee approval.");
 }
 
-/* 🎯 關鍵修復：完全分開 1v1 與 3-Player 標籤文字 */
 function handleHostReceivedData(data, conn) {
     if (data.type === 'SUBMIT_DECK') {
         if (isMatchLocked) {
@@ -521,16 +520,19 @@ function autoAcceptClientSubmission() {
     if (targetSlot === 1) {
         roster.t1Name = data.name;
         if (data.items && data.items.length) roster.t1 = [...data.items];
-        else roster.t1[0] = data.name;
+        else roster.t1 = [data.name, '陀螺二', '陀螺三'];
         occupiedSlots.slot1 = true;
+        safeSetInputValue('lobby-p1-name', data.name);
     } else if (targetSlot === 2) {
         roster.t2Name = data.name;
         if (data.items && data.items.length) roster.t2 = [...data.items];
-        else roster.t2[0] = data.name;
+        else roster.t2 = [data.name, '陀螺二', '陀螺三'];
         occupiedSlots.slot2 = true;
+        safeSetInputValue('lobby-p2-name', data.name);
     } else if (targetSlot === 3) {
         roster.t3Name = data.name;
         occupiedSlots.slot3 = true;
+        safeSetInputValue('lobby-p3-name', data.name);
         
         if (matchMode !== 'p3') {
             handleLobbyModeChangeFromData('p3');
