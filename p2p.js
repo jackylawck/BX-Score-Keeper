@@ -1,8 +1,8 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync (Max 28 Devices with Countdown)
+ * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync with Single-Slot Clearing
  * ========================================================================= */
 
-const MAX_DEVICES = 28; // 🛡️ 房間硬上限設為 28 人
+const MAX_DEVICES = 28;
 
 let peer = null;
 let p2pConnMap = {}; 
@@ -73,7 +73,6 @@ function initP2PHost() {
     peer.on('connection', (conn) => {
         let currentCount = Object.keys(p2pConnMap).length;
 
-        // 🛡️ 28 人硬上限攔截：超過 28 人直接拒絕
         if (currentCount >= MAX_DEVICES) {
             conn.on('open', () => {
                 conn.send({ type: 'ROOM_CAPACITY_FULL' });
@@ -131,11 +130,9 @@ function startHeartbeat() {
     }, 5000);
 }
 
-/* 🎯 實時更新 28 人倒數與名額顯示 */
 function updateConnectedCount(overrideCount = null) {
     let count = overrideCount !== null ? overrideCount : Object.keys(p2pConnMap).length;
     let remaining = Math.max(0, MAX_DEVICES - count);
-
     let displayTxt = `${count} / ${MAX_DEVICES} (${currentLang === 'zh' ? '名額剩餘' : 'Left'}: ${remaining})`;
     
     safeSetText('p2p-connected-count', displayTxt);
@@ -213,6 +210,39 @@ function syncRosterToLobbyUI() {
     safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || 'A');
     safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || 'B');
     safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
+}
+
+/* 🎯 裁判在大廳單獨清空某個 Slot，並重新釋放名額！ */
+function clearLobbySlot(slotNum) {
+    let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
+    let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
+    let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
+
+    if (slotNum === 1) {
+        occupiedSlots.slot1 = false;
+        roster.t1Name = defP1;
+        roster.t1 = ['1', '2', '3'];
+        safeSetInputValue('lobby-p1-name', defP1);
+        safeSetInputValue('lobby-p1-d1', '1');
+        safeSetInputValue('lobby-p1-d2', '2');
+        safeSetInputValue('lobby-p1-d3', '3');
+    } else if (slotNum === 2) {
+        occupiedSlots.slot2 = false;
+        roster.t2Name = defP2;
+        roster.t2 = ['A', 'B', 'C'];
+        safeSetInputValue('lobby-p2-name', defP2);
+        safeSetInputValue('lobby-p2-d1', 'A');
+        safeSetInputValue('lobby-p2-d2', 'B');
+        safeSetInputValue('lobby-p2-d3', 'C');
+    } else if (slotNum === 3) {
+        occupiedSlots.slot3 = false;
+        roster.t3Name = defP3;
+        safeSetInputValue('lobby-p3-name', defP3);
+    }
+
+    // 廣播名額釋放：讓剛剛被擠掉的選手端可以重新送出！
+    isMatchLocked = false;
+    broadcastToClients({ type: 'LOBBY_WAITING' });
 }
 
 function swapLobbySides() {
@@ -532,7 +562,13 @@ function handleClientReceivedData(data) {
         applyStateSync(data);
     } else if (data.type === 'LOBBY_WAITING') {
         safeSetDisplay('win-modal', 'none');
-        safeSetDisplay('spectator-waiting-overlay', 'flex');
+        // 🎯 重新開放選手提交區，允許被誤判的選手重新送出排陣！
+        if (myPeerRole === 'player') {
+            safeSetDisplay('p2p-client-submit-box', 'block');
+            safeSetDisplay('spectator-waiting-overlay', 'none');
+        } else {
+            safeSetDisplay('spectator-waiting-overlay', 'flex');
+        }
     } else if (data.type === 'REJECT_FULL') {
         alert(currentLang === 'zh' ? "⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。" : "⚠️ Match slots are full! Switched to Spectator mode.");
         myPeerRole = 'spectator';
