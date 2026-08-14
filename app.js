@@ -3,7 +3,7 @@ let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
 let teamWinsP1 = 0, teamWinsP2 = 0;
 let kofIndexP1 = 0, kofIndexP2 = 0;
 let battleCount = 1;
-let matchMode = 'std'; // 'std', '3v3', 'team', 'p3'
+let matchMode = 'std';
 let targetScore = 4;
 let history = [], logs = [];
 let currentLang = 'zh';
@@ -28,10 +28,10 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     } catch(e) {}
 }
 
-/* 📢 語音與文字 100% 精準同步倒數機制 */
 function startShootCountdown() {
     const btn = document.getElementById('shoot-btn');
-    btn.disabled = true; // 防止重複點擊
+    if (!btn) return;
+    btn.disabled = true;
 
     const steps = [
         { txt: "Three", label: "3...", freq: 523.25 },
@@ -177,15 +177,26 @@ function setMatchMode(mode) {
     applyLanguage();
 }
 
+/* 有名顯名，無名 default 顯示 */
 function updatePlayerNamesForMode() {
     if (matchMode === 'team') {
+        let t1Name = roster.t1Name || 'Team A';
+        let t2Name = roster.t2Name || 'Team B';
         let p1Name = roster.t1[kofIndexP1] || `PLAYER ${kofIndexP1 + 1}`;
         let p2Name = roster.t2[kofIndexP2] || `PLAYER ${kofIndexP2 + 1}`;
-        document.getElementById('p1-title').value = `${p1Name} (${roster.t1Name || 'Team A'})`;
-        document.getElementById('p2-title').value = `${p2Name} (${roster.t2Name || 'Team B'})`;
+        
+        document.getElementById('p1-title').value = `${p1Name} (${t1Name})`;
+        document.getElementById('p2-title').value = `${p2Name} (${t2Name})`;
     } else if (matchMode === '3v3') {
         document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
         document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
+    } else if (matchMode === 'std') {
+        document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
+        document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
+    } else if (matchMode === 'p3') {
+        document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
+        document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
+        document.getElementById('p3-title').value = roster.t3Name || 'PLAYER 3';
     }
 }
 
@@ -199,6 +210,7 @@ function closeVersusModal() { document.getElementById('versus-modal').style.disp
 function openRosterModal() { document.getElementById('roster-modal').style.display = 'flex'; }
 function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
 
+/* 👥 儲存排陣後自動跳轉至 Team Battle 模式 */
 function saveRoster() {
     roster.t1Name = document.getElementById('roster-t1-name').value.trim() || 'Team A';
     roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || '1';
@@ -210,12 +222,14 @@ function saveRoster() {
     roster.t2[1] = document.getElementById('roster-t2-p2').value.trim() || 'B';
     roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'C';
 
-    updatePlayerNamesForMode();
-
     closeRosterModal();
-    saveState();
-    updateDisplay();
-    triggerVersusAnimation(document.getElementById('p1-title').value, document.getElementById('p2-title').value);
+    
+    // 自動切換到 Team Battle 模式
+    setMatchMode('team');
+    
+    let p1Show = `${roster.t1[0]} (${roster.t1Name})`;
+    let p2Show = `${roster.t2[0]} (${roster.t2Name})`;
+    triggerVersusAnimation(p1Show, p2Show);
 }
 
 function addScore(player, pts, typeName) {
@@ -418,14 +432,16 @@ function updateDisplay() {
     }
 
     const logList = document.getElementById('log-list');
-    logList.innerHTML = '';
-    logs.forEach(l => {
-        const li = document.createElement('li');
-        li.className = 'log-item';
-        li.textContent = l;
-        logList.appendChild(li);
-    });
-    logList.scrollTop = 0; // 最新紀錄自動置頂
+    if (logList) {
+        logList.innerHTML = '';
+        logs.forEach(l => {
+            const li = document.createElement('li');
+            li.className = 'log-item';
+            li.textContent = l;
+            logList.appendChild(li);
+        });
+        logList.scrollTop = 0;
+    }
 }
 
 function checkWinner() {
