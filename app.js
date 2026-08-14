@@ -160,7 +160,6 @@ function setMatchMode(mode, shouldReset = false) {
     }
 }
 
-/* 🎯 乾淨呈現隊名與選手名 */
 function updatePlayerNamesForMode() {
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
@@ -226,8 +225,13 @@ function handleManualNameChange(slot) {
     broadcastCurrentState();
 }
 
-function triggerVersusAnimation(p1, p2) {
-    safeSetText('vs-player-names', `${p1} VS ${p2}`);
+/* 🎯 關鍵修復：支持 3-Player 登場動畫 XX VS YY VS ZZ */
+function triggerVersusAnimation(p1, p2, p3 = '') {
+    if (matchMode === 'p3' && p3) {
+        safeSetText('vs-player-names', `${p1} VS ${p2} VS ${p3}`);
+    } else {
+        safeSetText('vs-player-names', `${p1} VS ${p2}`);
+    }
     safeSetDisplay('versus-modal', 'flex');
     playBeep(700, 'triangle', 0.2);
 }
@@ -526,11 +530,6 @@ function updateDisplay() {
     const f2 = document.getElementById('btn-foul-p2'); if (f2) f2.classList.toggle('active-foul', foulsP2 > 0);
     const f3 = document.getElementById('btn-foul-p3'); if (f3) f3.classList.toggle('active-foul', foulsP3 > 0);
 
-    if (matchMode === '3v3') {
-        let currentBeyNum = ((battleCount - 1) % 3) + 1;
-        safeSetText('deck-status', `ITEM #${currentBeyNum}`);
-    }
-
     if (matchMode === 'team') {
         let t1Label = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
         let t2Label = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
@@ -642,7 +641,6 @@ function applyLanguage() {
     safeSetText('btn-draw', lang.drawBtn);
     safeSetText('btn-reset', lang.reset);
     safeSetText('next-kof-btn', lang.nextKof);
-    safeSetText('reorder-btn', lang.reorderBtn);
     safeSetText('log-title', lang.logTitle);
     safeSetText('disclaimer', lang.disclaimer);
     safeSetText('privacy-notice', lang.privacyNotice);
@@ -708,7 +706,7 @@ const i18n = {
         rosterModalTitle: "👥 隊伍名單與對戰排序",
         saveRosterBtn: "儲存排陣名單",
         xtreme: "極限終結", over: "擊出終結", burst: "爆裂終結", spin: "迴轉勝利", foulTxt: "發射失誤",
-        undo: "復原", drawBtn: "平手重賽", reset: "重置賽事", nextKof: "下一局換人", reorderBtn: "重置順序",
+        undo: "復原", drawBtn: "平手重賽", reset: "重置賽事", nextKof: "下一局換人",
         logTitle: "⚡ 對局紀錄", winMsg: "率先達到目標分數，獲得本局勝利！",
         teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
         teamFinalWinMsg: "擊敗對手全體隊員，獲得整場團隊賽事總勝利！",
@@ -742,9 +740,9 @@ const i18n = {
         spectatorWaiting: "⏳ 裁判正在大廳排陣準備中，請稍候...",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南 (上限 15 人)：</div>
-            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：建立房間後 Code 全天有效！可看剩餘名額倒數 (上限15人)，一鍵全場開賽。</div>
-            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 私密填寫陀螺/隊員送出，開賽後自動鎖定。</div>
-            <div>• <b>👁️ 觀眾端</b>：輸入一次 ID 即可全程即時同步比分、獲勝彈窗與對局紀錄！</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：同一個 Code 全天有效！下一場按「等候大廳」可按「清空」接收新選手，再按「鎖定開賽」。</div>
+            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：同一個 Code 可繼續用，換人時重新按「選手連線」並填寫排陣送出。</div>
+            <div>• <b>👁️ 觀眾端</b>：無需操作全程自動同步；若離線重新輸入 Code 按「觀眾觀戰」即可。</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
@@ -769,7 +767,7 @@ const i18n = {
         rosterModalTitle: "👥 Team Roster & Order Setup",
         saveRosterBtn: "Save Roster",
         xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish", foulTxt: "Shooting Error",
-        undo: "Undo", drawBtn: "Draw", reset: "Reset Match", nextKof: "Next Round", reorderBtn: "Reset Order",
+        undo: "Undo", drawBtn: "Draw", reset: "Reset Match", nextKof: "Next Round",
         logTitle: "⚡ BATTLE LOG", winMsg: "Reached target score and wins the match!",
         teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
         teamFinalWinMsg: "Defeated all opponent team members and won the Team Match!",
@@ -803,9 +801,9 @@ const i18n = {
         spectatorWaiting: "⏳ Referee is setting up next match in Lobby, please wait...",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide (Max 15 Devices):</div>
-            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room once! Manage lobby, view capacity countdown (max 15), and start match.</div>
-            <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Enter Room ID & click 'Join as Player', submit secret deck to referee.</div>
-            <div>• <b>👁️ Spectator</b>: Enter Room ID once to enjoy live sync scores, popups & battle logs!</div>
+            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Same Code valid all day! Click 'Host Lobby' and 'Clear' for next match, then lock to start.</div>
+            <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Keep using the same Code, re-click 'Join as Player' to submit new roster.</div>
+            <div>• <b>👁️ Spectator</b>: Live sync automatically throughout; if disconnected, simply re-enter Code to join!</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
