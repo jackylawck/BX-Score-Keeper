@@ -371,6 +371,15 @@
         </div>
     </div>
 
+    <!-- ⏳ 觀眾專屬：裁判回大廳排陣時的等候過場遮罩 (不中斷連線) -->
+    <div class="modal" id="spectator-waiting-overlay" style="display: none; background: rgba(8, 12, 20, 0.92); z-index: 9999;">
+        <div class="modal-content" style="text-align: center; border: 1px solid var(--neon-blue);">
+            <div style="font-size: 2.5rem; animation: pulse 1.5s infinite;">⏳</div>
+            <h3 style="color: var(--neon-yellow); margin: 10px 0;" id="txt-spectator-waiting">裁判正在大廳排陣準備中，請稍候...</h3>
+            <p style="font-size: 0.85rem; color: #cbd5e1;">房間持續連線中，裁判開賽後畫面將自動同步！</p>
+        </div>
+    </div>
+
     <footer>
         <p id="disclaimer">本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。</p>
         <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
