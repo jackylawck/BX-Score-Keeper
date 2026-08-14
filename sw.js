@@ -1,9 +1,9 @@
-const CACHE_NAME = 'bx-score-v38';
+const CACHE_NAME = 'bx-score-v39';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
-  './p2p.js',     // 👈 新增 p2p.js 模組快取
+  './p2p.js',
   './app.js',
   './manifest.json',
   './BXScoreKeepericon-192.png',
