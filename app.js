@@ -1,7 +1,7 @@
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
 let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
 let teamWinsP1 = 0, teamWinsP2 = 0;
-let kofIndexP1 = 0, kofIndexP2 = 0;
+let kofIndexP1 = 0, kofIndexP2 = 0; // 追蹤隊員登場位置 (0 = 先鋒, 1 = 中堅, 2 = 大將)
 let battleCount = 1;
 let matchMode = 'std';
 let targetScore = 4;
@@ -28,7 +28,6 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     } catch(e) {}
 }
 
-/* 🔄 強制清除 Service Worker 快取與 LocalStorage 並重新載入 App */
 function forceRefreshApp() {
     if (confirm(currentLang === 'zh' ? "是否重新載入並清除舊資料？" : "Reload and clear cache?")) {
         localStorage.removeItem('bx_score_state');
@@ -121,6 +120,7 @@ const i18n = {
         undo: "復原", drawBtn: "平手重賽", reset: "重置賽事", nextKof: "下一局換人", reorderBtn: "重置順序",
         logTitle: "⚡ 對局紀錄", winMsg: "率先達到目標分數，獲得本局勝利！",
         teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
+        teamFinalWinMsg: "擊敗對手全體隊員，獲得整場團隊賽事總勝利！🏆",
         reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
         disclaimer: "本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。",
         privacyNotice: "本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。",
@@ -152,6 +152,7 @@ const i18n = {
         undo: "Undo", drawBtn: "Draw", reset: "Reset Match", nextKof: "Next Round", reorderBtn: "Reset Order",
         logTitle: "⚡ BATTLE LOG", winMsg: "Reached target score and wins the match!",
         teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
+        teamFinalWinMsg: "Defeated all opponent team members and won the Team Match! 🏆",
         reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
         disclaimer: "Unofficial fan-made score keeper tool based on BEYBLADE X Regulations (Asia Version) 12th Edition.",
         privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
@@ -227,7 +228,19 @@ function triggerVersusAnimation(p1, p2) {
 }
 function closeVersusModal() { document.getElementById('versus-modal').style.display = 'none'; }
 
-function openRosterModal() { document.getElementById('roster-modal').style.display = 'flex'; }
+function openRosterModal() { 
+    document.getElementById('roster-t1-name').value = roster.t1Name || '';
+    document.getElementById('roster-t1-p1').value = roster.t1[0] || '';
+    document.getElementById('roster-t1-p2').value = roster.t1[1] || '';
+    document.getElementById('roster-t1-p3').value = roster.t1[2] || '';
+
+    document.getElementById('roster-t2-name').value = roster.t2Name || '';
+    document.getElementById('roster-t2-p1').value = roster.t2[0] || '';
+    document.getElementById('roster-t2-p2').value = roster.t2[1] || '';
+    document.getElementById('roster-t2-p3').value = roster.t2[2] || '';
+
+    document.getElementById('roster-modal').style.display = 'flex'; 
+}
 function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
 
 function saveRoster() {
@@ -241,6 +254,9 @@ function saveRoster() {
     roster.t2[1] = document.getElementById('roster-t2-p2').value.trim() || 'B';
     roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'C';
 
+    kofIndexP1 = 0;
+    kofIndexP2 = 0;
+
     closeRosterModal();
     setMatchMode('team');
     
@@ -250,10 +266,7 @@ function saveRoster() {
 }
 
 function addScore(player, pts, typeName) {
-    // 若已達勝負標準，先檢查防卡死
-    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) {
-        return;
-    }
+    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
 
     playBeep(600, 'square', 0.08);
 
@@ -368,11 +381,30 @@ function addDraw() {
     saveState();
 }
 
+/* 👥 Team KOF 正確輪換與全滅判定 */
 function nextKOFRound() {
+    // 檢查是否有隊伍已經淘汰滿 3 人 (全滅)
+    if (teamWinsP1 >= 3 || teamWinsP2 >= 3) {
+        return; // 整場 Team Battle 已經結束
+    }
+
     if (scoreP1 >= targetScore) {
-        kofIndexP2 = (kofIndexP2 + 1) % 3;
+        // P1 贏，P2 隊伍換下一個隊員
+        kofIndexP2++;
     } else if (scoreP2 >= targetScore) {
-        kofIndexP1 = (kofIndexP1 + 1) % 3;
+        // P2 贏，P1 隊伍換下一個隊員
+        kofIndexP1++;
+    }
+
+    // 若某隊 3 人全部被淘汰，判定整場賽事總勝負
+    if (kofIndexP1 >= 3) {
+        let winnerTeam = roster.t2Name || 'Team B';
+        showWinModal(`🏆 ${winnerTeam}`, true);
+        return;
+    } else if (kofIndexP2 >= 3) {
+        let winnerTeam = roster.t1Name || 'Team A';
+        showWinModal(`🏆 ${winnerTeam}`, true);
+        return;
     }
 
     updatePlayerNamesForMode();
@@ -419,7 +451,7 @@ function resetMatch(askConfirm = true) {
         kofIndexP1 = 0; kofIndexP2 = 0;
         battleCount = 1;
         history = []; logs = [];
-        localStorage.removeItem('bx_score_state'); // 解除鎖定
+        localStorage.removeItem('bx_score_state');
         updatePlayerNamesForMode();
         updateDisplay();
         saveState();
@@ -488,9 +520,13 @@ function checkWinner() {
     return false;
 }
 
-function showWinModal(winner) {
+function showWinModal(winner, isFinalTeamWin = false) {
     document.getElementById('winner-name').textContent = winner;
-    document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
+    if (isFinalTeamWin) {
+        document.getElementById('win-msg').innerText = i18n[currentLang].teamFinalWinMsg;
+    } else {
+        document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
+    }
     document.getElementById('win-modal').style.display = 'flex';
 }
 
