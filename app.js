@@ -173,7 +173,6 @@ const i18n = {
     }
 };
 
-/* 修復 3-Player 顯隱死鎖 Bug */
 function setMatchMode(mode) {
     matchMode = mode;
     if (mode === 'team') targetScore = 2;
@@ -189,9 +188,8 @@ function setMatchMode(mode) {
     document.getElementById('team-tracker-bar').style.display = mode === 'team' ? 'flex' : 'none';
     document.getElementById('next-kof-btn').style.display = mode === 'team' ? 'inline-block' : 'none';
 
-    resetMatch(false); // 重置分數
+    resetMatch(false);
 
-    // 關鍵修復：卡片顯隱放在 resetMatch 之後，絕不被蓋掉！
     const scoreboard = document.getElementById('main-scoreboard');
     const p3Card = document.getElementById('p3-card');
     if (mode === 'p3') {
