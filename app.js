@@ -14,8 +14,8 @@ let history = [], logs = [];
 let currentLang = 'zh';
 
 let roster = {
-    t1Name: '隊伍 A', t1: ['選手一', '陀螺二', '陀螺三'],
-    t2Name: '隊伍 B', t2: ['選手二', '陀螺二', '陀螺三'],
+    t1Name: '隊伍 A', t1: ['1', '2', '3'],
+    t2Name: '隊伍 B', t2: ['A', 'B', 'C'],
     t3Name: '選手三'
 };
 
@@ -172,14 +172,14 @@ function updatePlayerNamesForMode() {
         let t2Name = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         let idx1 = Math.min(kofIndexP1, 2);
         let idx2 = Math.min(kofIndexP2, 2);
-        let p1Name = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : `${defP1}`;
-        let p2Name = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : `${defP2}`;
+        let p1Name = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : `1`;
+        let p2Name = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : `A`;
         
         if (p1Title) p1Title.value = `${p1Name} (${t1Name})`;
         if (p2Title) p2Title.value = `${p2Name} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : defP1;
-        if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : defP2;
+        if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || defP1);
+        if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || defP2);
     } else if (matchMode === 'p3') {
         if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : defP1;
         if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : defP2;
@@ -246,14 +246,14 @@ function moveRosterItem(teamKey, fromIdx, toIndex) {
 function saveRoster() {
     const getVal = (id, def) => { const el = document.getElementById(id); return el && el.value.trim() ? el.value.trim() : def; };
     roster.t1Name = getVal('roster-t1-name', currentLang === 'zh' ? '隊伍 A' : 'Team A');
-    roster.t1[0] = getVal('roster-t1-p1', currentLang === 'zh' ? '選手一' : 'Player 1');
-    roster.t1[1] = getVal('roster-t1-p2', currentLang === 'zh' ? '陀螺二' : 'Bey 2');
-    roster.t1[2] = getVal('roster-t1-p3', currentLang === 'zh' ? '陀螺三' : 'Bey 3');
+    roster.t1[0] = getVal('roster-t1-p1', '1');
+    roster.t1[1] = getVal('roster-t1-p2', '2');
+    roster.t1[2] = getVal('roster-t1-p3', '3');
 
     roster.t2Name = getVal('roster-t2-name', currentLang === 'zh' ? '隊伍 B' : 'Team B');
-    roster.t2[0] = getVal('roster-t2-p1', currentLang === 'zh' ? '選手二' : 'Player 2');
-    roster.t2[1] = getVal('roster-t2-p2', currentLang === 'zh' ? '陀螺二' : 'Bey 2');
-    roster.t2[2] = getVal('roster-t2-p3', currentLang === 'zh' ? '陀螺三' : 'Bey 3');
+    roster.t2[0] = getVal('roster-t2-p1', 'A');
+    roster.t2[1] = getVal('roster-t2-p2', 'B');
+    roster.t2[2] = getVal('roster-t2-p3', 'C');
 
     kofIndexP1 = 0;
     kofIndexP2 = 0;
@@ -269,7 +269,6 @@ function saveRoster() {
     broadcastCurrentState();
 }
 
-/* 🎯 關鍵修復 3：統一 State 廣播封包，確保連同 Logs、KOF 與比分 100% 完整傳送 */
 function broadcastCurrentState() {
     if (typeof broadcastToClients === 'function') {
         broadcastToClients({
@@ -624,9 +623,6 @@ function applyLanguage() {
     safeSetText('lbl-submit-title', lang.lblSubmitTitle);
     safeSetText('lbl-select-mode', lang.lblSelectMode);
     safeSetText('btn-submit-deck', lang.btnSubmitDeck);
-    safeSetText('lbl-choose-pos', lang.lblChoosePos);
-    safeSetText('btn-slot1', lang.btnSlot1);
-    safeSetText('btn-slot2', lang.btnSlot2);
     safeSetText('btn-leave-p2p', lang.btnLeaveP2P);
     safeSetText('btn-open-lobby', lang.btnOpenLobby);
     safeSetText('p2p-lbl-room', lang.lblRoom);
@@ -641,6 +637,9 @@ function applyLanguage() {
     safeSetText('lbl-lobby-p2', lang.lblLobbyP2);
     safeSetText('lbl-lobby-p3', lang.lblLobbyP3);
     safeSetText('btn-lobby-start', lang.btnLobbyStart);
+    safeSetText('btn-swap-sides', lang.btnSwapSides);
+    safeSetText('lbl-auto-assign-tip', lang.lblAutoAssignTip);
+    safeSetText('btn-auto-accept', lang.btnAutoAccept);
 
     const guideBox = document.getElementById('p2p-guide-box');
     if (guideBox) guideBox.innerHTML = lang.p2pGuide;
@@ -684,9 +683,6 @@ const i18n = {
         lblSubmitTitle: "📩 提交個人 / 隊伍排陣名單",
         lblSelectMode: "選擇欲提交的賽制模式：",
         btnSubmitDeck: "🔒 私密送出給裁判審核",
-        lblChoosePos: "請選擇放入大廳的位置：",
-        btnSlot1: "👈 放左邊 (選手一)",
-        btnSlot2: "👉 放右邊 (選手二)",
         btnLeaveP2P: "🚪 離開房間",
         btnOpenLobby: "🏟️ 等候大廳",
         lblRoom: "房間 ID",
@@ -699,11 +695,14 @@ const i18n = {
         lblLobbyP2: "👉 右邊 (選手二 / 隊伍 B)",
         lblLobbyP3: "👆 中間 (選手三)",
         btnLobbyStart: "🔒 鎖定排陣並邀請全場開賽！",
+        btnSwapSides: "⇄ 左右對調",
+        lblAutoAssignTip: "系統將依序由左至右自動分配進大廳：",
+        btnAutoAccept: "✅ 接收並放入大廳空位",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南：</div>
-            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：點擊「建立對戰房間」，進入等候大廳，可選賽制、修改雙方排陣並一鍵全場開賽。</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：點擊「建立對戰房間」，進入等候大廳，接收選手排陣（自動由左至右填入），可點「左右對調」微調並一鍵全場開賽。</div>
             <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 點擊「選手連線」，在自己手機私密填寫陀螺/隊員送出。</div>
-            <div>• <b>👁️ 觀眾端</b>：輸入房間 ID 點擊「觀眾觀戰」，畫面將即時同步大螢幕賽果與動畫！</div>
+            <div>• <b>👁️ 觀眾端</b>：輸入房間 ID 點擊「觀眾觀戰」，畫面將即時同步大螢幕賽果與對局紀錄！</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
@@ -745,9 +744,6 @@ const i18n = {
         lblSubmitTitle: "📩 Submit Player / Team Roster",
         lblSelectMode: "Select Match Mode:",
         btnSubmitDeck: "🔒 Submit Privately to Referee",
-        lblChoosePos: "Assign player to Lobby slot:",
-        btnSlot1: "👈 Place Left (Player 1)",
-        btnSlot2: "👉 Place Right (Player 2)",
         btnLeaveP2P: "🚪 Leave Room",
         btnOpenLobby: "🏟️ Host Lobby",
         lblRoom: "Room ID",
@@ -760,11 +756,14 @@ const i18n = {
         lblLobbyP2: "👉 Right Side (Player 2 / Team B)",
         lblLobbyP3: "👆 Middle (Player 3)",
         btnLobbyStart: "🔒 Lock Rosters & Start Match (All Screens)!",
+        btnSwapSides: "⇄ Swap Sides",
+        lblAutoAssignTip: "System will auto-assign from left to right slots:",
+        btnAutoAccept: "✅ Accept & Place in Lobby",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide:</div>
-            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room, manage lobby, select mode, tweak rosters, and start match.</div>
+            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room, manage lobby, auto-receive rosters (left to right), click 'Swap Sides' if needed, and start match.</div>
             <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Enter Room ID & click 'Join as Player', submit secret deck to referee.</div>
-            <div>• <b>👁️ Spectator</b>: Enter Room ID & click 'Join as Spectator' for live sync scoreboard!</div>
+            <div>• <b>👁️ Spectator</b>: Enter Room ID & click 'Join as Spectator' for live sync scoreboard and battle logs!</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
