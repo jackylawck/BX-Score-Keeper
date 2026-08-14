@@ -23,16 +23,16 @@ function updateP2PFormFields() {
 
     if (mode === 'std' || mode === 'p3') {
         if (extraBox) extraBox.style.display = 'none';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 選手一)' : 'Player Name (e.g. Player 1)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
     } else if (mode === '3v3') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 選手一)' : 'Player Name (e.g. Player 1)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
         safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '陀螺 1 號 (ITEM #1)' : 'Bey #1 (ITEM #1)');
         safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '陀螺 2 號 (ITEM #2)' : 'Bey #2 (ITEM #2)');
         safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '陀螺 3 號 (ITEM #3)' : 'Bey #3 (ITEM #3)');
     } else if (mode === 'team') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 隊伍 A)' : 'Team Name (e.g. Team A)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 BB)' : 'Team Name (e.g. BB)';
         safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '先鋒 1 號' : '1st Vanguard');
         safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '中堅 2 號' : '2nd Middle');
         safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '大將 3 號' : '3rd General');
@@ -65,7 +65,6 @@ function initP2PHost() {
         p2pConnMap[conn.peer] = conn;
         updateConnectedCount();
 
-        // 🎯 關鍵修復 1：新設備連線進來，裁判立刻補發最新狀態（包含 Log 與名字）
         conn.on('open', () => {
             conn.send({
                 type: 'STATE_SYNC',
@@ -130,22 +129,56 @@ function applyLobbyLayout() {
     safeSetDisplay('lobby-p3-box', (matchMode === 'p3') ? 'block' : 'none');
 }
 
+/* 🎯 關鍵修復：正確將隊伍名 / 選手名填入大廳欄位，不再被預設數值覆蓋！ */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
     let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
 
-    safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (matchMode === 'team' ? roster.t1Name : defP1));
-    safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (matchMode === 'team' ? roster.t2Name : defP2));
+    if (matchMode === 'team') {
+        safeSetInputValue('lobby-p1-name', roster.t1Name || defP1);
+        safeSetInputValue('lobby-p2-name', roster.t2Name || defP2);
+    } else {
+        safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || defP1));
+        safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || defP2));
+    }
     safeSetInputValue('lobby-p3-name', roster.t3Name || defP3);
 
-    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'));
-    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'));
-    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || (currentLang === 'zh' ? '陀螺三' : 'Bey 3'));
+    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || (currentLang === 'zh' ? '1' : '1'));
+    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || (currentLang === 'zh' ? '2' : '2'));
+    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || (currentLang === 'zh' ? '3' : '3'));
 
-    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'));
-    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'));
-    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || (currentLang === 'zh' ? '陀螺三' : 'Bey 3'));
+    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || (currentLang === 'zh' ? 'A' : 'A'));
+    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || (currentLang === 'zh' ? 'B' : 'B'));
+    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || (currentLang === 'zh' ? 'C' : 'C'));
+}
+
+/* ⇄ 左右一鍵對調功能 (Swap Sides) */
+function swapLobbySides() {
+    let p1Name = document.getElementById('lobby-p1-name').value;
+    let p2Name = document.getElementById('lobby-p2-name').value;
+    document.getElementById('lobby-p1-name').value = p2Name;
+    document.getElementById('lobby-p2-name').value = p1Name;
+
+    let p1d1 = document.getElementById('lobby-p1-d1').value;
+    let p1d2 = document.getElementById('lobby-p1-d2').value;
+    let p1d3 = document.getElementById('lobby-p1-d3').value;
+
+    let p2d1 = document.getElementById('lobby-p2-d1').value;
+    let p2d2 = document.getElementById('lobby-p2-d2').value;
+    let p2d3 = document.getElementById('lobby-p2-d3').value;
+
+    document.getElementById('lobby-p1-d1').value = p2d1;
+    document.getElementById('lobby-p1-d2').value = p2d2;
+    document.getElementById('lobby-p1-d3').value = p2d3;
+
+    document.getElementById('lobby-p2-d1').value = p1d1;
+    document.getElementById('lobby-p2-d2').value = p1d2;
+    document.getElementById('lobby-p2-d3').value = p1d3;
+
+    let tempOcc = occupiedSlots.slot1;
+    occupiedSlots.slot1 = occupiedSlots.slot2;
+    occupiedSlots.slot2 = tempOcc;
 }
 
 function startMatchFromLobby() {
@@ -163,14 +196,14 @@ function startMatchFromLobby() {
 
     if (matchMode === '3v3' || matchMode === 'team') {
         roster.t1 = [
-            document.getElementById('lobby-p1-d1').value.trim() || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'),
-            document.getElementById('lobby-p1-d2').value.trim() || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'),
-            document.getElementById('lobby-p1-d3').value.trim() || (currentLang === 'zh' ? '陀螺三' : 'Bey 3')
+            document.getElementById('lobby-p1-d1').value.trim() || '1',
+            document.getElementById('lobby-p1-d2').value.trim() || '2',
+            document.getElementById('lobby-p1-d3').value.trim() || '3'
         ];
         roster.t2 = [
-            document.getElementById('lobby-p2-d1').value.trim() || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'),
-            document.getElementById('lobby-p2-d2').value.trim() || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'),
-            document.getElementById('lobby-p2-d3').value.trim() || (currentLang === 'zh' ? '陀螺三' : 'Bey 3')
+            document.getElementById('lobby-p2-d1').value.trim() || 'A',
+            document.getElementById('lobby-p2-d2').value.trim() || 'B',
+            document.getElementById('lobby-p2-d3').value.trim() || 'C'
         ];
     } else {
         roster.t1[0] = p1Val;
@@ -291,9 +324,9 @@ function sendClientDeckToHost() {
     let mode = document.getElementById('p2p-form-type').value;
     let defName = currentLang === 'zh' ? '選手一' : 'Player 1';
     let name = document.getElementById('p2p-player-name').value.trim() || defName;
-    let item1 = document.getElementById('p2p-item-1').value.trim() || (currentLang === 'zh' ? '陀螺一' : 'Bey 1');
-    let item2 = document.getElementById('p2p-item-2').value.trim() || (currentLang === 'zh' ? '陀螺二' : 'Bey 2');
-    let item3 = document.getElementById('p2p-item-3').value.trim() || (currentLang === 'zh' ? '陀螺三' : 'Bey 3');
+    let item1 = document.getElementById('p2p-item-1').value.trim() || '1';
+    let item2 = document.getElementById('p2p-item-2').value.trim() || '2';
+    let item3 = document.getElementById('p2p-item-3').value.trim() || '3';
 
     let payload = {
         type: 'SUBMIT_DECK',
@@ -335,26 +368,35 @@ function handleHostReceivedData(data, conn) {
         const modalBody = document.getElementById('p2p-request-body');
         if (modalBody) modalBody.innerHTML = bodyHtml;
 
-        safeSetDisplay('p2p-slot3-btn', data.formMode === 'p3' || matchMode === 'p3' ? 'inline-block' : 'none');
         safeSetDisplay('p2p-confirm-modal', 'flex');
     }
 }
 
-function acceptClientSubmission(targetSlot) {
+/* 🎯 全新：由左至右自動分配進大廳 Slot 1 或 Slot 2 */
+function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
     let data = pendingClientData;
     setMatchMode(data.formMode);
 
+    let targetSlot = 1;
+    if (!occupiedSlots.slot1) {
+        targetSlot = 1;
+    } else if (!occupiedSlots.slot2) {
+        targetSlot = 2;
+    } else if (matchMode === 'p3' && !occupiedSlots.slot3) {
+        targetSlot = 3;
+    } else {
+        targetSlot = 1; // 預設覆蓋第一位
+    }
+
     if (targetSlot === 1) {
         roster.t1Name = data.name;
-        roster.t1[0] = data.name;
-        if (data.items && data.items.length) roster.t1 = [...data.items];
+        roster.t1 = (data.items && data.items.length) ? [...data.items] : [data.name, '2', '3'];
         occupiedSlots.slot1 = true;
     } else if (targetSlot === 2) {
         roster.t2Name = data.name;
-        roster.t2[0] = data.name;
-        if (data.items && data.items.length) roster.t2 = [...data.items];
+        roster.t2 = (data.items && data.items.length) ? [...data.items] : [data.name, 'B', 'C'];
         occupiedSlots.slot2 = true;
     } else if (targetSlot === 3) {
         roster.t3Name = data.name;
@@ -365,7 +407,6 @@ function acceptClientSubmission(targetSlot) {
     openLobbyModal();
 }
 
-/* 🎯 關鍵修復 2：完整解析全量同步封包，包含 Log、姓名與 KOF 輪替狀態 */
 function handleClientReceivedData(data) {
     if (data.type === 'REJECT_FULL') {
         alert(currentLang === 'zh' ? "⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。" : "⚠️ Match slots are full! Switched to Spectator mode.");
