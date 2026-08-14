@@ -1,5 +1,5 @@
 /* =========================================================================
- * ⚡ app.js - BX Score Keeper Main Application Logic (100% Bilingual & Official Rhythm)
+ * ⚡ app.js - BX Score Keeper Main Application Logic
  * ========================================================================= */
 
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
@@ -86,8 +86,8 @@ function startShootCountdown() {
             window.speechSynthesis.cancel();
             let u = new SpeechSynthesisUtterance(current.speech);
             u.lang = 'en-US';
-            u.rate = stepIndex === 3 ? 0.95 : 0.9; // 沉穩有力的官方大賽語速
-            u.pitch = stepIndex === 3 ? 1.2 : 1.0; // Shoot 時高亢熱血
+            u.rate = stepIndex === 3 ? 0.95 : 0.9;
+            u.pitch = stepIndex === 3 ? 1.2 : 1.0;
 
             u.onstart = () => {
                 btn.innerText = current.label;
@@ -120,7 +120,19 @@ function safeSetText(id, val) { const el = document.getElementById(id); if (el) 
 function safeSetInputValue(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function safeSetInputPlaceholder(id, txt) { const el = document.getElementById(id); if (el) el.placeholder = txt; }
 
-function setMatchMode(mode, shouldReset = false) {
+/* 🎯 封裝完整狀態標準物件 */
+function getFullState() {
+    return {
+        roster, scoreP1, scoreP2, scoreP3,
+        foulsP1, foulsP2, foulsP3,
+        teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
+        battleCount, matchMode, logs,
+        isMatchLocked: typeof isMatchLocked !== 'undefined' ? isMatchLocked : false
+    };
+}
+
+/* 🎯 支援 broadcast 選填參數，防止重複循環廣播 */
+function setMatchMode(mode, shouldReset = false, broadcast = true) {
     matchMode = mode;
     if (mode === 'team') targetScore = 2;
     else if (mode === 'p3') targetScore = 5;
@@ -157,12 +169,11 @@ function setMatchMode(mode, shouldReset = false) {
     updatePlayerNamesForMode();
     applyLanguage();
 
-    if (myPeerRole === 'host') {
+    if (broadcast && myPeerRole === 'host' && typeof broadcastToClients === 'function') {
         broadcastToClients({ type: 'MODE_SYNC', mode });
     }
 }
 
-/* 🎯 嚴格區分自訂名字與預設佔位符，英文模式下絕不帶出「先鋒 / 隊伍」 */
 function updatePlayerNamesForMode() {
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
@@ -236,7 +247,8 @@ function handleManualNameChange(slot) {
     broadcastCurrentState();
 }
 
-function triggerVersusAnimation(p1, p2, p3 = '') {
+/* 🎯 支援三人大亂鬥動漫風登場彈窗 */
+function triggerVersusAnimation(p1, p2, p3 = null) {
     if (matchMode === 'p3' && p3) {
         safeSetText('vs-player-names', `${p1} VS ${p2} VS ${p3}`);
     } else {
@@ -296,7 +308,7 @@ function saveRoster() {
     isFinalTeamWinActive = false;
 
     closeRosterModal();
-    setMatchMode('team', false);
+    setMatchMode('team', false, true);
     
     let p1Show = `${roster.t1[0]} (${roster.t1Name})`;
     let p2Show = `${roster.t2[0]} (${roster.t2Name})`;
@@ -309,13 +321,7 @@ function broadcastCurrentState() {
     if (typeof broadcastToClients === 'function') {
         broadcastToClients({
             type: 'STATE_SYNC',
-            isMatchLocked: typeof isMatchLocked !== 'undefined' ? isMatchLocked : false,
-            roster: roster,
-            scoreP1, scoreP2, scoreP3,
-            foulsP1, foulsP2, foulsP3,
-            teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
-            battleCount, matchMode,
-            logs: logs
+            ...getFullState()
         });
     }
 }
@@ -956,7 +962,7 @@ function loadState() {
             if (state.p2Name) setVal('p2-title', state.p2Name);
             if (state.p3Name) setVal('p3-title', state.p3Name);
 
-            setMatchMode(matchMode, false);
+            setMatchMode(matchMode, false, false);
         } catch(e) {
             console.error("State restore failed:", e);
         }
