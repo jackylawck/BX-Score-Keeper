@@ -1,6 +1,8 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync & Lobby Module
+ * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync (Max 28 Devices with Countdown)
  * ========================================================================= */
+
+const MAX_DEVICES = 28; // 🛡️ 房間硬上限設為 28 人
 
 let peer = null;
 let p2pConnMap = {}; 
@@ -9,6 +11,8 @@ let myPeerRole = 'none'; // 'host', 'player', 'spectator'
 let currentRoomId = '';
 let pendingClientData = null;
 let occupiedSlots = { slot1: false, slot2: false, slot3: false };
+let isMatchLocked = false;
+let heartbeatTimer = null;
 
 function openP2PModal() { 
     applyLanguage();
@@ -40,7 +44,10 @@ function updateP2PFormFields() {
 }
 
 function initP2PHost() {
-    if (peer) peer.destroy();
+    if (peer && !peer.destroyed) {
+        openLobbyModal();
+        return;
+    }
     
     let randomNum = Math.floor(10000000 + Math.random() * 90000000).toString();
     currentRoomId = `bx-${randomNum}`;
@@ -50,40 +57,61 @@ function initP2PHost() {
     peer.on('open', (id) => {
         myPeerRole = 'host';
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
+        isMatchLocked = false;
         setUIPermissions();
         
         safeSetDisplay('p2p-status-bar', 'block');
         safeSetText('p2p-role-badge', currentLang === 'zh' ? 'HOST (裁判)' : 'HOST (Referee)');
         safeSetText('p2p-current-room', randomNum);
-        safeSetText('p2p-connected-count', '0');
+        updateConnectedCount();
 
+        startHeartbeat();
         closeP2PModal();
         openLobbyModal();
     });
 
     peer.on('connection', (conn) => {
+        let currentCount = Object.keys(p2pConnMap).length;
+
+        // 🛡️ 28 人硬上限攔截：超過 28 人直接拒絕
+        if (currentCount >= MAX_DEVICES) {
+            conn.on('open', () => {
+                conn.send({ type: 'ROOM_CAPACITY_FULL' });
+                setTimeout(() => conn.close(), 500);
+            });
+            return;
+        }
+
         p2pConnMap[conn.peer] = conn;
         updateConnectedCount();
 
         conn.on('open', () => {
             conn.send({
-                type: 'STATE_SYNC',
+                type: 'INIT_SYNC',
+                isMatchLocked: isMatchLocked,
                 roster: roster,
                 scoreP1, scoreP2, scoreP3,
                 foulsP1, foulsP2, foulsP3,
                 teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
                 battleCount, matchMode,
-                logs: logs
+                logs: logs,
+                connectedCount: Object.keys(p2pConnMap).length
             });
+            broadcastDeviceCount();
         });
 
         conn.on('data', (data) => {
+            if (data.type === 'PING') {
+                conn.send({ type: 'PONG' });
+                return;
+            }
             handleHostReceivedData(data, conn);
         });
 
         conn.on('close', () => {
             delete p2pConnMap[conn.peer];
             updateConnectedCount();
+            broadcastDeviceCount();
         });
     });
 
@@ -92,10 +120,31 @@ function initP2PHost() {
     });
 }
 
-function updateConnectedCount() {
+function startHeartbeat() {
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
+    heartbeatTimer = setInterval(() => {
+        if (myPeerRole === 'host') {
+            broadcastToClients({ type: 'PING' });
+        } else if (hostConn && hostConn.open) {
+            hostConn.send({ type: 'PING' });
+        }
+    }, 5000);
+}
+
+/* 🎯 實時更新 28 人倒數與名額顯示 */
+function updateConnectedCount(overrideCount = null) {
+    let count = overrideCount !== null ? overrideCount : Object.keys(p2pConnMap).length;
+    let remaining = Math.max(0, MAX_DEVICES - count);
+
+    let displayTxt = `${count} / ${MAX_DEVICES} (${currentLang === 'zh' ? '名額剩餘' : 'Left'}: ${remaining})`;
+    
+    safeSetText('p2p-connected-count', displayTxt);
+    safeSetText('lobby-connected-count', displayTxt);
+}
+
+function broadcastDeviceCount() {
     let count = Object.keys(p2pConnMap).length;
-    safeSetText('p2p-connected-count', count);
-    safeSetText('lobby-connected-count', count);
+    broadcastToClients({ type: 'DEVICE_COUNT_SYNC', count });
 }
 
 function openLobbyModal() {
@@ -111,13 +160,16 @@ function openLobbyModal() {
     syncRosterToLobbyUI();
     applyLobbyLayout();
     safeSetDisplay('lobby-modal', 'flex');
+
+    isMatchLocked = false;
+    broadcastToClients({ type: 'LOBBY_WAITING' });
 }
 
 function closeLobbyModal() { safeSetDisplay('lobby-modal', 'none'); }
 
 function handleLobbyModeChange() {
     let newMode = document.getElementById('lobby-match-mode').value;
-    setMatchMode(newMode);
+    setMatchMode(newMode, false);
     applyLobbyLayout();
     broadcastToClients({ type: 'MODE_SYNC', mode: newMode });
 }
@@ -130,7 +182,6 @@ function applyLobbyLayout() {
     safeSetDisplay('lobby-p2-deck-box', is3v3OrTeam ? 'block' : 'none');
     safeSetDisplay('lobby-p3-box', isP3 ? 'block' : 'none');
 
-    // 🎯 3人模式顯示輪調，雙人模式顯示對調
     const swapBtn = document.getElementById('btn-swap-sides');
     if (swapBtn) {
         if (isP3) {
@@ -164,14 +215,12 @@ function syncRosterToLobbyUI() {
     safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
 }
 
-/* 🎯 支援 2 人對調 與 3 人順時針輪調 (Rotate 1➔2➔3➔1) */
 function swapLobbySides() {
     let p1Name = document.getElementById('lobby-p1-name').value;
     let p2Name = document.getElementById('lobby-p2-name').value;
     let p3Name = document.getElementById('lobby-p3-name').value;
 
     if (matchMode === 'p3') {
-        // 三人順時針輪替: 1 ➔ 2, 2 ➔ 3, 3 ➔ 1
         document.getElementById('lobby-p1-name').value = p3Name;
         document.getElementById('lobby-p2-name').value = p1Name;
         document.getElementById('lobby-p3-name').value = p2Name;
@@ -181,7 +230,6 @@ function swapLobbySides() {
         occupiedSlots.slot2 = occupiedSlots.slot1;
         occupiedSlots.slot1 = tempOcc;
     } else {
-        // 雙人左右對調
         document.getElementById('lobby-p1-name').value = p2Name;
         document.getElementById('lobby-p2-name').value = p1Name;
 
@@ -239,6 +287,16 @@ function startMatchFromLobby() {
     occupiedSlots.slot1 = true;
     occupiedSlots.slot2 = true;
     if (matchMode === 'p3') occupiedSlots.slot3 = true;
+    
+    isMatchLocked = true;
+
+    scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
+    foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
+    teamWinsP1 = 0; teamWinsP2 = 0;
+    kofIndexP1 = 0; kofIndexP2 = 0;
+    battleCount = 1;
+    history = []; logs = [];
+    isFinalTeamWinActive = false;
 
     closeLobbyModal();
 
@@ -251,6 +309,7 @@ function startMatchFromLobby() {
 
     broadcastToClients({
         type: 'MATCH_START_SYNC',
+        isMatchLocked: true,
         roster: roster,
         scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
@@ -292,15 +351,18 @@ function joinP2PRoom(roleType) {
                 safeSetText('p2p-role-badge', currentLang === 'zh' ? '🎮 PLAYER (選手)' : '🎮 PLAYER');
                 safeSetDisplay('p2p-client-submit-box', 'block');
                 updateP2PFormFields();
-                alert(currentLang === 'zh' ? "已成功連線至裁判房間！請填寫資料並送出。" : "Connected! Please fill in your roster and submit.");
             }
 
+            startHeartbeat();
             setUIPermissions();
             safeSetText('p2p-current-room', inputId);
-            safeSetText('p2p-connected-count', currentLang === 'zh' ? '已連線' : 'Connected');
         });
 
         hostConn.on('data', (data) => {
+            if (data.type === 'PING') {
+                hostConn.send({ type: 'PONG' });
+                return;
+            }
             handleClientReceivedData(data);
         });
 
@@ -317,6 +379,7 @@ function joinP2PRoom(roleType) {
 function leaveP2PRoom() {
     let confirmMsg = currentLang === 'zh' ? "確定要離開目前的對戰房間嗎？" : "Are you sure you want to leave the room?";
     if (confirm(confirmMsg)) {
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
         if (peer) peer.destroy();
         peer = null;
         hostConn = null;
@@ -324,6 +387,7 @@ function leaveP2PRoom() {
         myPeerRole = 'none';
         
         safeSetDisplay('p2p-status-bar', 'none');
+        safeSetDisplay('spectator-waiting-overlay', 'none');
         setUIPermissions();
         alert(currentLang === 'zh' ? "已離開房間，恢復單機計分模式。" : "Left room. Returned to offline mode.");
     }
@@ -347,6 +411,11 @@ function sendClientDeckToHost() {
         return;
     }
 
+    if (isMatchLocked) {
+        alert(currentLang === 'zh' ? "⚠️ 本局比賽已鎖定開賽！無法再提交排陣。" : "⚠️ Match already started! Cannot submit roster.");
+        return;
+    }
+
     let mode = document.getElementById('p2p-form-type').value;
     let defName = currentLang === 'zh' ? '選手一' : 'Player 1';
     let name = document.getElementById('p2p-player-name').value.trim() || defName;
@@ -367,6 +436,11 @@ function sendClientDeckToHost() {
 
 function handleHostReceivedData(data, conn) {
     if (data.type === 'SUBMIT_DECK') {
+        if (isMatchLocked) {
+            conn.send({ type: 'REJECT_FULL' });
+            return;
+        }
+
         let isFull = (matchMode === 'p3') 
             ? (occupiedSlots.slot1 && occupiedSlots.slot2 && occupiedSlots.slot3)
             : (occupiedSlots.slot1 && occupiedSlots.slot2);
@@ -398,7 +472,6 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 🎯 裁判接受選手提交（完全保留裁判原本設定的賽制，不被選手篡改） */
 function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
@@ -432,14 +505,35 @@ function autoAcceptClientSubmission() {
     openLobbyModal();
 }
 
-/* 🎯 裁判拒絕 / 忽略選手提交 */
 function rejectClientSubmission() {
     pendingClientData = null;
     safeSetDisplay('p2p-confirm-modal', 'none');
 }
 
 function handleClientReceivedData(data) {
-    if (data.type === 'REJECT_FULL') {
+    if (data.type === 'ROOM_CAPACITY_FULL') {
+        alert(currentLang === 'zh' ? "⚠️ 本房間人數已達 28 人上限！無法加入。" : "⚠️ Room capacity reached (28/28 max)!");
+        leaveP2PRoom();
+    } else if (data.type === 'DEVICE_COUNT_SYNC') {
+        updateConnectedCount(data.count);
+    } else if (data.type === 'INIT_SYNC') {
+        isMatchLocked = data.isMatchLocked || false;
+        if (isMatchLocked && myPeerRole === 'player') {
+            myPeerRole = 'spectator';
+            safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
+            safeSetDisplay('p2p-client-submit-box', 'none');
+            closeP2PModal();
+            setUIPermissions();
+            alert(currentLang === 'zh' ? "⚠️ 本局對戰已鎖定開賽！您已自動轉為【觀眾直播】模式。" : "⚠️ Match is in progress! Automatically switched to Spectator mode.");
+        } else if (myPeerRole === 'player' && !isMatchLocked) {
+            alert(currentLang === 'zh' ? "已成功連線至裁判房間！請填寫資料並送出。" : "Connected! Please fill in your roster and submit.");
+        }
+        if (data.connectedCount) updateConnectedCount(data.connectedCount);
+        applyStateSync(data);
+    } else if (data.type === 'LOBBY_WAITING') {
+        safeSetDisplay('win-modal', 'none');
+        safeSetDisplay('spectator-waiting-overlay', 'flex');
+    } else if (data.type === 'REJECT_FULL') {
         alert(currentLang === 'zh' ? "⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。" : "⚠️ Match slots are full! Switched to Spectator mode.");
         myPeerRole = 'spectator';
         safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
@@ -447,30 +541,40 @@ function handleClientReceivedData(data) {
         closeP2PModal();
         setUIPermissions();
     } else if (data.type === 'STATE_SYNC' || data.type === 'MATCH_START_SYNC') {
-        if (data.roster) roster = data.roster;
-        scoreP1 = data.scoreP1 || 0;
-        scoreP2 = data.scoreP2 || 0;
-        scoreP3 = data.scoreP3 || 0;
-        foulsP1 = data.foulsP1 || 0;
-        foulsP2 = data.foulsP2 || 0;
-        foulsP3 = data.foulsP3 || 0;
-        teamWinsP1 = data.teamWinsP1 || 0;
-        teamWinsP2 = data.teamWinsP2 || 0;
-        kofIndexP1 = data.kofIndexP1 || 0;
-        kofIndexP2 = data.kofIndexP2 || 0;
-        battleCount = data.battleCount || 1;
-        if (data.matchMode) matchMode = data.matchMode;
-        if (Array.isArray(data.logs)) logs = data.logs;
-
-        updatePlayerNamesForMode();
-        updateDisplay();
+        safeSetDisplay('spectator-waiting-overlay', 'none');
+        if (data.isMatchLocked !== undefined) isMatchLocked = data.isMatchLocked;
+        applyStateSync(data);
 
         if (data.type === 'MATCH_START_SYNC') {
             triggerVersusAnimation(data.p1Show, data.p2Show);
         }
+    } else if (data.type === 'WIN_SYNC') {
+        showWinModal(data.winner, data.isFinalTeamWin);
+    } else if (data.type === 'CLOSE_WIN_SYNC') {
+        safeSetDisplay('win-modal', 'none');
     } else if (data.type === 'MODE_SYNC') {
-        setMatchMode(data.mode);
+        setMatchMode(data.mode, false);
     }
+}
+
+function applyStateSync(data) {
+    if (data.roster) roster = data.roster;
+    scoreP1 = data.scoreP1 || 0;
+    scoreP2 = data.scoreP2 || 0;
+    scoreP3 = data.scoreP3 || 0;
+    foulsP1 = data.foulsP1 || 0;
+    foulsP2 = data.foulsP2 || 0;
+    foulsP3 = data.foulsP3 || 0;
+    teamWinsP1 = data.teamWinsP1 || 0;
+    teamWinsP2 = data.teamWinsP2 || 0;
+    kofIndexP1 = data.kofIndexP1 || 0;
+    kofIndexP2 = data.kofIndexP2 || 0;
+    battleCount = data.battleCount || 1;
+    if (data.matchMode) matchMode = data.matchMode;
+    if (Array.isArray(data.logs)) logs = data.logs;
+
+    updatePlayerNamesForMode();
+    updateDisplay();
 }
 
 function broadcastToClients(payload) {
