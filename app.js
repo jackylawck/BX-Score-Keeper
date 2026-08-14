@@ -28,6 +28,27 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     } catch(e) {}
 }
 
+/* 🔄 強制清除 Service Worker 快取並重新載入 App */
+function forceRefreshApp() {
+    if (confirm(currentLang === 'zh' ? "是否重新載入並檢查最新版本？" : "Reload and check for updates?")) {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+                caches.keys().then(names => {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                    window.location.reload(true);
+                });
+            });
+        } else {
+            window.location.reload(true);
+        }
+    }
+}
+
 function startShootCountdown() {
     const btn = document.getElementById('shoot-btn');
     if (!btn) return;
@@ -91,6 +112,7 @@ const i18n = {
         rulesTag: "《爆旋陀螺X規則（亞洲版）》第 12 版",
         rulesBtn: "規則",
         rosterBtn: "隊伍排陣",
+        refreshBtn: "更新",
         modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
         rosterModalTitle: "👥 隊伍名單與對戰排序",
         saveRosterBtn: "儲存排陣名單",
@@ -121,6 +143,7 @@ const i18n = {
         rulesTag: "BEYBLADE X Regulations (Asia Version) 12th Ed",
         rulesBtn: "Rules",
         rosterBtn: "Roster",
+        refreshBtn: "Refresh",
         modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
         rosterModalTitle: "👥 Team Roster & Order Setup",
         saveRosterBtn: "Save Roster",
@@ -177,20 +200,16 @@ function setMatchMode(mode) {
     applyLanguage();
 }
 
-/* 有名顯名，無名 default 顯示 */
 function updatePlayerNamesForMode() {
     if (matchMode === 'team') {
         let t1Name = roster.t1Name || 'Team A';
         let t2Name = roster.t2Name || 'Team B';
-        let p1Name = roster.t1[kofIndexP1] || `PLAYER ${kofIndexP1 + 1}`;
-        let p2Name = roster.t2[kofIndexP2] || `PLAYER ${kofIndexP2 + 1}`;
+        let p1Name = roster.t1[kofIndexP1] || `${kofIndexP1 + 1}`;
+        let p2Name = roster.t2[kofIndexP2] || `${String.fromCharCode(65 + kofIndexP2)}`;
         
         document.getElementById('p1-title').value = `${p1Name} (${t1Name})`;
         document.getElementById('p2-title').value = `${p2Name} (${t2Name})`;
-    } else if (matchMode === '3v3') {
-        document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
-        document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
-    } else if (matchMode === 'std') {
+    } else if (matchMode === '3v3' || matchMode === 'std') {
         document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
         document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
     } else if (matchMode === 'p3') {
@@ -210,7 +229,6 @@ function closeVersusModal() { document.getElementById('versus-modal').style.disp
 function openRosterModal() { document.getElementById('roster-modal').style.display = 'flex'; }
 function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
 
-/* 👥 儲存排陣後自動跳轉至 Team Battle 模式 */
 function saveRoster() {
     roster.t1Name = document.getElementById('roster-t1-name').value.trim() || 'Team A';
     roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || '1';
@@ -223,8 +241,6 @@ function saveRoster() {
     roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'C';
 
     closeRosterModal();
-    
-    // 自動切換到 Team Battle 模式
     setMatchMode('team');
     
     let p1Show = `${roster.t1[0]} (${roster.t1Name})`;
@@ -496,6 +512,8 @@ function applyLanguage() {
     document.getElementById('rules-tag').innerText = lang.rulesTag;
     document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
     document.getElementById('btn-roster-txt').innerText = lang.rosterBtn;
+    let refreshTxt = document.getElementById('btn-refresh-txt');
+    if (refreshTxt) refreshTxt.innerText = lang.refreshBtn;
     document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
     document.getElementById('btn-undo').innerText = lang.undo;
     document.getElementById('btn-draw').innerText = lang.drawBtn;
