@@ -1,5 +1,5 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Module (Rock-Solid Live Sync Fix)
+ * 🌐 p2p.js - WebRTC PeerJS Module (Bulletproof Sync & Registration Fix)
  * ========================================================================= */
 
 const MAX_DEVICES = 15;
@@ -32,7 +32,7 @@ let isMatchLocked = false;
 let heartbeatTimer = null;
 let connectTimeoutTimer = null;
 
-// 🌐 強化版 STUN 伺服器池（專門穿透 5G / 家居 WiFi）
+// 🌐 強化版 STUN 伺服器池
 const PEER_CONFIG = {
     config: {
         iceServers: [
@@ -118,11 +118,16 @@ function initP2PHost() {
     });
 }
 
-/* 🎯 關鍵修復：嚴謹處理連線握手，絕不提前誤刪有效連線 */
+/* 🎯 終極防禦：只要收到封包，即使漏掉 open 事件也強制註冊廣播名單 */
 function handleNewHostConnection(conn) {
-    const handleOpen = () => {
-        if (Object.keys(p2pConnMap).length >= MAX_DEVICES) {
-            conn.send({ type: P2P_EVENTS.ROOM_CAPACITY_FULL });
+    let isRegistered = false;
+
+    const registerConnection = () => {
+        if (isRegistered) return;
+        isRegistered = true;
+
+        if (getActiveConnectionCount() >= MAX_DEVICES) {
+            try { conn.send({ type: P2P_EVENTS.ROOM_CAPACITY_FULL }); } catch(e) {}
             setTimeout(() => conn.close(), 500);
             return;
         }
@@ -130,23 +135,30 @@ function handleNewHostConnection(conn) {
         p2pConnMap[conn.peer] = conn;
         updateConnectedCount();
 
-        // 立即向客戶端發送最新完整比分與紀錄
-        conn.send({
-            type: P2P_EVENTS.INIT_SYNC,
-            ...getFullState(),
-            connectedCount: Object.keys(p2pConnMap).length
-        });
+        // 立即發送初始化資料給剛連線的手機
+        try {
+            conn.send({
+                type: P2P_EVENTS.INIT_SYNC,
+                ...getFullState(),
+                connectedCount: getActiveConnectionCount()
+            });
+        } catch(e) {}
 
         broadcastDeviceCount();
     };
 
     if (conn.open) {
-        handleOpen();
+        registerConnection();
     } else {
-        conn.on('open', handleOpen);
+        conn.on('open', registerConnection);
     }
 
     conn.on('data', (data) => {
+        // 🔥 絕對防禦機制：一旦收到資料，若未註冊則強制註冊！
+        if (!isRegistered) {
+            registerConnection();
+        }
+
         if (data.type === P2P_EVENTS.PING) {
             try { conn.send({ type: P2P_EVENTS.PONG }); } catch(e) {}
             return;
@@ -156,7 +168,7 @@ function handleNewHostConnection(conn) {
                 conn.send({
                     type: P2P_EVENTS.INIT_SYNC,
                     ...getFullState(),
-                    connectedCount: Object.keys(p2pConnMap).length
+                    connectedCount: getActiveConnectionCount()
                 });
             } catch(e) {}
             return;
@@ -165,19 +177,36 @@ function handleNewHostConnection(conn) {
     });
 
     const handleClose = () => {
-        delete p2pConnMap[conn.peer];
-        updateConnectedCount();
-        broadcastDeviceCount();
+        if (p2pConnMap[conn.peer]) {
+            delete p2pConnMap[conn.peer];
+            updateConnectedCount();
+            broadcastDeviceCount();
+        }
     };
 
     conn.on('close', handleClose);
     conn.on('error', handleClose);
 }
 
+function cleanDeadConnections() {
+    Object.keys(p2pConnMap).forEach(key => {
+        let c = p2pConnMap[key];
+        if (!c || !c.open) {
+            delete p2pConnMap[key];
+        }
+    });
+}
+
+function getActiveConnectionCount() {
+    cleanDeadConnections();
+    return Object.keys(p2pConnMap).length;
+}
+
 function startHeartbeat() {
     if (heartbeatTimer) clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(() => {
         if (myPeerRole === 'host') {
+            cleanDeadConnections();
             broadcastToClients({ type: P2P_EVENTS.PING });
         } else if (hostConn && hostConn.open) {
             try { hostConn.send({ type: P2P_EVENTS.PING }); } catch(e) {}
@@ -186,7 +215,7 @@ function startHeartbeat() {
 }
 
 function updateConnectedCount(overrideCount = null) {
-    let count = overrideCount !== null ? overrideCount : Object.keys(p2pConnMap).length;
+    let count = overrideCount !== null ? overrideCount : getActiveConnectionCount();
     let remaining = Math.max(0, MAX_DEVICES - count);
     let displayTxt = `${count} / ${MAX_DEVICES} (${currentLang === 'zh' ? '名額剩餘' : 'Left'}: ${remaining})`;
     
@@ -195,7 +224,7 @@ function updateConnectedCount(overrideCount = null) {
 }
 
 function broadcastDeviceCount() {
-    let count = Object.keys(p2pConnMap).length;
+    let count = getActiveConnectionCount();
     broadcastToClients({ type: P2P_EVENTS.DEVICE_COUNT_SYNC, count });
 }
 
@@ -422,7 +451,6 @@ function startMatchFromLobby() {
     triggerVersusAnimation(p1Show, p2Show, p3Show);
 }
 
-/* 🎯 關鍵修復：客戶端連線成功後發送 REQUEST_SYNC 要求比分同步 */
 function joinP2PRoom(roleType) {
     let inputId = document.getElementById('p2p-input-room').value.trim();
     if (!inputId || inputId.length < 8) {
@@ -481,7 +509,6 @@ function joinP2PRoom(roleType) {
                 updateP2PFormFields();
             }
 
-            // 📢 客戶端主動要求裁判傳送當前最新狀態（雙保險）
             try { hostConn.send({ type: P2P_EVENTS.REQUEST_SYNC }); } catch(e) {}
 
             startHeartbeat();
@@ -673,7 +700,7 @@ function handleClientReceivedData(data) {
         alert(currentLang === 'zh' ? "⚠️ 本房間人數已達 15 人上限！無法加入。" : "⚠️ Room capacity reached (15/15 max)!");
         leaveP2PRoom();
     } else if (data.type === P2P_EVENTS.DEVICE_COUNT_SYNC) {
-        updateConnectedCount(data.count);
+        if (data.count !== undefined) updateConnectedCount(data.count);
     } else if (data.type === P2P_EVENTS.INIT_SYNC) {
         isMatchLocked = data.isMatchLocked || false;
         if (isMatchLocked && myPeerRole === 'player') {
@@ -684,7 +711,7 @@ function handleClientReceivedData(data) {
             setUIPermissions();
             alert(currentLang === 'zh' ? "⚠️ 本局對戰已鎖定開賽！您已自動轉為【觀眾直播】模式。" : "⚠️ Match is in progress! Automatically switched to Spectator mode.");
         }
-        if (data.connectedCount) updateConnectedCount(data.connectedCount);
+        if (data.connectedCount !== undefined) updateConnectedCount(data.connectedCount);
         applyStateSync(data);
     } else if (data.type === P2P_EVENTS.LOBBY_WAITING) {
         safeSetDisplay('win-modal', 'none');
@@ -717,7 +744,6 @@ function handleClientReceivedData(data) {
     }
 }
 
-/* 🎯 狀態套用並即時渲染至介面 */
 function applyStateSync(data) {
     if (data.roster) roster = data.roster;
     if (data.isMatchLocked !== undefined) isMatchLocked = data.isMatchLocked;
@@ -747,6 +773,7 @@ function applyStateSync(data) {
 
 function broadcastToClients(payload) {
     if (myPeerRole !== 'host') return;
+    cleanDeadConnections();
     Object.values(p2pConnMap).forEach(conn => {
         if (conn && conn.open) {
             try { conn.send(payload); } catch(e) {}
