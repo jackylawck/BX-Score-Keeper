@@ -7,6 +7,9 @@
     <!-- Google 網站驗證 -->
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
 
+    <!-- Content Security Policy (CSP) 資安防護 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://peerjs.com; img-src 'self' data:;">
+
     <!-- SEO Meta -->
     <title>BX Score Keeper | 爆旋計分器</title>
     <meta name="description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的免費對戰計分器 Web App / PWA。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
@@ -28,10 +31,9 @@
     <link rel="icon" type="image/png" sizes="192x192" href="BXScoreKeepericon-192.png">
     <link rel="apple-touch-icon" href="BXScoreKeepericon-192.png">
     <meta name="theme-color" content="#080c14">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- 載入獨立 CSS 樣式檔 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -57,6 +59,12 @@
             <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3')">3-Player (5-pt)</button>
         </div>
         <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
+    </div>
+
+    <!-- 3on3 Status Box -->
+    <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 10px 0;">
+        <span id="deck-status" style="color: var(--neon-yellow); font-weight: bold;">ITEM #1</span>
+        <button class="ctrl-btn" id="reorder-btn" onclick="resetBattleCounter()" style="font-size: 0.8rem; padding: 4px 8px;">重置順序</button>
     </div>
 
     <!-- Team Battle Tracker Bar -->
@@ -114,7 +122,7 @@
             </div>
         </div>
 
-        <!-- Player 3 (關鍵補上這個卡片區塊！) -->
+        <!-- Player 3 -->
         <div class="player-card" id="p3-card" style="display: none;">
             <input type="text" class="player-name-input" id="p3-title" value="PLAYER 3" onchange="saveState()">
             <div class="score-display" id="score-p3">0</div>
@@ -150,7 +158,7 @@
         <ul class="log-list" id="log-list"></ul>
     </div>
 
-    <!-- 👥 隊伍與排陣 Modal (支援上下搬動順序) -->
+    <!-- 👥 隊伍與排陣 Modal -->
     <div class="modal" id="roster-modal">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
@@ -233,7 +241,6 @@
         <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
     </footer>
 
-    <!-- 載入獨立 JavaScript 邏輯檔 -->
     <script src="app.js"></script>
 </body>
 </html>
