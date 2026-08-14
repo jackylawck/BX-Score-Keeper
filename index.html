@@ -26,141 +26,148 @@
 </head>
 <body>
 
-    <header>
-        <div>
-            <h1>BX SCORE KEEPER</h1>
-            <div class="subtitle" id="rules-tag">《爆旋陀螺X規則（亞洲版）》第 12 版</div>
+    <div class="app-container">
+        <header>
+            <div>
+                <h1>BX SCORE KEEPER</h1>
+                <div class="subtitle" id="rules-tag">《爆旋陀螺X規則（亞洲版）》第 12 版</div>
+            </div>
+            <div class="nav-btns">
+                <button class="top-btn" onclick="openP2PModal()" title="跨機對戰/遠端提交/觀眾直播">🌐 <span id="btn-p2p-txt">跨機連線</span></button>
+                <button class="top-btn" onclick="forceRefreshApp()" title="重新載入 / 檢查更新">🔄 <span id="btn-refresh-txt">更新</span></button>
+                <button class="top-btn" onclick="openRosterModal()">👥 <span id="btn-roster-txt">隊伍排陣</span></button>
+                <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
+                <button class="top-btn" onclick="toggleLanguage()" id="lang-btn">EN</button>
+            </div>
+        </header>
+
+        <!-- 頂部模式切換與 Go Shoot -->
+        <div class="mode-banner" id="top-mode-banner">
+            <div class="mode-toggle">
+                <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std', true)">1v1 Standard</button>
+                <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3', true)">3on3 Battle</button>
+                <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team', true)">Team Battle</button>
+                <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3', true)">3-Player (5-pt)</button>
+            </div>
+            <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
         </div>
-        <div class="nav-btns">
-            <button class="top-btn" onclick="openP2PModal()" title="跨機對戰/遠端提交/觀眾直播">🌐 <span id="btn-p2p-txt">跨機連線</span></button>
-            <button class="top-btn" onclick="forceRefreshApp()" title="重新載入 / 檢查更新">🔄 <span id="btn-refresh-txt">更新</span></button>
-            <button class="top-btn" onclick="openRosterModal()">👥 <span id="btn-roster-txt">隊伍排陣</span></button>
-            <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
-            <button class="top-btn" onclick="toggleLanguage()" id="lang-btn">EN</button>
+
+        <!-- 3on3 Status Box -->
+        <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 6px 0;">
+            <span id="deck-status" style="color: var(--neon-yellow); font-weight: bold;">ITEM #1</span>
+            <button class="ctrl-btn" id="reorder-btn" onclick="resetBattleCounter()" style="font-size: 0.8rem; padding: 4px 8px;">重置順序</button>
         </div>
-    </header>
 
-    <!-- 📍 還原頂部：模式切換與 Go Shoot 按鈕 -->
-    <div class="mode-banner" id="top-mode-banner">
-        <div class="mode-toggle">
-            <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std', true)">1v1 Standard</button>
-            <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3', true)">3on3 Battle</button>
-            <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team', true)">Team Battle</button>
-            <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3', true)">3-Player (5-pt)</button>
+        <!-- Team Battle Tracker Bar -->
+        <div class="team-tracker-bar" id="team-tracker-bar" style="display: none; margin: 6px auto;">
+            <span>TEAM WINS:</span>
+            <span style="color: var(--neon-blue);" id="team-wins-p1">隊伍 A: 0</span>
+            <span>vs</span>
+            <span style="color: var(--neon-red);" id="team-wins-p2">隊伍 B: 0</span>
         </div>
-        <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
-    </div>
 
-    <!-- 3on3 Status Box -->
-    <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 6px 0;">
-        <span id="deck-status" style="color: var(--neon-yellow); font-weight: bold;">ITEM #1</span>
-        <button class="ctrl-btn" id="reorder-btn" onclick="resetBattleCounter()" style="font-size: 0.8rem; padding: 4px 8px;">重置順序</button>
-    </div>
+        <!-- 核心計分板 -->
+        <div class="scoreboard" id="main-scoreboard">
+            <!-- Player 1 -->
+            <div class="player-card">
+                <input type="text" class="player-name-input" id="p1-title" value="選手一" onchange="handleManualNameChange(1)">
+                <div class="score-display" id="score-p1">0</div>
+                <div class="btn-grid">
+                    <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
+                        <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
+                    </button>
+                    <button class="score-btn btn-over" onclick="addScore(1, 2, 'Over')">
+                        <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
+                    </button>
+                    <button class="score-btn btn-burst" onclick="addScore(1, 2, 'Burst')">
+                        <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
+                    </button>
+                    <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
+                        <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
+                    </button>
+                    <button class="score-btn btn-foul" id="btn-foul-p1" onclick="addFoul(1)">
+                        <span id="txt-foul-p1">發射失誤</span><span class="pts-badge" id="foul-badge-p1">0/2</span>
+                    </button>
+                </div>
+            </div>
 
-    <!-- Team Battle Tracker Bar -->
-    <div class="team-tracker-bar" id="team-tracker-bar" style="display: none; margin: 6px auto;">
-        <span>TEAM WINS:</span>
-        <span style="color: var(--neon-blue);" id="team-wins-p1">隊伍 A: 0</span>
-        <span>vs</span>
-        <span style="color: var(--neon-red);" id="team-wins-p2">隊伍 B: 0</span>
-    </div>
+            <!-- Player 2 -->
+            <div class="player-card">
+                <input type="text" class="player-name-input" id="p2-title" value="選手二" onchange="handleManualNameChange(2)">
+                <div class="score-display" id="score-p2">0</div>
+                <div class="btn-grid">
+                    <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
+                        <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
+                    </button>
+                    <button class="score-btn btn-over" onclick="addScore(2, 2, 'Over')">
+                        <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
+                    </button>
+                    <button class="score-btn btn-burst" onclick="addScore(2, 2, 'Burst')">
+                        <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
+                    </button>
+                    <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
+                        <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
+                    </button>
+                    <button class="score-btn btn-foul" id="btn-foul-p2" onclick="addFoul(2)">
+                        <span id="txt-foul-p2">發射失誤</span><span class="pts-badge" id="foul-badge-p2">0/2</span>
+                    </button>
+                </div>
+            </div>
 
-    <!-- 📱 核心計分板 -->
-    <div class="scoreboard" id="main-scoreboard">
-        <!-- Player 1 -->
-        <div class="player-card">
-            <input type="text" class="player-name-input" id="p1-title" value="選手一" onchange="handleManualNameChange(1)">
-            <div class="score-display" id="score-p1">0</div>
-            <div class="btn-grid">
-                <button class="score-btn btn-xtreme" onclick="addScore(1, 3, 'Xtreme')">
-                    <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
-                </button>
-                <button class="score-btn btn-over" onclick="addScore(1, 2, 'Over')">
-                    <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
-                </button>
-                <button class="score-btn btn-burst" onclick="addScore(1, 2, 'Burst')">
-                    <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
-                </button>
-                <button class="score-btn btn-spin" onclick="addScore(1, 1, 'Spin')">
-                    <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
-                </button>
-                <button class="score-btn btn-foul" id="btn-foul-p1" onclick="addFoul(1)">
-                    <span id="txt-foul-p1">發射失誤</span><span class="pts-badge" id="foul-badge-p1">0/2</span>
-                </button>
+            <!-- Player 3 -->
+            <div class="player-card" id="p3-card" style="display: none;">
+                <input type="text" class="player-name-input" id="p3-title" value="選手三" onchange="handleManualNameChange(3)">
+                <div class="score-display" id="score-p3">0</div>
+                <div class="btn-grid">
+                    <button class="score-btn btn-xtreme" onclick="addScore(3, 3, 'Xtreme')">
+                        <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
+                    </button>
+                    <button class="score-btn btn-over" onclick="addScore(3, 2, 'Over')">
+                        <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
+                    </button>
+                    <button class="score-btn btn-burst" onclick="addScore(3, 2, 'Burst')">
+                        <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
+                    </button>
+                    <button class="score-btn btn-spin" onclick="addScore(3, 1, 'Spin')">
+                        <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
+                    </button>
+                    <button class="score-btn btn-foul" id="btn-foul-p3" onclick="addFoul(3)">
+                        <span id="txt-foul-p3">發射失誤</span><span class="pts-badge" id="foul-badge-p3">0/2</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Player 2 -->
-        <div class="player-card">
-            <input type="text" class="player-name-input" id="p2-title" value="選手二" onchange="handleManualNameChange(2)">
-            <div class="score-display" id="score-p2">0</div>
-            <div class="btn-grid">
-                <button class="score-btn btn-xtreme" onclick="addScore(2, 3, 'Xtreme')">
-                    <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
-                </button>
-                <button class="score-btn btn-over" onclick="addScore(2, 2, 'Over')">
-                    <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
-                </button>
-                <button class="score-btn btn-burst" onclick="addScore(2, 2, 'Burst')">
-                    <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
-                </button>
-                <button class="score-btn btn-spin" onclick="addScore(2, 1, 'Spin')">
-                    <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
-                </button>
-                <button class="score-btn btn-foul" id="btn-foul-p2" onclick="addFoul(2)">
-                    <span id="txt-foul-p2">發射失誤</span><span class="pts-badge" id="foul-badge-p2">0/2</span>
-                </button>
-            </div>
+        <!-- 賽事控制列 -->
+        <div class="controls" id="main-controls">
+            <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原</button>
+            <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手重賽</button>
+            <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局換人</button>
+            <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
         </div>
 
-        <!-- Player 3 -->
-        <div class="player-card" id="p3-card" style="display: none;">
-            <input type="text" class="player-name-input" id="p3-title" value="選手三" onchange="handleManualNameChange(3)">
-            <div class="score-display" id="score-p3">0</div>
-            <div class="btn-grid">
-                <button class="score-btn btn-xtreme" onclick="addScore(3, 3, 'Xtreme')">
-                    <span class="txt-xtreme">極限終結</span><span class="pts-badge">+3</span>
-                </button>
-                <button class="score-btn btn-over" onclick="addScore(3, 2, 'Over')">
-                    <span class="txt-over">擊出終結</span><span class="pts-badge">+2</span>
-                </button>
-                <button class="score-btn btn-burst" onclick="addScore(3, 2, 'Burst')">
-                    <span class="txt-burst">爆裂終結</span><span class="pts-badge">+2</span>
-                </button>
-                <button class="score-btn btn-spin" onclick="addScore(3, 1, 'Spin')">
-                    <span class="txt-spin">迴轉勝利</span><span class="pts-badge">+1</span>
-                </button>
-                <button class="score-btn btn-foul" id="btn-foul-p3" onclick="addFoul(3)">
-                    <span id="txt-foul-p3">發射失誤</span><span class="pts-badge" id="foul-badge-p3">0/2</span>
-                </button>
-            </div>
+        <!-- 對局紀錄面板 -->
+        <div class="log-panel">
+            <div class="log-title" id="log-title">⚡ 對局紀錄</div>
+            <ul class="log-list" id="log-list"></ul>
         </div>
+
+        <!-- P2P 狀態條 -->
+        <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 8px 12px; margin: 12px auto; width: 100%; text-align: center; font-size: 0.85rem; color: #fff;">
+            <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
+            <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow); font-size: 1.1rem; letter-spacing: 1px;">----</strong> | 
+            <span id="p2p-lbl-connected">已連線設備</span>: <strong id="p2p-connected-count" style="color: var(--neon-green);">0 / 15</strong>
+            <button class="ctrl-btn" onclick="openLobbyModal()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px; background: var(--neon-blue); color: #000; font-weight: bold;" id="btn-open-lobby">🏟️ 等候大廳</button>
+            <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 6px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
+        </div>
+
+        <footer>
+            <p id="disclaimer">本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。</p>
+            <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
+        </footer>
     </div>
 
-    <!-- 🎮 控制列：復原 / 平手 / 換人 / 重置 -->
-    <div class="controls" id="main-controls">
-        <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原</button>
-        <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手重賽</button>
-        <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局換人</button>
-        <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
-    </div>
-
-    <!-- 對局紀錄面板 -->
-    <div class="log-panel">
-        <div class="log-title" id="log-title">⚡ 對局紀錄</div>
-        <ul class="log-list" id="log-list"></ul>
-    </div>
-
-    <!-- P2P 狀態條 -->
-    <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 8px 12px; margin: 12px auto; max-width: 700px; text-align: center; font-size: 0.85rem; color: #fff;">
-        <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
-        <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow); font-size: 1.1rem; letter-spacing: 1px;">----</strong> | 
-        <span id="p2p-lbl-connected">已連線設備</span>: <strong id="p2p-connected-count" style="color: var(--neon-green);">0</strong>
-        <button class="ctrl-btn" onclick="openLobbyModal()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px; background: var(--neon-blue); color: #000; font-weight: bold;" id="btn-open-lobby">🏟️ 等候大廳</button>
-        <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 6px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
-    </div>
-
-    <!-- 🌐 WebRTC P2P 跨機連線入口 Modal -->
+    <!-- 🌐 WebRTC P2P 入口 Modal -->
     <div class="modal" id="p2p-modal">
         <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
@@ -185,16 +192,16 @@
 
                 <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-top: 14px; text-align: left; font-size: 0.8rem; line-height: 1.45;" id="p2p-guide-box"></div>
 
-                <!-- 選手專用排陣提交區 -->
+                <!-- 選手專用排陣提交區 (徹底拆分 1v1 與 3-Player) -->
                 <div id="p2p-client-submit-box" style="display: none; margin-top: 15px; border-top: 2px solid var(--neon-yellow); padding-top: 12px; text-align: left;">
                     <h4 style="color: var(--neon-yellow); margin-bottom: 8px;" id="lbl-submit-title">📩 提交個人 / 隊伍排陣名單</h4>
                     
                     <label style="font-size: 0.8rem; color: #cbd5e1;" id="lbl-select-mode">選擇欲提交的賽制模式：</label>
                     <select id="p2p-form-type" class="roster-input" style="margin-bottom: 8px;" onchange="updateP2PFormFields()">
-                        <option value="std">1v1 Standard</option>
-                        <option value="3v3">3on3 Battle</option>
-                        <option value="team">Team Battle</option>
-                        <option value="p3">3-Player (5-pt)</option>
+                        <option value="std">1v1 Standard (1對1 單人對決)</option>
+                        <option value="3v3">3on3 Battle (3隻陀螺對決)</option>
+                        <option value="team">Team Battle (3人 KOF 團隊戰)</option>
+                        <option value="p3">3-Player (三人大亂鬥 5分制)</option>
                     </select>
 
                     <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 BB)" style="margin-bottom: 6px;">
@@ -211,7 +218,7 @@
         </div>
     </div>
 
-    <!-- 🏟️ 裁判專屬：賽事等候大廳 -->
+    <!-- 🏟️ 裁判等候大廳 (美化清空按鈕佈局) -->
     <div class="modal" id="lobby-modal">
         <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 8px;">
@@ -224,7 +231,7 @@
                     <div style="font-size: 0.8rem; color: #cbd5e1;" id="lbl-lobby-room-tip">請告知選手與觀眾輸入此 8 位數房間 ID：</div>
                     <div style="font-size: 2rem; font-family: 'Orbitron', monospace; font-weight: 900; color: var(--neon-yellow); letter-spacing: 3px;" id="lobby-display-room">--------</div>
                     <div style="font-size: 0.8rem; color: var(--neon-green); margin-top: 2px;">
-                        <span id="lbl-lobby-dev-count">已連線設備</span>: <strong id="lobby-connected-count">0</strong>
+                        <span id="lbl-lobby-dev-count">已連線設備</span>: <strong id="lobby-connected-count">0 / 15</strong>
                     </div>
                 </div>
 
@@ -242,13 +249,13 @@
                 </div>
 
                 <div style="text-align: left; margin-bottom: 12px;">
-                    <!-- Side 1 -->
-                    <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Side 1 卡片 -->
+                    <div class="lobby-card side-1">
+                        <div class="slot-header">
                             <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
-                            <button class="ctrl-btn" onclick="clearLobbySlot(1)" style="font-size: 0.7rem; padding: 2px 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">🗑️ 清空</button>
+                            <button class="btn-clear" onclick="clearLobbySlot(1)">🗑️ 清空</button>
                         </div>
-                        <input type="text" id="lobby-p1-name" class="roster-input" style="margin-top:4px;" placeholder="選手一名稱" value="選手一">
+                        <input type="text" id="lobby-p1-name" class="roster-input" placeholder="選手一名稱" value="選手一">
                         <div id="lobby-p1-deck-box" style="display:none; margin-top:4px;">
                             <input type="text" id="lobby-p1-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="1">
                             <input type="text" id="lobby-p1-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="2">
@@ -256,13 +263,13 @@
                         </div>
                     </div>
 
-                    <!-- Side 2 -->
-                    <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid var(--neon-red); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Side 2 卡片 -->
+                    <div class="lobby-card side-2">
+                        <div class="slot-header">
                             <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
-                            <button class="ctrl-btn" onclick="clearLobbySlot(2)" style="font-size: 0.7rem; padding: 2px 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">🗑️ 清空</button>
+                            <button class="btn-clear" onclick="clearLobbySlot(2)">🗑️ 清空</button>
                         </div>
-                        <input type="text" id="lobby-p2-name" class="roster-input" style="margin-top:4px;" placeholder="選手二名稱" value="選手二">
+                        <input type="text" id="lobby-p2-name" class="roster-input" placeholder="選手二名稱" value="選手二">
                         <div id="lobby-p2-deck-box" style="display:none; margin-top:4px;">
                             <input type="text" id="lobby-p2-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="A">
                             <input type="text" id="lobby-p2-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="B">
@@ -270,13 +277,13 @@
                         </div>
                     </div>
 
-                    <!-- Side 3 -->
-                    <div id="lobby-p3-box" style="display:none; background: rgba(234, 179, 8, 0.05); border: 1px solid var(--neon-yellow); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Side 3 卡片 (3-Player) -->
+                    <div id="lobby-p3-box" class="lobby-card side-3" style="display:none;">
+                        <div class="slot-header">
                             <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (選手三)</strong>
-                            <button class="ctrl-btn" onclick="clearLobbySlot(3)" style="font-size: 0.7rem; padding: 2px 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">🗑️ 清空</button>
+                            <button class="btn-clear" onclick="clearLobbySlot(3)">🗑️ 清空</button>
                         </div>
-                        <input type="text" id="lobby-p3-name" class="roster-input" style="margin-top:4px;" placeholder="選手三名稱" value="選手三">
+                        <input type="text" id="lobby-p3-name" class="roster-input" placeholder="選手三名稱" value="選手三">
                     </div>
                 </div>
 
@@ -347,7 +354,7 @@
         </div>
     </div>
 
-    <!-- ⚡ 動漫風對決登場 Modal -->
+    <!-- ⚡ 對決登場動畫 Modal -->
     <div class="modal" id="versus-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 1.2rem; color: var(--neon-yellow); font-family:'Orbitron';" id="vs-round-tag">ROUND 1</div>
@@ -378,7 +385,7 @@
         </div>
     </div>
 
-    <!-- ⏳ 觀眾專屬等候遮罩（提供離開房間按鈕） -->
+    <!-- ⏳ 觀眾等候過場遮罩 -->
     <div class="modal" id="spectator-waiting-overlay" style="display: none; background: rgba(8, 12, 20, 0.92); z-index: 9999;">
         <div class="modal-content" style="text-align: center; border: 1px solid var(--neon-blue);">
             <div style="font-size: 2.5rem; animation: pulse 1.5s infinite;">⏳</div>
@@ -388,12 +395,6 @@
         </div>
     </div>
 
-    <footer>
-        <p id="disclaimer">本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。</p>
-        <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
-    </footer>
-
-    <!-- 🌐 先載入網絡連線模組，再載入核心應用邏輯 -->
     <script src="p2p.js"></script>
     <script src="app.js"></script>
 </body>
