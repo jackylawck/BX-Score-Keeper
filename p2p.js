@@ -2,7 +2,7 @@
  * 🌐 p2p.js - WebRTC PeerJS Module (Max 15 Devices & Smart 3-Slot Receiver)
  * ========================================================================= */
 
-const MAX_DEVICES = 15; // 🛡️ 連線硬上限設為 15 人
+const MAX_DEVICES = 15; // 🛡️ 連線硬上限為 15 人
 
 let peer = null;
 let p2pConnMap = {}; 
@@ -25,9 +25,12 @@ function updateP2PFormFields() {
     let extraBox = document.getElementById('p2p-extra-items');
     let nameInput = document.getElementById('p2p-player-name');
 
-    if (mode === 'std' || mode === 'p3') {
+    if (mode === 'std') {
         if (extraBox) extraBox.style.display = 'none';
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
+    } else if (mode === 'p3') {
+        if (extraBox) extraBox.style.display = 'none';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 tyujj)' : 'Player Name (e.g. tyujj)';
     } else if (mode === '3v3') {
         if (extraBox) extraBox.style.display = 'block';
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
@@ -190,22 +193,17 @@ function applyLobbyLayout() {
     }
 }
 
-/* 🎯 徹底清理預設名殘留（不再出現 1 或 A） */
+/* 🎯 關鍵修復：大廳名字絕不被 1 或 A 覆蓋 */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
     let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
 
-    let isRealName = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B';
+    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B';
 
-    if (matchMode === 'team') {
-        safeSetInputValue('lobby-p1-name', isRealName(roster.t1Name) ? roster.t1Name : defP1);
-        safeSetInputValue('lobby-p2-name', isRealName(roster.t2Name) ? roster.t2Name : defP2);
-    } else {
-        safeSetInputValue('lobby-p1-name', (roster.t1 && isRealName(roster.t1[0])) ? roster.t1[0] : (isRealName(roster.t1Name) ? roster.t1Name : defP1));
-        safeSetInputValue('lobby-p2-name', (roster.t2 && isRealName(roster.t2[0])) ? roster.t2[0] : (isRealName(roster.t2Name) ? roster.t2Name : defP2));
-    }
-    safeSetInputValue('lobby-p3-name', isRealName(roster.t3Name) ? roster.t3Name : defP3);
+    safeSetInputValue('lobby-p1-name', isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1));
+    safeSetInputValue('lobby-p2-name', isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2));
+    safeSetInputValue('lobby-p3-name', isReal(roster.t3Name) ? roster.t3Name : defP3);
 
     safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || '1');
     safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || '2');
@@ -224,19 +222,13 @@ function clearLobbySlot(slotNum) {
     if (slotNum === 1) {
         occupiedSlots.slot1 = false;
         roster.t1Name = defP1;
-        roster.t1 = ['1', '2', '3'];
+        roster.t1 = ['選手一', '陀螺二', '陀螺三'];
         safeSetInputValue('lobby-p1-name', defP1);
-        safeSetInputValue('lobby-p1-d1', '1');
-        safeSetInputValue('lobby-p1-d2', '2');
-        safeSetInputValue('lobby-p1-d3', '3');
     } else if (slotNum === 2) {
         occupiedSlots.slot2 = false;
         roster.t2Name = defP2;
-        roster.t2 = ['A', 'B', 'C'];
+        roster.t2 = ['選手二', '陀螺二', '陀螺三'];
         safeSetInputValue('lobby-p2-name', defP2);
-        safeSetInputValue('lobby-p2-d1', 'A');
-        safeSetInputValue('lobby-p2-d2', 'B');
-        safeSetInputValue('lobby-p2-d3', 'C');
     } else if (slotNum === 3) {
         occupiedSlots.slot3 = false;
         roster.t3Name = defP3;
@@ -466,7 +458,7 @@ function sendClientDeckToHost() {
     alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並排入大廳！" : "Submitted! Waiting for Referee approval.");
 }
 
-/* 🎯 關鍵修復：獨立顯示 1v1 Standard 與 3-Player 賽制名稱 */
+/* 🎯 關鍵修復：完全分開 1v1 與 3-Player 標籤文字 */
 function handleHostReceivedData(data, conn) {
     if (data.type === 'SUBMIT_DECK') {
         if (isMatchLocked) {
@@ -484,10 +476,10 @@ function handleHostReceivedData(data, conn) {
         safeSetText('p2p-request-title', currentLang === 'zh' ? `收到 [ ${data.name} ] 的排陣提交` : `Received Roster from [ ${data.name} ]`);
         
         let modeLabels = {
-            'std': '1v1 Standard (單人對決)',
-            '3v3': '3on3 Battle (3隻陀螺)',
-            'team': 'Team Battle (團隊戰)',
-            'p3': '3-Player (三人亂鬥)'
+            'std': currentLang === 'zh' ? '1v1 Standard (1對1 單人對決)' : '1v1 Standard',
+            '3v3': currentLang === 'zh' ? '3on3 Battle (3隻陀螺對決)' : '3on3 Battle',
+            'team': currentLang === 'zh' ? 'Team Battle (3人 KOF 團隊戰)' : 'Team Battle',
+            'p3': currentLang === 'zh' ? '3-Player (三人亂鬥 5分制)' : '3-Player Battle'
         };
         let modeLabel = modeLabels[data.formMode] || data.formMode;
 
@@ -509,7 +501,7 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 🎯 關鍵修復：智能入名（Slot 1 ➔ Slot 2 ➔ Slot 3）100% 成功寫入 */
+/* 🎯 關鍵修復：按「接收」時準確填入 Slot 1、2、3，絕不丟失名字 */
 function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
@@ -528,20 +520,18 @@ function autoAcceptClientSubmission() {
 
     if (targetSlot === 1) {
         roster.t1Name = data.name;
-        roster.t1 = (data.items && data.items.length) ? [...data.items] : [data.name, '2', '3'];
+        if (data.items && data.items.length) roster.t1 = [...data.items];
+        else roster.t1[0] = data.name;
         occupiedSlots.slot1 = true;
-        safeSetInputValue('lobby-p1-name', data.name);
     } else if (targetSlot === 2) {
         roster.t2Name = data.name;
-        roster.t2 = (data.items && data.items.length) ? [...data.items] : [data.name, 'B', 'C'];
+        if (data.items && data.items.length) roster.t2 = [...data.items];
+        else roster.t2[0] = data.name;
         occupiedSlots.slot2 = true;
-        safeSetInputValue('lobby-p2-name', data.name);
     } else if (targetSlot === 3) {
         roster.t3Name = data.name;
         occupiedSlots.slot3 = true;
-        safeSetInputValue('lobby-p3-name', data.name);
         
-        // 若排入第 3 人，自動同步大廳賽制為 3-Player
         if (matchMode !== 'p3') {
             handleLobbyModeChangeFromData('p3');
         }
