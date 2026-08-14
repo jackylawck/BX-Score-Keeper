@@ -51,14 +51,8 @@
         <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
     </div>
 
-    <!-- 3on3 Status Box -->
-    <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 6px 0;">
-        <span id="deck-status" style="color: var(--neon-yellow); font-weight: bold;">ITEM #1</span>
-        <button class="ctrl-btn" id="reorder-btn" onclick="resetBattleCounter()" style="font-size: 0.8rem; padding: 4px 8px;">重置順序</button>
-    </div>
-
     <!-- Team Battle Tracker Bar -->
-    <div class="team-tracker-bar" id="team-tracker-bar" style="display: none; margin: 6px auto;">
+    <div class="team-tracker-bar" id="team-tracker-bar" style="display: none;">
         <span>TEAM WINS:</span>
         <span style="color: var(--neon-blue);" id="team-wins-p1">隊伍 A: 0</span>
         <span>vs</span>
@@ -185,7 +179,7 @@
 
                 <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-top: 14px; text-align: left; font-size: 0.8rem; line-height: 1.45;" id="p2p-guide-box"></div>
 
-                <!-- 選手專用排陣提交區：徹底拆分各賽制 -->
+                <!-- 選手專用排陣提交區 -->
                 <div id="p2p-client-submit-box" style="display: none; margin-top: 15px; border-top: 2px solid var(--neon-yellow); padding-top: 12px; text-align: left;">
                     <h4 style="color: var(--neon-yellow); margin-bottom: 8px;" id="lbl-submit-title">📩 提交個人 / 隊伍排陣名單</h4>
                     
@@ -347,7 +341,7 @@
         </div>
     </div>
 
-    <!-- ⚡ 動漫風對決登場 Modal -->
+    <!-- ⚡ 對決登場動畫 Modal -->
     <div class="modal" id="versus-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 1.2rem; color: var(--neon-yellow); font-family:'Orbitron';" id="vs-round-tag">ROUND 1</div>
