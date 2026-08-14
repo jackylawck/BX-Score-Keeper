@@ -1,7 +1,8 @@
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
 let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
 let teamWinsP1 = 0, teamWinsP2 = 0;
-let kofIndexP1 = 0, kofIndexP2 = 0; // 0 = 先鋒, 1 = 中堅, 2 = 大將
+let kofIndexP1 = 0, kofIndexP2 = 0;
+let isFinalTeamWinActive = false;
 let battleCount = 1;
 let matchMode = 'std';
 let targetScore = 4;
@@ -120,7 +121,7 @@ const i18n = {
         undo: "復原", drawBtn: "平手重賽", reset: "重置賽事", nextKof: "下一局換人", reorderBtn: "重置順序",
         logTitle: "⚡ 對局紀錄", winMsg: "率先達到目標分數，獲得本局勝利！",
         teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
-        teamFinalWinMsg: "擊敗對手全體隊員，獲得整場團隊賽事總勝利！🏆",
+        teamFinalWinMsg: "擊敗對手全體隊員，獲得整場團隊賽事總勝利！",
         reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
         disclaimer: "本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。",
         privacyNotice: "本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。",
@@ -152,7 +153,7 @@ const i18n = {
         undo: "Undo", drawBtn: "Draw", reset: "Reset Match", nextKof: "Next Round", reorderBtn: "Reset Order",
         logTitle: "⚡ BATTLE LOG", winMsg: "Reached target score and wins the match!",
         teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
-        teamFinalWinMsg: "Defeated all opponent team members and won the Team Match! 🏆",
+        teamFinalWinMsg: "Defeated all opponent team members and won the Team Match!",
         reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
         disclaimer: "Unofficial fan-made score keeper tool based on BEYBLADE X Regulations (Asia Version) 12th Edition.",
         privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
@@ -206,8 +207,10 @@ function updatePlayerNamesForMode() {
     if (matchMode === 'team') {
         let t1Name = roster.t1Name || 'Team A';
         let t2Name = roster.t2Name || 'Team B';
-        let p1Name = roster.t1[kofIndexP1] || `${kofIndexP1 + 1}`;
-        let p2Name = roster.t2[kofIndexP2] || `${String.fromCharCode(65 + kofIndexP2)}`;
+        let idx1 = Math.min(kofIndexP1, 2);
+        let idx2 = Math.min(kofIndexP2, 2);
+        let p1Name = roster.t1[idx1] || `${idx1 + 1}`;
+        let p2Name = roster.t2[idx2] || `${String.fromCharCode(65 + idx2)}`;
         
         document.getElementById('p1-title').value = `${p1Name} (${t1Name})`;
         document.getElementById('p2-title').value = `${p2Name} (${t2Name})`;
@@ -243,7 +246,6 @@ function openRosterModal() {
 }
 function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
 
-/* ⬆️ ⬇️ 上下箭頭搬動隊員順序 */
 function moveRosterItem(teamKey, fromIdx, toIndex) {
     let p1 = document.getElementById(`roster-${teamKey}-p1`);
     let p2 = document.getElementById(`roster-${teamKey}-p2`);
@@ -272,6 +274,7 @@ function saveRoster() {
 
     kofIndexP1 = 0;
     kofIndexP2 = 0;
+    isFinalTeamWinActive = false;
 
     closeRosterModal();
     setMatchMode('team');
@@ -282,7 +285,7 @@ function saveRoster() {
 }
 
 function addScore(player, pts, typeName) {
-    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
+    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore) || isFinalTeamWinActive) return;
 
     playBeep(600, 'square', 0.08);
 
@@ -333,7 +336,7 @@ function addScore(player, pts, typeName) {
 }
 
 function addFoul(player) {
-    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
+    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore) || isFinalTeamWinActive) return;
 
     playBeep(350, 'sawtooth', 0.12);
 
@@ -397,22 +400,22 @@ function addDraw() {
     saveState();
 }
 
-/* 👥 Team KOF 精確全滅判定 (不重複換人) */
 function nextKOFRound() {
+    if (isFinalTeamWinActive) return;
+
     if (scoreP1 >= targetScore) {
-        kofIndexP2++; // P2 隊員被淘汰
+        kofIndexP2++;
     } else if (scoreP2 >= targetScore) {
-        kofIndexP1++; // P1 隊員被淘汰
+        kofIndexP1++;
     }
 
-    // 正確判定：某一隊 3 人全滅時，直接宣佈總勝負
     if (kofIndexP1 >= 3) {
         let winnerTeam = roster.t2Name || 'Team B';
-        showWinModal(`🏆 ${winnerTeam}`, true);
+        showWinModal(winnerTeam, true);
         return;
     } else if (kofIndexP2 >= 3) {
         let winnerTeam = roster.t1Name || 'Team A';
-        showWinModal(`🏆 ${winnerTeam}`, true);
+        showWinModal(winnerTeam, true);
         return;
     }
 
@@ -444,6 +447,7 @@ function undo() {
         teamWinsP1 = last.teamP1; teamWinsP2 = last.teamP2;
         kofIndexP1 = last.k1 || 0; kofIndexP2 = last.k2 || 0;
         battleCount = last.battle; logs = last.logs;
+        isFinalTeamWinActive = false;
 
         updatePlayerNamesForMode();
 
@@ -460,6 +464,7 @@ function resetMatch(askConfirm = true) {
         kofIndexP1 = 0; kofIndexP2 = 0;
         battleCount = 1;
         history = []; logs = [];
+        isFinalTeamWinActive = false;
         localStorage.removeItem('bx_score_state');
         updatePlayerNamesForMode();
         updateDisplay();
@@ -514,26 +519,35 @@ function checkWinner() {
     if (scoreP1 >= targetScore) {
         if (matchMode === 'team') teamWinsP1++;
         playBeep(880, 'triangle', 0.3);
-        showWinModal(name1);
+        // 如果是 1v1 或 3on3，達到 4 分即為總冠軍；如果是 Team 戰且對手全滅也為總冠軍
+        let isFinal = matchMode !== 'team'; 
+        showWinModal(name1, isFinal);
         return true;
     } else if (scoreP2 >= targetScore) {
         if (matchMode === 'team') teamWinsP2++;
         playBeep(880, 'triangle', 0.3);
-        showWinModal(name2);
+        let isFinal = matchMode !== 'team';
+        showWinModal(name2, isFinal);
         return true;
     } else if (matchMode === 'p3' && scoreP3 >= targetScore) {
         playBeep(880, 'triangle', 0.3);
-        showWinModal(name3);
+        showWinModal(name3, true);
         return true;
     }
     return false;
 }
 
+/* 🏆 / ⚡ 區分：只有總冠軍才出 🏆 獎盃，單局獲勝顯示 ⚡ */
 function showWinModal(winner, isFinalTeamWin = false) {
     document.getElementById('winner-name').textContent = winner;
+    const modalIcon = document.querySelector('#win-modal div[style*="font-size: 3rem;"]');
+
     if (isFinalTeamWin) {
+        isFinalTeamWinActive = true;
+        if (modalIcon) modalIcon.innerText = "🏆"; // 總冠軍出獎盃
         document.getElementById('win-msg').innerText = i18n[currentLang].teamFinalWinMsg;
     } else {
+        if (modalIcon) modalIcon.innerText = "⚡"; // 一般單局勝出出閃電
         document.getElementById('win-msg').innerText = matchMode === 'team' ? i18n[currentLang].teamWinMsg : i18n[currentLang].winMsg;
     }
     document.getElementById('win-modal').style.display = 'flex';
@@ -541,7 +555,14 @@ function showWinModal(winner, isFinalTeamWin = false) {
 
 function closeWinModal() {
     document.getElementById('win-modal').style.display = 'none';
-    if (matchMode === 'team') nextKOFRound();
+    if (matchMode === 'team') {
+        if (isFinalTeamWinActive) {
+            kofIndexP1 = 0;
+            kofIndexP2 = 0;
+        } else {
+            nextKOFRound();
+        }
+    }
 }
 
 function openRules() { 
@@ -596,7 +617,7 @@ function saveState() {
         scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
         teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
-        battleCount, matchMode, roster,
+        battleCount, matchMode, roster, isFinalTeamWinActive,
         p1Name: document.getElementById('p1-title').value,
         p2Name: document.getElementById('p2-title').value,
         p3Name: document.getElementById('p3-title').value,
@@ -620,6 +641,7 @@ function loadState() {
             teamWinsP2 = state.teamWinsP2 || 0;
             kofIndexP1 = state.k1 || 0;
             kofIndexP2 = state.k2 || 0;
+            isFinalTeamWinActive = state.isFinalTeamWinActive || false;
             battleCount = state.battleCount || 1;
             matchMode = state.matchMode || 'std';
             logs = Array.isArray(state.logs) ? state.logs : [];
