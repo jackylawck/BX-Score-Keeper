@@ -53,7 +53,7 @@
 
     <!-- Team Battle Tracker Bar -->
     <div class="team-tracker-bar" id="team-tracker-bar" style="display: none;">
-        <span>TEAM WINS:</span>
+        <span id="lbl-team-wins-title">TEAM WINS:</span>
         <span style="color: var(--neon-blue);" id="team-wins-p1">隊伍 A: 0</span>
         <span>vs</span>
         <span style="color: var(--neon-red);" id="team-wins-p2">隊伍 B: 0</span>
@@ -154,7 +154,7 @@
         <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 6px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
     </div>
 
-    <!-- 🌐 WebRTC P2P 入口 Modal -->
+    <!-- 🌐 WebRTC P2P 入口 Modal (向選手與觀眾深入說明) -->
     <div class="modal" id="p2p-modal">
         <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
@@ -177,7 +177,8 @@
                     </div>
                 </div>
 
-                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-top: 14px; text-align: left; font-size: 0.8rem; line-height: 1.45;" id="p2p-guide-box"></div>
+                <!-- 📖 選手/觀眾連線玩法指南 -->
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-top: 14px; text-align: left; font-size: 0.8rem; line-height: 1.5;" id="p2p-guide-box"></div>
 
                 <!-- 選手專用排陣提交區 -->
                 <div id="p2p-client-submit-box" style="display: none; margin-top: 15px; border-top: 2px solid var(--neon-yellow); padding-top: 12px; text-align: left;">
@@ -185,10 +186,10 @@
                     
                     <label style="font-size: 0.8rem; color: #cbd5e1;" id="lbl-select-mode">選擇欲提交的賽制模式：</label>
                     <select id="p2p-form-type" class="roster-input" style="margin-bottom: 8px;" onchange="updateP2PFormFields()">
-                        <option value="std">1v1 Standard (1對1 單人對決)</option>
-                        <option value="3v3">3on3 Battle (3隻陀螺對決)</option>
-                        <option value="team">Team Battle (3人 KOF 團隊戰)</option>
-                        <option value="p3">3-Player (三人亂鬥 5分制)</option>
+                        <option value="std" id="opt-std">1v1 Standard (1對1 單人對決)</option>
+                        <option value="3v3" id="opt-3v3">3on3 Battle (3隻陀螺對決)</option>
+                        <option value="team" id="opt-team">Team Battle (3人 KOF 團隊戰)</option>
+                        <option value="p3" id="opt-p3">3-Player (三人亂鬥 5分制)</option>
                     </select>
 
                     <input type="text" id="p2p-player-name" class="roster-input" placeholder="選手 / 隊伍名稱 (例如 BB)" style="margin-bottom: 6px;">
@@ -205,7 +206,7 @@
         </div>
     </div>
 
-    <!-- 🏟️ 裁判等候大廳 -->
+    <!-- 🏟️ 裁判等候大廳 (向裁判多加指引與全英語支援) -->
     <div class="modal" id="lobby-modal">
         <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 8px;">
@@ -222,14 +223,17 @@
                     </div>
                 </div>
 
+                <!-- 👑 裁判專屬操作指引方塊 -->
+                <div style="background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 6px; padding: 8px; margin-bottom: 10px; text-align: left; font-size: 0.78rem; line-height: 1.45; color: #cbd5e1;" id="lobby-referee-guide"></div>
+
                 <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 10px;">
                     <div style="flex: 1; text-align: left;">
                         <label style="font-size: 0.8rem; color: var(--neon-blue); font-weight: bold;" id="lbl-lobby-select-mode">👑 本局賽事模式：</label>
                         <select id="lobby-match-mode" class="roster-input" style="margin-top: 4px; margin-bottom: 0;" onchange="handleLobbyModeChange()">
-                            <option value="std">1v1 Standard (4分制)</option>
-                            <option value="3v3">3on3 Battle (4分制 / 3隻陀螺)</option>
-                            <option value="team">Team Battle (KOF 團隊戰 2分制)</option>
-                            <option value="p3">3-Player (三人亂鬥 5分制)</option>
+                            <option value="std" id="lobby-opt-std">1v1 Standard (4分制)</option>
+                            <option value="3v3" id="lobby-opt-3v3">3on3 Battle (4分制 / 3隻陀螺)</option>
+                            <option value="team" id="lobby-opt-team">Team Battle (KOF 團隊戰 2分制)</option>
+                            <option value="p3" id="lobby-opt-p3">3-Player (三人亂鬥 5分制)</option>
                         </select>
                     </div>
                     <button class="ctrl-btn" onclick="swapLobbySides()" style="background: var(--neon-blue); color: #000; font-weight: bold; padding: 7px 12px; white-space: nowrap;" id="btn-swap-sides">⇄ 左右對調</button>
@@ -240,7 +244,7 @@
                     <div class="lobby-card side-1">
                         <div class="slot-header">
                             <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
-                            <button class="btn-clear" onclick="clearLobbySlot(1)">🗑️ 清空</button>
+                            <button class="btn-clear" onclick="clearLobbySlot(1)" id="btn-clear-slot1">🗑️ 清空</button>
                         </div>
                         <input type="text" id="lobby-p1-name" class="roster-input" placeholder="選手一名稱" value="選手一">
                         <div id="lobby-p1-deck-box" style="display:none; margin-top:4px;">
@@ -254,7 +258,7 @@
                     <div class="lobby-card side-2">
                         <div class="slot-header">
                             <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
-                            <button class="btn-clear" onclick="clearLobbySlot(2)">🗑️ 清空</button>
+                            <button class="btn-clear" onclick="clearLobbySlot(2)" id="btn-clear-slot2">🗑️ 清空</button>
                         </div>
                         <input type="text" id="lobby-p2-name" class="roster-input" placeholder="選手二名稱" value="選手二">
                         <div id="lobby-p2-deck-box" style="display:none; margin-top:4px;">
@@ -268,7 +272,7 @@
                     <div id="lobby-p3-box" class="lobby-card side-3" style="display:none;">
                         <div class="slot-header">
                             <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (選手三)</strong>
-                            <button class="btn-clear" onclick="clearLobbySlot(3)">🗑️ 清空</button>
+                            <button class="btn-clear" onclick="clearLobbySlot(3)" id="btn-clear-slot3">🗑️ 清空</button>
                         </div>
                         <input type="text" id="lobby-p3-name" class="roster-input" placeholder="選手三名稱" value="選手三">
                     </div>
@@ -377,8 +381,8 @@
         <div class="modal-content" style="text-align: center; border: 1px solid var(--neon-blue);">
             <div style="font-size: 2.5rem; animation: pulse 1.5s infinite;">⏳</div>
             <h3 style="color: var(--neon-yellow); margin: 10px 0;" id="txt-spectator-waiting">裁判正在大廳排陣準備中，請稍候...</h3>
-            <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">房間持續連線中，裁判開賽後畫面將自動同步！</p>
-            <button class="ctrl-btn" onclick="leaveP2PRoom()" style="background: #ef4444; color: #fff; font-weight: bold; padding: 6px 16px;">🚪 離開房間</button>
+            <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;" id="txt-spectator-waiting-sub">房間持續連線中，裁判開賽後畫面將自動同步！</p>
+            <button class="ctrl-btn" onclick="leaveP2PRoom()" style="background: #ef4444; color: #fff; font-weight: bold; padding: 6px 16px;" id="btn-spectator-leave">🚪 離開房間</button>
         </div>
     </div>
 
