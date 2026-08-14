@@ -40,6 +40,17 @@
         </div>
     </header>
 
+    <!-- 📍 還原頂部：模式切換與 Go Shoot 按鈕 -->
+    <div class="mode-banner" id="top-mode-banner">
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std', true)">1v1 Standard</button>
+            <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3', true)">3on3 Battle</button>
+            <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team', true)">Team Battle</button>
+            <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3', true)">3-Player (5-pt)</button>
+        </div>
+        <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
+    </div>
+
     <!-- 3on3 Status Box -->
     <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 6px 0;">
         <span id="deck-status" style="color: var(--neon-yellow); font-weight: bold;">ITEM #1</span>
@@ -54,7 +65,7 @@
         <span style="color: var(--neon-red);" id="team-wins-p2">隊伍 B: 0</span>
     </div>
 
-    <!-- 📱 核心計分板：直達畫面中央，手機端一目了然 -->
+    <!-- 📱 核心計分板 -->
     <div class="scoreboard" id="main-scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
@@ -134,24 +145,13 @@
         <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
     </div>
 
-    <!-- 📍 移至控制列下方：賽制切換與 Go Shoot 按鈕 -->
-    <div class="mode-banner" style="margin-top: 10px;">
-        <div class="mode-toggle">
-            <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std', true)">1v1 Standard</button>
-            <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3', true)">3on3 Battle</button>
-            <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team', true)">Team Battle</button>
-            <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3', true)">3-Player (5-pt)</button>
-        </div>
-        <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
-    </div>
-
     <!-- 對局紀錄面板 -->
     <div class="log-panel">
         <div class="log-title" id="log-title">⚡ 對局紀錄</div>
         <ul class="log-list" id="log-list"></ul>
     </div>
 
-    <!-- 📍 移至最底部：P2P 狀態條（裁判 ID / 觀戰人數 / 大廳與離開按鈕） -->
+    <!-- P2P 狀態條 -->
     <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 8px 12px; margin: 12px auto; max-width: 700px; text-align: center; font-size: 0.85rem; color: #fff;">
         <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
         <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow); font-size: 1.1rem; letter-spacing: 1px;">----</strong> | 
