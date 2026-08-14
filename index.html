@@ -221,7 +221,6 @@
             </div>
             
             <div style="margin-top: 10px; text-align: center;">
-                <!-- 房間號碼大字看板 -->
                 <div style="background: rgba(0, 240, 255, 0.08); border: 1px dashed var(--neon-blue); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
                     <div style="font-size: 0.8rem; color: #cbd5e1;" id="lbl-lobby-room-tip">請告知選手與觀眾輸入此 8 位數房間 ID：</div>
                     <div style="font-size: 2rem; font-family: 'Orbitron', monospace; font-weight: 900; color: var(--neon-yellow); letter-spacing: 3px;" id="lobby-display-room">--------</div>
@@ -230,7 +229,6 @@
                     </div>
                 </div>
 
-                <!-- 裁判快速選賽制 -->
                 <div style="margin-bottom: 12px; text-align: left;">
                     <label style="font-size: 0.8rem; color: var(--neon-blue); font-weight: bold;" id="lbl-lobby-select-mode">👑 選擇本局賽事模式：</label>
                     <select id="lobby-match-mode" class="roster-input" style="margin-top: 4px;" onchange="handleLobbyModeChange()">
@@ -241,7 +239,6 @@
                     </select>
                 </div>
 
-                <!-- 雙方即時排陣檢視與手動補填區 (Default 選手一 / 選手二) -->
                 <div style="text-align: left; margin-bottom: 12px;">
                     <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px;" id="lbl-lobby-slots-tip">選手連線送出後將自動填入，裁判亦可直接手動修改：</div>
                     
@@ -274,7 +271,6 @@
                     </div>
                 </div>
 
-                <!-- 鎖定並開賽大按鈕 -->
                 <button class="ctrl-btn" onclick="startMatchFromLobby()" style="background: var(--neon-yellow); color: #000; font-weight: 900; width: 100%; padding: 12px; font-size: 1.05rem; letter-spacing: 1px;" id="btn-lobby-start">🔒 鎖定排陣並邀請全場開賽！</button>
             </div>
         </div>
@@ -379,6 +375,8 @@
         <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
     </footer>
 
+    <!-- 🌐 先載入網絡連線模組，再載入核心應用邏輯 -->
+    <script src="p2p.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
