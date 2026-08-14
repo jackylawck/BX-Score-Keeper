@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Google 網站驗證 -->
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
-
-    <!-- Content Security Policy (CSP) 安全防護 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.peerjs.com wss://*.peerjs.com https://0.peerjs.com https://unpkg.com; img-src 'self' data:;">
 
     <title>BX Score Keeper | 爆旋計分器</title>
@@ -25,8 +22,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="stylesheet" href="style.css">
-
-    <!-- 🌐 引入 PeerJS CDN 實現 WebRTC P2P 連線 -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
@@ -212,7 +207,7 @@
         </div>
     </div>
 
-    <!-- 🏟️ 裁判專屬：賽事等候大廳 (含 ⇄ 左右對調/三人輪調功能) -->
+    <!-- 🏟️ 裁判專屬：賽事等候大廳 (含 🗑️ 單邊清空/刪除按鈕) -->
     <div class="modal" id="lobby-modal">
         <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 8px;">
@@ -244,9 +239,12 @@
                 </div>
 
                 <div style="text-align: left; margin-bottom: 12px;">
-                    <!-- Side 1 -->
+                    <!-- Side 1 卡片 (含清空按鈕) -->
                     <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
+                            <button class="ctrl-btn" onclick="clearLobbySlot(1)" style="font-size: 0.7rem; padding: 2px 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">🗑️ 清空</button>
+                        </div>
                         <input type="text" id="lobby-p1-name" class="roster-input" style="margin-top:4px;" placeholder="選手一名稱" value="選手一">
                         <div id="lobby-p1-deck-box" style="display:none; margin-top:4px;">
                             <input type="text" id="lobby-p1-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="1">
@@ -255,9 +253,12 @@
                         </div>
                     </div>
 
-                    <!-- Side 2 -->
+                    <!-- Side 2 卡片 (含清空按鈕) -->
                     <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid var(--neon-red); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
+                            <button class="ctrl-btn" onclick="clearLobbySlot(2)" style="font-size: 0.7rem; padding: 2px 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">🗑️ 清空</button>
+                        </div>
                         <input type="text" id="lobby-p2-name" class="roster-input" style="margin-top:4px;" placeholder="選手二名稱" value="選手二">
                         <div id="lobby-p2-deck-box" style="display:none; margin-top:4px;">
                             <input type="text" id="lobby-p2-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="A">
@@ -266,9 +267,12 @@
                         </div>
                     </div>
 
-                    <!-- Side 3 (3-Player) -->
+                    <!-- Side 3 卡片 (3-Player) -->
                     <div id="lobby-p3-box" style="display:none; background: rgba(234, 179, 8, 0.05); border: 1px solid var(--neon-yellow); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-                        <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (選手三)</strong>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (選手三)</strong>
+                            <button class="ctrl-btn" onclick="clearLobbySlot(3)" style="font-size: 0.7rem; padding: 2px 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444;">🗑️ 清空</button>
+                        </div>
                         <input type="text" id="lobby-p3-name" class="roster-input" style="margin-top:4px;" placeholder="選手三名稱" value="選手三">
                     </div>
                 </div>
