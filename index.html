@@ -1,19 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Google 網站驗證 -->
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.peerjs.com wss://*.peerjs.com https://0.peerjs.com https://unpkg.com; img-src 'self' data:;">
 
-    <title>BX Score Keeper | 爆旋計分器</title>
-    <meta name="description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的免費對戰計分器 Web App / PWA。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
-    <meta name="keywords" content="爆旋陀螺X, Beyblade X, 計分器, Score Keeper, 極限終結, 擊出終結, 爆裂終結, 迴轉勝利, 亞洲版第12版, PWA, 陀螺戰鬥助手">
+    <!-- 🌐 國際與亞洲雙語 SEO 標籤 (Bilingual Global SEO) -->
+    <title>BX Score Keeper | Beyblade X Scoreboard & 爆旋陀螺X 對戰計分器 PWA</title>
+    <meta name="description" content="Free Beyblade X Scoreboard & Tournament Tool compliant with Asia 12th Ed Regulations. Features WebRTC P2P multi-device live sync, Referee Lobby, 1v1, 3on3, KOF Team & 3-Player modes. 依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的專業跨機對戰計分器，支援裁判大廳與15人即時觀戰。">
+    <meta name="keywords" content="Beyblade X, Beyblade X Score Keeper, Beyblade X Scoreboard, Beyblade X Tournament App, Xtreme Finish, Over Finish, Burst Finish, Spin Finish, 爆旋陀螺X, 爆旋陀螺X計分器, 陀螺計分板, 極限終結, 擊出終結, 爆裂終結, 迴轉勝利, WebRTC, PWA, Takara Tomy">
     <meta name="author" content="羅子淇 Jacky Law">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://jackylawck.github.io/BX-Score-Keeper/">
 
+    <!-- 📱 全球社群分享 Open Graph (WhatsApp, Discord, Reddit, Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
+    <meta property="og:title" content="BX Score Keeper | Beyblade X Live Scoreboard & 爆旋計分器">
+    <meta property="og:description" content="Free Beyblade X Score Keeper PWA with WebRTC live sync (15 devices), Referee Lobby, 1v1, 3on3, KOF & 3-Player modes. 支援跨機連線與發射倒數。">
+    <meta property="og:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
+
+    <!-- 🐦 Twitter Card 標籤 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
+    <meta name="twitter:title" content="BX Score Keeper | Beyblade X Scoreboard">
+    <meta name="twitter:description" content="Free Beyblade X Scoreboard PWA with WebRTC multi-device sync, 1v1, 3on3, KOF Team & 3-Player battle modes.">
+    <meta name="twitter:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
+
+    <!-- 🔍 Google 結構化資料 (Schema.org JSON-LD 全球爬蟲加速) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "BX Score Keeper",
+      "alternateName": "爆旋計分器",
+      "url": "https://jackylawck.github.io/BX-Score-Keeper/",
+      "description": "An unofficial fan-made Web App / PWA score keeper for Beyblade X compliant with Asia Version 12th Edition regulations. Supports WebRTC multi-device sync and official tournament formats.",
+      "applicationCategory": "SportsApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "inLanguage": ["en", "zh-HK", "zh-TW"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Jacky Law"
+      }
+    }
+    </script>
+
+    <!-- CSP 安全防護 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; connect-src 'self' https://*.peerjs.com wss://*.peerjs.com https://0.peerjs.com https://unpkg.com; img-src 'self' data:;">
+
+    <!-- PWA 與圖示設定 -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="BXScoreKeepericon-192.png">
     <link rel="apple-touch-icon" href="BXScoreKeepericon-192.png">
@@ -154,7 +198,7 @@
         <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 6px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
     </div>
 
-    <!-- 🌐 WebRTC P2P 入口 Modal (向選手與觀眾深入說明) -->
+    <!-- 🌐 WebRTC P2P 入口 Modal -->
     <div class="modal" id="p2p-modal">
         <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
@@ -206,7 +250,7 @@
         </div>
     </div>
 
-    <!-- 🏟️ 裁判等候大廳 (向裁判多加指引與全英語支援) -->
+    <!-- 🏟️ 裁判等候大廳 -->
     <div class="modal" id="lobby-modal">
         <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 8px;">
