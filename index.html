@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Google 網站驗證 (Google Site Verification) -->
+    <!-- Google 網站驗證 -->
     <meta name="google-site-verification" content="JZ5UohX-CcP_fQV0_DI9VadkKY4ZoTTkUifL88-fIcY" />
 
     <!-- SEO Meta -->
@@ -15,10 +15,10 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://jackylawck.github.io/BX-Score-Keeper/">
 
-    <!-- Open Graph (Facebook, WhatsApp, Discord) -->
+    <!-- Open Graph (Facebook, WhatsApp, Discord - 雙語友善相容) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="BX Score Keeper | 爆旋計分器">
-    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的免費對戰計分器 Web App / PWA。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥。">
+    <meta property="og:description" content="依據《爆旋陀螺X規則（亞洲版）》第 12 版製作的免費對戰計分器 Web App / PWA。支援 1v1、3on3、KOF 團隊戰與 3人亂鬥 (BEYBLADE X Regulations 12th Ed Compliant).">
     <meta property="og:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
     <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
     <meta property="og:site_name" content="BX Score Keeper">
@@ -153,42 +153,23 @@
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
         }
 
-        .deck-controls { display: flex; align-items: center; gap: 8px; }
-
-        .deck-indicator {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.85rem;
+        .shoot-btn {
+            background: linear-gradient(135deg, var(--neon-red), var(--neon-orange));
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
             font-weight: 900;
-            color: var(--neon-yellow);
-            text-shadow: 0 0 8px var(--neon-yellow);
-        }
-
-        .reorder-btn {
-            background: rgba(255, 204, 0, 0.15);
-            color: var(--neon-yellow);
-            border: 1px solid var(--neon-yellow);
-            padding: 2px 8px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .team-tracker-bar {
-            width: 100%;
-            max-width: 950px;
-            background: rgba(0, 240, 255, 0.05);
-            border: 1px dashed var(--neon-blue);
-            padding: 6px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-sizing: border-box;
-            font-family: 'Orbitron', sans-serif;
             font-size: 0.85rem;
-            font-weight: bold;
+            cursor: pointer;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(255, 0, 85, 0.8); }
+            100% { transform: scale(1); }
         }
 
         .scoreboard {
@@ -330,14 +311,28 @@
             color: var(--text-main);
         }
 
-        .winner-title {
+        .versus-title {
             font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
-            font-size: 2rem;
-            color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
-            margin: 10px 0;
+            font-size: 2.2rem;
+            font-style: italic;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.8);
+            margin: 15px 0;
             font-weight: 900;
-            word-break: break-all;
+        }
+
+        .roster-input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 6px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.85rem;
         }
 
         footer { margin-top: auto; padding-top: 12px; font-size: 0.65rem; color: var(--text-sub); text-align: center; }
@@ -346,35 +341,6 @@
             .scoreboard.p3-mode { grid-template-columns: 1fr; }
             .score-display { font-size: 3.5rem; }
         }
-
-        @media (orientation: landscape) and (max-height: 500px) {
-            body { padding: 6px 12px; }
-            header { margin-bottom: 4px; padding-bottom: 2px; }
-            h1 { font-size: 1rem; }
-            .subtitle { font-size: 0.65rem; }
-
-            .mode-banner { margin-bottom: 6px; padding: 4px 8px; }
-            .mode-btn { font-size: 0.7rem; padding: 2px 6px; }
-
-            .team-tracker-bar { padding: 4px; margin-bottom: 4px; font-size: 0.75rem; }
-
-            .scoreboard { gap: 8px; }
-            .player-card { padding: 6px 8px; }
-            .player-name-input { font-size: 0.8rem; }
-            .score-display { font-size: 2.5rem; margin: 0; }
-
-            .btn-grid { gap: 4px; }
-            button.score-btn { padding: 5px 6px; font-size: 0.7rem; }
-            .pts-badge { font-size: 0.8rem; }
-
-            .controls { margin-top: 6px; gap: 6px; }
-            .ctrl-btn { padding: 4px 12px; font-size: 0.75rem; }
-
-            .log-panel { margin-top: 6px; padding: 6px; }
-            .log-list { max-height: 50px; }
-
-            footer { padding-top: 6px; font-size: 0.6rem; }
-        }
     </style>
 </head>
 <body>
@@ -382,9 +348,10 @@
     <header>
         <div>
             <h1>BX SCORE KEEPER</h1>
-            <div class="subtitle" id="rules-tag">BEYBLADE X Regulations (Asia Version) 12th Ed</div>
+            <div class="subtitle" id="rules-tag">《爆旋陀螺X規則（亞洲版）》第 12 版</div>
         </div>
         <div class="nav-btns">
+            <button class="top-btn" onclick="openRosterModal()">👥 <span id="btn-roster-txt">隊伍排陣</span></button>
             <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
             <button class="top-btn" onclick="toggleLanguage()" id="lang-btn">EN</button>
         </div>
@@ -397,10 +364,7 @@
             <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team')">Team Battle</button>
             <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3')">3-Player (5-pt)</button>
         </div>
-        <div class="deck-controls" id="deck-box" style="display: none;">
-            <span class="deck-indicator" id="deck-status">ITEM #1</span>
-            <button class="reorder-btn" onclick="resetBattleCounter()" id="reorder-btn">重置順序</button>
-        </div>
+        <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
     </div>
 
     <!-- Team Battle Tracker Bar -->
@@ -458,7 +422,7 @@
             </div>
         </div>
 
-        <!-- Player 3 (3-Player Battle) -->
+        <!-- Player 3 -->
         <div class="player-card" id="p3-card" style="display: none;">
             <input type="text" class="player-name-input" id="p3-title" value="PLAYER 3" onchange="saveState()">
             <div class="score-display" id="score-p3">0</div>
@@ -484,14 +448,49 @@
 
     <div class="controls">
         <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原</button>
-        <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手 (重賽)</button>
-        <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局 (KOF 換人)</button>
+        <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手重賽</button>
+        <button class="ctrl-btn" id="next-kof-btn" onclick="nextKOFRound()" style="display: none; background: var(--neon-blue); color: #000;">下一局換人</button>
         <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
     </div>
 
     <div class="log-panel">
-        <div class="log-title" id="log-title">⚡ 對局紀錄 (BATTLE LOG)</div>
+        <div class="log-title" id="log-title">⚡ 對局紀錄</div>
         <ul class="log-list" id="log-list"></ul>
+    </div>
+
+    <!-- 👥 隊伍與排陣 Modal -->
+    <div class="modal" id="roster-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
+                <h2 style="margin:0; font-size:1.1rem; color:var(--neon-blue);" id="roster-modal-title">👥 隊伍名單與對戰排序</h2>
+                <button style="background:transparent; border:none; color:var(--text-sub); font-size:1.5rem; cursor:pointer;" onclick="closeRosterModal()">&times;</button>
+            </div>
+            <div style="margin-top:10px;">
+                <h4 style="color:var(--neon-blue); margin-bottom:4px;" id="lbl-t1-header">TEAM A (隊伍 1)</h4>
+                <input type="text" id="roster-t1-name" class="roster-input" placeholder="隊伍名稱 (預設 Team A)">
+                <input type="text" id="roster-t1-p1" class="roster-input" placeholder="先鋒 1號 (預設 PLAYER 1)">
+                <input type="text" id="roster-t1-p2" class="roster-input" placeholder="中堅 2號 (預設 PLAYER 2)">
+                <input type="text" id="roster-t1-p3" class="roster-input" placeholder="大將 3號 (預設 PLAYER 3)">
+
+                <h4 style="color:var(--neon-red); margin-top:10px; margin-bottom:4px;" id="lbl-t2-header">TEAM B (隊伍 2)</h4>
+                <input type="text" id="roster-t2-name" class="roster-input" placeholder="隊伍名稱 (預設 Team B)">
+                <input type="text" id="roster-t2-p1" class="roster-input" placeholder="先鋒 1號 (預設 PLAYER 1)">
+                <input type="text" id="roster-t2-p2" class="roster-input" placeholder="中堅 2號 (預設 PLAYER 2)">
+                <input type="text" id="roster-t2-p3" class="roster-input" placeholder="大將 3號 (預設 PLAYER 3)">
+
+                <button class="ctrl-btn" onclick="saveRoster()" id="btn-save-roster" style="margin-top:10px; width:100%; background:var(--neon-blue); color:#000; font-weight:900;">儲存排陣名單</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚡ 動漫風對決登場 Modal -->
+    <div class="modal" id="versus-modal">
+        <div class="modal-content" style="text-align: center;">
+            <div style="font-size: 1.2rem; color: var(--neon-yellow); font-family:'Orbitron';" id="vs-round-tag">ROUND 1</div>
+            <div class="versus-title" id="vs-player-names">PLAYER 1 VS PLAYER 2</div>
+            <p style="font-size: 0.9rem; color: #cbd5e1;" id="vs-sub-msg">對決準備！</p>
+            <button class="ctrl-btn" onclick="closeVersusModal()" id="btn-start-vs" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">開始對戰</button>
+        </div>
     </div>
 
     <!-- Rules Modal -->
@@ -510,13 +509,13 @@
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 3rem;">🏆</div>
             <div class="winner-title" id="winner-name">PLAYER 1</div>
-            <p style="font-size: 1.1rem; color: #fff; font-weight: bold;" id="win-msg">MATCH WINNER!</p>
-            <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">OK</button>
+            <p style="font-size: 1.1rem; color: #fff; font-weight: bold;" id="win-msg">獲得本局勝利！</p>
+            <button class="ctrl-btn" onclick="closeWinModal()" style="margin-top: 15px; background: var(--neon-blue); color: #000; font-weight: bold;">確定</button>
         </div>
     </div>
 
     <footer>
-        <p id="disclaimer">Unofficial fan-made tool for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition.</p>
+        <p id="disclaimer">本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。</p>
         <p style="margin-top:4px; opacity: 0.8;" id="privacy-notice">本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。</p>
     </footer>
 
@@ -524,11 +523,17 @@
         let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
         let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
         let teamWinsP1 = 0, teamWinsP2 = 0;
+        let kofIndexP1 = 0, kofIndexP2 = 0;
         let battleCount = 1;
         let matchMode = 'std';
         let targetScore = 4;
         let history = [], logs = [];
         let currentLang = 'zh';
+
+        let roster = {
+            t1Name: '', t1: ['', '', ''],
+            t2Name: '', t2: ['', '', '']
+        };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playBeep(freq = 440, type = 'sine', duration = 0.1) {
@@ -545,58 +550,58 @@
             } catch(e) {}
         }
 
+        function startShootCountdown() {
+            playBeep(800, 'square', 0.15);
+            let btn = document.getElementById('shoot-btn');
+            btn.innerText = "3...";
+            
+            const speak = (txt) => {
+                if ('speechSynthesis' in window) {
+                    let u = new SpeechSynthesisUtterance(txt);
+                    u.lang = 'en-US';
+                    u.rate = 1.2;
+                    window.speechSynthesis.speak(u);
+                }
+            };
+
+            speak("Three");
+            setTimeout(() => { btn.innerText = "2..."; speak("Two"); }, 1000);
+            setTimeout(() => { btn.innerText = "1..."; speak("One"); }, 2000);
+            setTimeout(() => { 
+                btn.innerText = "GO SHOOT!"; 
+                speak("Go Shoot!"); 
+                playBeep(1200, 'triangle', 0.4);
+            }, 3000);
+            setTimeout(() => { btn.innerText = "📢 3, 2, 1, Go Shoot!"; }, 4500);
+        }
+
         const i18n = {
             zh: {
                 rulesTag: "《爆旋陀螺X規則（亞洲版）》第 12 版",
                 rulesBtn: "規則",
+                rosterBtn: "隊伍排陣",
                 modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
-                xtreme: "極限終結",
-                over: "擊出終結",
-                burst: "爆裂終結",
-                spin: "迴轉勝利",
-                foulTxt: "發射失誤",
-                undo: "復原",
-                drawBtn: "平手 (重賽)",
-                reset: "重置賽事",
-                nextKof: "下一局 (KOF 換人)",
-                reorderBtn: "重置順序",
-                logTitle: "⚡ 對局紀錄 (BATTLE LOG)",
-                winMsg: "率先達到目標分數，獲得本局勝利！",
+                rosterModalTitle: "👥 隊伍名單與對戰排序",
+                saveRosterBtn: "儲存排陣名單",
+                xtreme: "極限終結", over: "擊出終結", burst: "爆裂終結", spin: "迴轉勝利", foulTxt: "發射失誤",
+                undo: "復原", drawBtn: "平手重賽", reset: "重置賽事", nextKof: "下一局換人", reorderBtn: "重置順序",
+                logTitle: "⚡ 對局紀錄", winMsg: "率先達到目標分數，獲得本局勝利！",
                 teamWinMsg: "拿下本局！敗方請更換下一位隊員登場（比分重置為 0-0）。",
                 reorderMsg: "已打完 3 戰未滿 4 分！請雙方重新排列組合順序，從 1 號開始繼續比賽。",
                 disclaimer: "本工具為非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。",
                 privacyNotice: "本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。",
+                vsSubMsg: "對決準備！",
+                btnStartVs: "開始對戰",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分與判定機制 (Scoring Outcomes)</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分與判定機制</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>極限終結 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回對戰區。</li>
-                            <li><b>擊出終結 (Over Finish) - 2分</b>：完全進入超區且無法返回對戰區。</li>
+                            <li><b>極限終結 (Xtreme Finish) - 3分</b>：完全進入極限區且無法返回。</li>
+                            <li><b>擊出終結 (Over Finish) - 2分</b>：完全進入超區且無法返回。</li>
                             <li><b>爆裂終結 (Burst Finish) - 2分</b>：對手陀螺部件先行分離。</li>
                             <li><b>迴轉勝利 (Spin Finish) - 1分</b>：對手陀螺先行停止旋轉。</li>
-                            <li><b>同時發生/平手 (Draw)</b>：雙方同時發生 Finish 視為 Draw，無人得分並重賽。</li>
-                            <li><b>發射失誤/罰分 (Shooting Errors)</b>：同一局累積 2 次發射失誤 (Premature/Delayed/Miss)，對手直接獲得 1 分並重賽。正式得分後之前的失誤自動清零。</li>
-                        </ul>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3對3賽制 (3on3 Battle)</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>預先決定 3 個陀螺順序，不得使用重複部件 (Custom Line 鎖晶片限制 1 個)。</li>
-                            <li>打完 3 場未滿 4 分，<b>得分保留，重新排列順序（由 1 號重新開始）</b>繼續對戰。</li>
-                        </ul>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">3. 團隊戰 KOF 機制 (Team Battle)</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>每局採<b>先得 2 分制</b>，勝方留場，敗方換下一位隊員。</li>
-                            <li>換人時當前局比分重置為 0-0，累積團隊總勝場數。</li>
-                        </ul>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3人同場大亂鬥 (3-Blader Battle)</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>5分制 (5-point System)</b>：其餘兩位對手淘汰產生的所有分數，全數歸屬於最後留在場上的玩家。先累積滿 5 分獲勝。</li>
-                            <li><b>兩勝制 (Best of Two Wins System)</b>：最後留場者獲得 1 勝，率先取得 2 勝者獲勝。</li>
+                            <li><b>同時發生/平手 (Draw)</b>：雙方同時 Finish 視為 Draw，無人得分並重賽。</li>
+                            <li><b>發射失誤/罰分</b>：同一局累積 2 次失誤，對手直接獲得 1 分並重賽。正式得分後失誤自動清零。</li>
                         </ul>
                     </div>
                 `
@@ -604,55 +609,27 @@
             en: {
                 rulesTag: "BEYBLADE X Regulations (Asia Version) 12th Ed",
                 rulesBtn: "Rules",
+                rosterBtn: "Roster",
                 modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
-                xtreme: "Xtreme Finish",
-                over: "Over Finish",
-                burst: "Burst Finish",
-                spin: "Spin Finish",
-                foulTxt: "Shooting Error",
-                undo: "Undo",
-                drawBtn: "Draw",
-                reset: "Reset Match",
-                nextKof: "Next Round (KOF)",
-                reorderBtn: "Reset Order",
-                logTitle: "⚡ BATTLE LOG",
-                winMsg: "Reached target score and wins the match!",
+                rosterModalTitle: "👥 Team Roster & Order Setup",
+                saveRosterBtn: "Save Roster",
+                xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish", foulTxt: "Shooting Error",
+                undo: "Undo", drawBtn: "Draw", reset: "Reset Match", nextKof: "Next Round", reorderBtn: "Reset Order",
+                logTitle: "⚡ BATTLE LOG", winMsg: "Reached target score and wins the match!",
                 teamWinMsg: "Round won! Losing side replaces player (Score resets to 0-0).",
                 reorderMsg: "3 battles completed without reaching 4 pts. Rearrange order and restart from item #1!",
                 disclaimer: "Unofficial fan-made score keeper tool based on BEYBLADE X Regulations (Asia Version) 12th Edition.",
                 privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
+                vsSubMsg: "READY TO BATTLE!",
+                btnStartVs: "START BATTLE",
                 rulesBody: `
                     <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems & Outcomes</h3>
+                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
                         <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone and cannot return.</li>
-                            <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone and cannot return.</li>
-                            <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach and separate first.</li>
-                            <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first in Battle Zone.</li>
-                            <li><b>Simultaneous Finish (Draw)</b>: Both Beys finish simultaneously; 0 pts awarded and battle is replayed.</li>
-                            <li><b>Shooting Errors / Penalties</b>: 2 shooting errors in a battle gives 1 pt to opponent. Nullified once a point is scored.</li>
-                        </ul>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">2. 3on3 Battle Rules</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>Set 3 Beys in order. No duplicate parts allowed.</li>
-                            <li>If no one reaches 4 pts after 3 battles, <b>scores stay, rearrange order and restart from item #1</b>.</li>
-                        </ul>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">3. Team Battle Outcomes (KOF)</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li>Each individual battle follows a <b>first-to-2-points rule</b>.</li>
-                            <li>Winning Blader stays, losing Blader replaced by next team member.</li>
-                            <li>Points reset to 0-0 when a new opponent steps in, team win counter is tracked.</li>
-                        </ul>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <h3 style="color:var(--neon-blue); margin-bottom:4px;">4. 3-Blader Battles</h3>
-                        <ul style="padding-left:20px; font-size:0.85rem; color:#cbd5e1;">
-                            <li><b>5-point System</b>: All points from finishing moves of the other two players are awarded to the last person remaining (First to 5 pts).</li>
-                            <li><b>Best of Two Wins System</b>: Last person remaining earns 1 win (First to 2 wins).</li>
+                            <li><b>Xtreme Finish (3 pts)</b>: Bey completely enters Xtreme Zone.</li>
+                            <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone.</li>
+                            <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach first.</li>
+                            <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first.</li>
                         </ul>
                     </div>
                 `
@@ -688,6 +665,36 @@
             applyLanguage();
         }
 
+        function triggerVersusAnimation(p1, p2) {
+            document.getElementById('vs-player-names').innerText = `${p1} VS ${p2}`;
+            document.getElementById('versus-modal').style.display = 'flex';
+            playBeep(700, 'triangle', 0.2);
+        }
+        function closeVersusModal() { document.getElementById('versus-modal').style.display = 'none'; }
+
+        function openRosterModal() { document.getElementById('roster-modal').style.display = 'flex'; }
+        function closeRosterModal() { document.getElementById('roster-modal').style.display = 'none'; }
+
+        function saveRoster() {
+            roster.t1Name = document.getElementById('roster-t1-name').value.trim() || 'Team A';
+            roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || 'PLAYER 1';
+            roster.t1[1] = document.getElementById('roster-t1-p2').value.trim() || 'PLAYER 2';
+            roster.t1[2] = document.getElementById('roster-t1-p3').value.trim() || 'PLAYER 3';
+
+            roster.t2Name = document.getElementById('roster-t2-name').value.trim() || 'Team B';
+            roster.t2[0] = document.getElementById('roster-t2-p1').value.trim() || 'PLAYER 1';
+            roster.t2[1] = document.getElementById('roster-t2-p2').value.trim() || 'PLAYER 2';
+            roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'PLAYER 3';
+
+            document.getElementById('p1-title').value = roster.t1[kofIndexP1];
+            document.getElementById('p2-title').value = roster.t2[kofIndexP2];
+
+            closeRosterModal();
+            saveState();
+            updateDisplay();
+            triggerVersusAnimation(roster.t1[kofIndexP1], roster.t2[kofIndexP2]);
+        }
+
         function addScore(player, pts, typeName) {
             if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
 
@@ -696,7 +703,7 @@
             history.push({
                 p1: scoreP1, p2: scoreP2, p3: scoreP3,
                 f1: foulsP1, f2: foulsP2, f3: foulsP3,
-                teamP1: teamWinsP1, teamP2: teamWinsP2,
+                teamP1: teamWinsP1, teamP2: teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
                 battle: battleCount, logs: [...logs]
             });
 
@@ -747,7 +754,7 @@
             history.push({
                 p1: scoreP1, p2: scoreP2, p3: scoreP3,
                 f1: foulsP1, f2: foulsP2, f3: foulsP3,
-                teamP1: teamWinsP1, teamP2: teamWinsP2,
+                teamP1: teamWinsP1, teamP2: teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
                 battle: battleCount, logs: [...logs]
             });
 
@@ -763,13 +770,15 @@
             let currentFouls = player === 1 ? foulsP1 : (player === 2 ? foulsP2 : foulsP3);
 
             if (currentFouls === 1) {
-                logs.unshift(`Round ${battleCount}: ${offenderName} 發射失誤 (1/2)`);
+                let txt = currentLang === 'zh' ? '發射失誤' : 'Shooting Error';
+                logs.unshift(`Round ${battleCount}: ${offenderName} ${txt} (1/2)`);
             } else if (currentFouls >= 2) {
                 if (player === 1) foulsP1 = 0;
                 else if (player === 2) foulsP2 = 0;
                 else if (player === 3) foulsP3 = 0;
 
-                logs.unshift(`Round ${battleCount}: ${offenderName} 累積2次失誤 ➔ 對手 +1 分`);
+                let txt = currentLang === 'zh' ? '累積2次失誤 ➔ 對手 +1 分' : '2 Errors ➔ Opponent +1 pt';
+                logs.unshift(`Round ${battleCount}: ${offenderName} ${txt}`);
 
                 if (matchMode === 'p3') {
                     if (player !== 1) scoreP1 += 1;
@@ -792,21 +801,33 @@
             history.push({
                 p1: scoreP1, p2: scoreP2, p3: scoreP3,
                 f1: foulsP1, f2: foulsP2, f3: foulsP3,
-                teamP1: teamWinsP1, teamP2: teamWinsP2,
+                teamP1: teamWinsP1, teamP2: teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
                 battle: battleCount, logs: [...logs]
             });
-            logs.unshift(`Round ${battleCount}: DRAW (平手重賽)`);
+            let txt = currentLang === 'zh' ? '平手重賽' : 'DRAW (Replay)';
+            logs.unshift(`Round ${battleCount}: ${txt}`);
             battleCount++;
             updateDisplay();
             saveState();
         }
 
         function nextKOFRound() {
+            if (scoreP1 >= targetScore) {
+                kofIndexP2 = (kofIndexP2 + 1) % 3;
+            } else if (scoreP2 >= targetScore) {
+                kofIndexP1 = (kofIndexP1 + 1) % 3;
+            }
+
+            document.getElementById('p1-title').value = roster.t1[kofIndexP1] || 'PLAYER 1';
+            document.getElementById('p2-title').value = roster.t2[kofIndexP2] || 'PLAYER 2';
+
             scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
             foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
             battleCount = 1;
+
             updateDisplay();
             saveState();
+            triggerVersusAnimation(document.getElementById('p1-title').value, document.getElementById('p2-title').value);
         }
 
         function resetBattleCounter() {
@@ -824,7 +845,12 @@
                 scoreP1 = last.p1; scoreP2 = last.p2; scoreP3 = last.p3 || 0;
                 foulsP1 = last.f1 || 0; foulsP2 = last.f2 || 0; foulsP3 = last.f3 || 0;
                 teamWinsP1 = last.teamP1; teamWinsP2 = last.teamP2;
+                kofIndexP1 = last.k1 || 0; kofIndexP2 = last.k2 || 0;
                 battleCount = last.battle; logs = last.logs;
+
+                document.getElementById('p1-title').value = roster.t1[kofIndexP1] || 'PLAYER 1';
+                document.getElementById('p2-title').value = roster.t2[kofIndexP2] || 'PLAYER 2';
+
                 updateDisplay();
                 saveState();
             }
@@ -835,6 +861,7 @@
                 scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
                 foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
                 teamWinsP1 = 0; teamWinsP2 = 0;
+                kofIndexP1 = 0; kofIndexP2 = 0;
                 battleCount = 1;
                 history = []; logs = [];
                 updateDisplay();
@@ -862,10 +889,10 @@
             }
 
             if (matchMode === 'team') {
-                let name1 = document.getElementById('p1-title').value;
-                let name2 = document.getElementById('p2-title').value;
-                document.getElementById('team-wins-p1').innerText = `${name1}: ${teamWinsP1}`;
-                document.getElementById('team-wins-p2').innerText = `${name2}: ${teamWinsP2}`;
+                let t1Label = roster.t1Name || 'Team A';
+                let t2Label = roster.t2Name || 'Team B';
+                document.getElementById('team-wins-p1').innerText = `${t1Label}: ${teamWinsP1}`;
+                document.getElementById('team-wins-p2').innerText = `${t2Label}: ${teamWinsP2}`;
             }
 
             const logList = document.getElementById('log-list');
@@ -929,6 +956,7 @@
 
             document.getElementById('rules-tag').innerText = lang.rulesTag;
             document.getElementById('btn-rules-txt').innerText = lang.rulesBtn;
+            document.getElementById('btn-roster-txt').innerText = lang.rosterBtn;
             document.getElementById('lang-btn').innerText = currentLang === 'zh' ? 'EN' : '中文';
             document.getElementById('btn-undo').innerText = lang.undo;
             document.getElementById('btn-draw').innerText = lang.drawBtn;
@@ -940,6 +968,11 @@
             document.getElementById('privacy-notice').innerText = lang.privacyNotice;
             document.getElementById('modal-title').innerText = lang.modalTitle;
             document.getElementById('modal-body').innerHTML = lang.rulesBody;
+
+            document.getElementById('roster-modal-title').innerText = lang.rosterModalTitle;
+            document.getElementById('btn-save-roster').innerText = lang.saveRosterBtn;
+            document.getElementById('vs-sub-msg').innerText = lang.vsSubMsg;
+            document.getElementById('btn-start-vs').innerText = lang.btnStartVs;
 
             document.querySelectorAll('.txt-xtreme').forEach(el => el.innerText = lang.xtreme);
             document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
@@ -955,7 +988,8 @@
             const state = {
                 scoreP1, scoreP2, scoreP3,
                 foulsP1, foulsP2, foulsP3,
-                teamWinsP1, teamWinsP2, battleCount, matchMode,
+                teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
+                battleCount, matchMode, roster,
                 p1Name: document.getElementById('p1-title').value,
                 p2Name: document.getElementById('p2-title').value,
                 p3Name: document.getElementById('p3-title').value,
@@ -977,10 +1011,14 @@
                     foulsP3 = state.foulsP3 || 0;
                     teamWinsP1 = state.teamWinsP1 || 0;
                     teamWinsP2 = state.teamWinsP2 || 0;
+                    kofIndexP1 = state.k1 || 0;
+                    kofIndexP2 = state.k2 || 0;
                     battleCount = state.battleCount || 1;
                     matchMode = state.matchMode || 'std';
                     logs = Array.isArray(state.logs) ? state.logs : [];
                     currentLang = state.currentLang || 'zh';
+
+                    if (state.roster) roster = state.roster;
 
                     if (state.p1Name) document.getElementById('p1-title').value = state.p1Name;
                     if (state.p2Name) document.getElementById('p2-title').value = state.p2Name;
