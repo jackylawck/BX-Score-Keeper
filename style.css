@@ -38,12 +38,18 @@ body {
     padding: 8px 12px;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
 }
 
-/* =========================================================================
- * 頂部導覽列 (Header & Navigation)
- * ========================================================================= */
+/* 🖥️ 寬螢幕/電腦版專屬置中容器：徹底防止橫向拉扯變形 */
+.app-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
 header {
     display: flex;
     justify-content: space-between;
@@ -91,9 +97,6 @@ h1 {
     color: #000;
 }
 
-/* =========================================================================
- * 賽制切換與語音發射橫幅 (Mode Banner & Shoot Button)
- * ========================================================================= */
 .mode-banner {
     display: flex;
     justify-content: space-between;
@@ -153,9 +156,6 @@ h1 {
     filter: brightness(1.2);
 }
 
-/* =========================================================================
- * 隊伍大分條 (Team Battle Tracker)
- * ========================================================================= */
 .team-tracker-bar {
     display: flex;
     justify-content: center;
@@ -167,18 +167,14 @@ h1 {
     padding: 4px 12px;
     font-size: 0.85rem;
     font-weight: bold;
-    max-width: 500px;
+    width: 100%;
 }
 
-/* =========================================================================
- * 核心計分板 (Scoreboard & Cards)
- * ========================================================================= */
 .scoreboard {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 8px;
-    flex: 1;
 }
 
 .scoreboard.p3-mode {
@@ -245,19 +241,10 @@ h1 {
     text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
 }
 
-.player-card:nth-child(2) .score-display {
-    color: var(--neon-blue);
-    text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
-}
-
-/* =========================================================================
- * 計分按鈕網格 (Scoring Button Grid)
- * ========================================================================= */
 .btn-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 4px;
-    flex: 1;
 }
 
 .score-btn {
@@ -302,9 +289,6 @@ h1 {
     font-size: 0.8rem;
 }
 
-/* =========================================================================
- * 賽事控制列 (Controls: Undo, Draw, Reset)
- * ========================================================================= */
 .controls {
     display: flex;
     gap: 6px;
@@ -340,9 +324,6 @@ h1 {
     color: var(--neon-red);
 }
 
-/* =========================================================================
- * 對局紀錄面板 (Battle Log)
- * ========================================================================= */
 .log-panel {
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--card-border);
@@ -350,7 +331,7 @@ h1 {
     padding: 8px;
     max-height: 120px;
     overflow-y: auto;
-    margin-top: auto;
+    margin-top: 4px;
 }
 
 .log-title {
@@ -372,9 +353,6 @@ h1 {
     padding: 2px 0;
 }
 
-/* =========================================================================
- * 彈窗通用樣式 (Modal Backdrop & Dialog Content)
- * ========================================================================= */
 .modal {
     position: fixed;
     top: 0;
@@ -422,6 +400,52 @@ h1 {
     border-color: var(--neon-blue);
 }
 
+/* 🗑️ 大廳卡片與清空按鈕美化對齊 */
+.lobby-card {
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.lobby-card.side-1 {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid var(--neon-blue);
+}
+
+.lobby-card.side-2 {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid var(--neon-red);
+}
+
+.lobby-card.side-3 {
+    background: rgba(234, 179, 8, 0.05);
+    border: 1px solid var(--neon-yellow);
+}
+
+.slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.btn-clear {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.btn-clear:active {
+    background: #ef4444;
+    color: #fff;
+}
+
 .versus-title {
     font-family: 'Orbitron', monospace;
     font-size: 1.8rem;
@@ -463,6 +487,10 @@ footer {
     body {
         padding: 4px 8px !important;
         overflow-y: auto;
+    }
+
+    .app-container {
+        max-width: 100% !important;
     }
 
     .scoreboard {
