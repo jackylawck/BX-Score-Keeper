@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bx-score-v53';
+const CACHE_NAME = 'bx-score-v55';
 const ASSETS = [
   './',
   './index.html',
@@ -33,6 +33,6 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    fetch(e.request).catch(() => caches.match(e.request, { ignoreSearch: true }))
   );
 });
