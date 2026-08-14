@@ -37,8 +37,7 @@ body {
     color: var(--text-main);
     padding: 10px 16px;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    display: block; /* 🛡️ 保持標準區塊佈局，徹底防止橫向擠壓變形 */
 }
 
 header {
@@ -159,6 +158,7 @@ h1 {
     font-size: 0.9rem;
     font-weight: bold;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 .scoreboard {
@@ -166,7 +166,6 @@ h1 {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 10px;
-    flex: 1;
 }
 
 .scoreboard.p3-mode {
@@ -237,7 +236,6 @@ h1 {
     display: grid;
     grid-template-columns: 1fr;
     gap: 5px;
-    flex: 1;
 }
 
 .score-btn {
@@ -460,15 +458,15 @@ footer {
     text-align: center;
     font-size: 0.7rem;
     color: var(--text-sub);
-    margin-top: 10px;
+    margin-top: 12px;
     padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* =========================================================================
- * 📱 手機橫屏模式 (Landscape Mode - 極致滿版全螢幕)
+ * 📱 僅在小型手機打橫時 (Mobile Landscape) 觸發頂格滿版
  * ========================================================================= */
-@media screen and (orientation: landscape) and (max-height: 500px) {
+@media screen and (orientation: landscape) and (max-height: 480px) and (max-width: 900px) {
     header,
     .subtitle,
     #top-mode-banner,
@@ -478,7 +476,6 @@ footer {
 
     body {
         padding: 4px 8px !important;
-        overflow-y: auto;
     }
 
     .scoreboard {
@@ -518,7 +515,7 @@ footer {
     }
 
     .log-panel {
-        margin-top: 6px !important;
+        margin-top: 4px !important;
         padding: 6px !important;
     }
 }
