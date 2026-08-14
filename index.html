@@ -40,39 +40,21 @@
         </div>
     </header>
 
-    <div class="mode-banner">
-        <div class="mode-toggle">
-            <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std')">1v1 Standard</button>
-            <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3')">3on3 Battle</button>
-            <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team')">Team Battle</button>
-            <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3')">3-Player (5-pt)</button>
-        </div>
-        <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
-    </div>
-
-    <!-- P2P 連線狀態顯示條 -->
-    <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 6px 12px; margin: 8px auto; max-width: 700px; text-align: center; font-size: 0.85rem; color: #fff;">
-        <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
-        <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow); font-size: 1.1rem; letter-spacing: 1px;">----</strong> | 
-        <span id="p2p-lbl-connected">已連線設備</span>: <strong id="p2p-connected-count" style="color: var(--neon-green);">0</strong>
-        <button class="ctrl-btn" onclick="openLobbyModal()" style="font-size: 0.75rem; padding: 2px 8px; margin-left: 8px; background: var(--neon-blue); color: #000; font-weight: bold;" id="btn-open-lobby">🏟️ 等候大廳</button>
-        <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 2px 8px; margin-left: 6px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
-    </div>
-
     <!-- 3on3 Status Box -->
-    <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 10px 0;">
+    <div id="deck-box" style="display: none; justify-content: center; align-items: center; gap: 10px; margin: 6px 0;">
         <span id="deck-status" style="color: var(--neon-yellow); font-weight: bold;">ITEM #1</span>
         <button class="ctrl-btn" id="reorder-btn" onclick="resetBattleCounter()" style="font-size: 0.8rem; padding: 4px 8px;">重置順序</button>
     </div>
 
     <!-- Team Battle Tracker Bar -->
-    <div class="team-tracker-bar" id="team-tracker-bar" style="display: none;">
+    <div class="team-tracker-bar" id="team-tracker-bar" style="display: none; margin: 6px auto;">
         <span>TEAM WINS:</span>
         <span style="color: var(--neon-blue);" id="team-wins-p1">隊伍 A: 0</span>
         <span>vs</span>
         <span style="color: var(--neon-red);" id="team-wins-p2">隊伍 B: 0</span>
     </div>
 
+    <!-- 📱 核心計分板：直達畫面中央，手機端一目了然 -->
     <div class="scoreboard" id="main-scoreboard">
         <!-- Player 1 -->
         <div class="player-card">
@@ -144,6 +126,7 @@
         </div>
     </div>
 
+    <!-- 🎮 控制列：復原 / 平手 / 換人 / 重置 -->
     <div class="controls" id="main-controls">
         <button class="ctrl-btn" onclick="undo()" id="btn-undo">復原</button>
         <button class="ctrl-btn draw" onclick="addDraw()" id="btn-draw">平手重賽</button>
@@ -151,9 +134,30 @@
         <button class="ctrl-btn reset" onclick="resetMatch()" id="btn-reset">重置賽事</button>
     </div>
 
+    <!-- 📍 移至控制列下方：賽制切換與 Go Shoot 按鈕 -->
+    <div class="mode-banner" style="margin-top: 10px;">
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="mode-std-btn" onclick="setMatchMode('std', true)">1v1 Standard</button>
+            <button class="mode-btn" id="mode-3v3-btn" onclick="setMatchMode('3v3', true)">3on3 Battle</button>
+            <button class="mode-btn" id="mode-team-btn" onclick="setMatchMode('team', true)">Team Battle</button>
+            <button class="mode-btn" id="mode-p3-btn" onclick="setMatchMode('p3', true)">3-Player (5-pt)</button>
+        </div>
+        <button class="shoot-btn" onclick="startShootCountdown()" id="shoot-btn">📢 3, 2, 1, Go Shoot!</button>
+    </div>
+
+    <!-- 對局紀錄面板 -->
     <div class="log-panel">
         <div class="log-title" id="log-title">⚡ 對局紀錄</div>
         <ul class="log-list" id="log-list"></ul>
+    </div>
+
+    <!-- 📍 移至最底部：P2P 狀態條（裁判 ID / 觀戰人數 / 大廳與離開按鈕） -->
+    <div id="p2p-status-bar" style="display: none; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 8px 12px; margin: 12px auto; max-width: 700px; text-align: center; font-size: 0.85rem; color: #fff;">
+        <span id="p2p-role-badge" style="background: var(--neon-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px;">HOST</span>
+        <span id="p2p-lbl-room">房間 ID</span>: <strong id="p2p-current-room" style="color: var(--neon-yellow); font-size: 1.1rem; letter-spacing: 1px;">----</strong> | 
+        <span id="p2p-lbl-connected">已連線設備</span>: <strong id="p2p-connected-count" style="color: var(--neon-green);">0</strong>
+        <button class="ctrl-btn" onclick="openLobbyModal()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px; background: var(--neon-blue); color: #000; font-weight: bold;" id="btn-open-lobby">🏟️ 等候大廳</button>
+        <button class="ctrl-btn" onclick="leaveP2PRoom()" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 6px; background: #ef4444; color: #fff;" id="btn-leave-p2p">🚪 離開房間</button>
     </div>
 
     <!-- 🌐 WebRTC P2P 跨機連線入口 Modal -->
@@ -207,7 +211,7 @@
         </div>
     </div>
 
-    <!-- 🏟️ 裁判專屬：賽事等候大廳 (含 🗑️ 單邊清空/刪除按鈕) -->
+    <!-- 🏟️ 裁判專屬：賽事等候大廳 -->
     <div class="modal" id="lobby-modal">
         <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 8px;">
@@ -224,7 +228,6 @@
                     </div>
                 </div>
 
-                <!-- 賽制選擇與左右對調工具列 -->
                 <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 10px;">
                     <div style="flex: 1; text-align: left;">
                         <label style="font-size: 0.8rem; color: var(--neon-blue); font-weight: bold;" id="lbl-lobby-select-mode">👑 本局賽事模式：</label>
@@ -239,7 +242,7 @@
                 </div>
 
                 <div style="text-align: left; margin-bottom: 12px;">
-                    <!-- Side 1 卡片 (含清空按鈕) -->
+                    <!-- Side 1 -->
                     <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
@@ -253,7 +256,7 @@
                         </div>
                     </div>
 
-                    <!-- Side 2 卡片 (含清空按鈕) -->
+                    <!-- Side 2 -->
                     <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid var(--neon-red); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
@@ -267,7 +270,7 @@
                         </div>
                     </div>
 
-                    <!-- Side 3 卡片 (3-Player) -->
+                    <!-- Side 3 -->
                     <div id="lobby-p3-box" style="display:none; background: rgba(234, 179, 8, 0.05); border: 1px solid var(--neon-yellow); border-radius: 6px; padding: 8px; margin-bottom: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <strong style="color: var(--neon-yellow);" id="lbl-lobby-p3">👆 中間 (選手三)</strong>
@@ -282,7 +285,7 @@
         </div>
     </div>
 
-    <!-- 📩 裁判接收單一選手提交確認 Modal (含接收與拒絕按鈕) -->
+    <!-- 📩 裁判審核 Modal -->
     <div class="modal" id="p2p-confirm-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 2rem; color: var(--neon-yellow);">📩</div>
@@ -375,12 +378,13 @@
         </div>
     </div>
 
-    <!-- ⏳ 觀眾專屬：裁判回大廳排陣時的等候過場遮罩 (不中斷連線) -->
+    <!-- ⏳ 觀眾專屬等候遮罩（提供離開房間按鈕） -->
     <div class="modal" id="spectator-waiting-overlay" style="display: none; background: rgba(8, 12, 20, 0.92); z-index: 9999;">
         <div class="modal-content" style="text-align: center; border: 1px solid var(--neon-blue);">
             <div style="font-size: 2.5rem; animation: pulse 1.5s infinite;">⏳</div>
             <h3 style="color: var(--neon-yellow); margin: 10px 0;" id="txt-spectator-waiting">裁判正在大廳排陣準備中，請稍候...</h3>
-            <p style="font-size: 0.85rem; color: #cbd5e1;">房間持續連線中，裁判開賽後畫面將自動同步！</p>
+            <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">房間持續連線中，裁判開賽後畫面將自動同步！</p>
+            <button class="ctrl-btn" onclick="leaveP2PRoom()" style="background: #ef4444; color: #fff; font-weight: bold; padding: 6px 16px;">🚪 離開房間</button>
         </div>
     </div>
 
