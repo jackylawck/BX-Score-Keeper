@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bx-score-v59';
+const CACHE_NAME = 'bx-score-v61';
 const ASSETS = [
   './',
   './index.html',
