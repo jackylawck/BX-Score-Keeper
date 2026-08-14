@@ -1,8 +1,24 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Module (Enhanced Android & STUN Compatibility)
+ * 🌐 p2p.js - WebRTC PeerJS Module (Refactored Clean Architecture)
  * ========================================================================= */
 
 const MAX_DEVICES = 15;
+
+const P2P_EVENTS = {
+    PING: 'PING',
+    PONG: 'PONG',
+    INIT_SYNC: 'INIT_SYNC',
+    STATE_SYNC: 'STATE_SYNC',
+    MATCH_START_SYNC: 'MATCH_START_SYNC',
+    WIN_SYNC: 'WIN_SYNC',
+    CLOSE_WIN_SYNC: 'CLOSE_WIN_SYNC',
+    MODE_SYNC: 'MODE_SYNC',
+    SUBMIT_DECK: 'SUBMIT_DECK',
+    LOBBY_WAITING: 'LOBBY_WAITING',
+    REJECT_FULL: 'REJECT_FULL',
+    ROOM_CAPACITY_FULL: 'ROOM_CAPACITY_FULL',
+    DEVICE_COUNT_SYNC: 'DEVICE_COUNT_SYNC'
+};
 
 let peer = null;
 let p2pConnMap = {}; 
@@ -13,15 +29,20 @@ let pendingClientData = null;
 let occupiedSlots = { slot1: false, slot2: false, slot3: false };
 let isMatchLocked = false;
 let heartbeatTimer = null;
+let connectTimeoutTimer = null;
 
-// 🌐 加入 Google 公共 STUN 伺服器，解決跨電信商/跨 WiFi 穿透問題
+// 🌐 強化版 STUN 穿透伺服器池
 const PEER_CONFIG = {
     config: {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            { urls: 'stun:stun.cloudflare.com:3478' }
+        ],
+        iceCandidatePoolSize: 10
     }
 };
 
@@ -70,7 +91,7 @@ function initP2PHost() {
     
     peer.on('open', (id) => {
         myPeerRole = 'host';
-        p2pConnMap = {}; // 清空舊連線表
+        p2pConnMap = {};
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
         isMatchLocked = false;
         setUIPermissions();
@@ -85,65 +106,59 @@ function initP2PHost() {
         openLobbyModal();
     });
 
-    peer.on('connection', (conn) => {
-        // 清理已關閉的無效連線，確保人數精準
-        cleanDeadConnections();
-
-        let currentCount = Object.keys(p2pConnMap).length;
-
-        if (currentCount >= MAX_DEVICES) {
-            conn.on('open', () => {
-                conn.send({ type: 'ROOM_CAPACITY_FULL' });
-                setTimeout(() => conn.close(), 500);
-            });
-            return;
-        }
-
-        p2pConnMap[conn.peer] = conn;
-        updateConnectedCount();
-
-        conn.on('open', () => {
-            conn.send({
-                type: 'INIT_SYNC',
-                isMatchLocked: isMatchLocked,
-                roster: roster,
-                scoreP1, scoreP2, scoreP3,
-                foulsP1, foulsP2, foulsP3,
-                teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
-                battleCount, matchMode,
-                logs: logs,
-                connectedCount: getActiveConnectionCount()
-            });
-            broadcastDeviceCount();
-        });
-
-        conn.on('data', (data) => {
-            if (data.type === 'PING') {
-                conn.send({ type: 'PONG' });
-                return;
-            }
-            handleHostReceivedData(data, conn);
-        });
-
-        conn.on('close', () => {
-            delete p2pConnMap[conn.peer];
-            updateConnectedCount();
-            broadcastDeviceCount();
-        });
-
-        conn.on('error', () => {
-            delete p2pConnMap[conn.peer];
-            updateConnectedCount();
-            broadcastDeviceCount();
-        });
-    });
+    // 🎯 抽離連線事件處理
+    peer.on('connection', (conn) => handleNewHostConnection(conn));
 
     peer.on('error', (err) => {
         if (err.type === 'unavailable-id') {
-            initP2PHost(); // 若極低機率撞號，自動重抽
+            initP2PHost();
         } else {
-            console.error("Peer Error:", err);
+            console.error("Peer Host Error:", err);
         }
+    });
+}
+
+function handleNewHostConnection(conn) {
+    cleanDeadConnections();
+
+    if (getActiveConnectionCount() >= MAX_DEVICES) {
+        conn.on('open', () => {
+            conn.send({ type: P2P_EVENTS.ROOM_CAPACITY_FULL });
+            setTimeout(() => conn.close(), 500);
+        });
+        return;
+    }
+
+    p2pConnMap[conn.peer] = conn;
+    updateConnectedCount();
+
+    conn.on('open', () => {
+        conn.send({
+            type: P2P_EVENTS.INIT_SYNC,
+            ...getFullState(),
+            connectedCount: getActiveConnectionCount()
+        });
+        broadcastDeviceCount();
+    });
+
+    conn.on('data', (data) => {
+        if (data.type === P2P_EVENTS.PING) {
+            conn.send({ type: P2P_EVENTS.PONG });
+            return;
+        }
+        handleHostReceivedData(data, conn);
+    });
+
+    conn.on('close', () => {
+        delete p2pConnMap[conn.peer];
+        updateConnectedCount();
+        broadcastDeviceCount();
+    });
+
+    conn.on('error', () => {
+        delete p2pConnMap[conn.peer];
+        updateConnectedCount();
+        broadcastDeviceCount();
     });
 }
 
@@ -166,9 +181,9 @@ function startHeartbeat() {
     heartbeatTimer = setInterval(() => {
         if (myPeerRole === 'host') {
             cleanDeadConnections();
-            broadcastToClients({ type: 'PING' });
+            broadcastToClients({ type: P2P_EVENTS.PING });
         } else if (hostConn && hostConn.open) {
-            hostConn.send({ type: 'PING' });
+            hostConn.send({ type: P2P_EVENTS.PING });
         }
     }, 5000);
 }
@@ -184,7 +199,7 @@ function updateConnectedCount(overrideCount = null) {
 
 function broadcastDeviceCount() {
     let count = getActiveConnectionCount();
-    broadcastToClients({ type: 'DEVICE_COUNT_SYNC', count });
+    broadcastToClients({ type: P2P_EVENTS.DEVICE_COUNT_SYNC, count });
 }
 
 function openLobbyModal() {
@@ -202,16 +217,16 @@ function openLobbyModal() {
     safeSetDisplay('lobby-modal', 'flex');
 
     isMatchLocked = false;
-    broadcastToClients({ type: 'LOBBY_WAITING' });
+    broadcastToClients({ type: P2P_EVENTS.LOBBY_WAITING });
 }
 
 function closeLobbyModal() { safeSetDisplay('lobby-modal', 'none'); }
 
 function handleLobbyModeChange() {
     let newMode = document.getElementById('lobby-match-mode').value;
-    setMatchMode(newMode, false);
+    setMatchMode(newMode, false, false);
     applyLobbyLayout();
-    broadcastToClients({ type: 'MODE_SYNC', mode: newMode });
+    broadcastToClients({ type: P2P_EVENTS.MODE_SYNC, mode: newMode });
 }
 
 function applyLobbyLayout() {
@@ -232,6 +247,16 @@ function applyLobbyLayout() {
     }
 }
 
+function isRealCustomName(val) {
+    const defaults = [
+        '1','2','3','A','B','C',
+        '選手一','選手二','選手三','Player 1','Player 2','Player 3',
+        '隊伍 A','隊伍 B','Team A','Team B',
+        '先鋒','中堅','大將'
+    ];
+    return val && !defaults.includes(val.trim()) && !val.includes('Vanguard') && !val.includes('Middle') && !val.includes('General');
+}
+
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -243,25 +268,22 @@ function syncRosterToLobbyUI() {
     let defD2 = matchMode === 'team' ? (currentLang === 'zh' ? '中堅' : '2nd Middle') : (currentLang === 'zh' ? '陀螺 2號' : 'Bey 2');
     let defD3 = matchMode === 'team' ? (currentLang === 'zh' ? '大將' : '3rd General') : (currentLang === 'zh' ? '陀螺 3號' : 'Bey 3');
 
-    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B' && val !== 'Team A' && val !== 'Team B' && !val.startsWith('選手') && !val.startsWith('Player');
-    let isRealDeck = (val) => val && val !== '1' && val !== '2' && val !== '3' && val !== 'A' && val !== 'B' && val !== 'C' && !val.startsWith('陀螺') && !val.startsWith('Bey') && val !== '先鋒' && val !== '中堅' && val !== '大將' && !val.includes('Vanguard') && !val.includes('Middle') && !val.includes('General');
-
     if (matchMode === 'team') {
-        safeSetInputValue('lobby-p1-name', isReal(roster.t1Name) ? roster.t1Name : defT1);
-        safeSetInputValue('lobby-p2-name', isReal(roster.t2Name) ? roster.t2Name : defT2);
+        safeSetInputValue('lobby-p1-name', isRealCustomName(roster.t1Name) ? roster.t1Name : defT1);
+        safeSetInputValue('lobby-p2-name', isRealCustomName(roster.t2Name) ? roster.t2Name : defT2);
     } else {
-        safeSetInputValue('lobby-p1-name', isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1));
-        safeSetInputValue('lobby-p2-name', isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2));
+        safeSetInputValue('lobby-p1-name', isRealCustomName(roster.t1Name) ? roster.t1Name : ((roster.t1 && isRealCustomName(roster.t1[0])) ? roster.t1[0] : defP1));
+        safeSetInputValue('lobby-p2-name', isRealCustomName(roster.t2Name) ? roster.t2Name : ((roster.t2 && isRealCustomName(roster.t2[0])) ? roster.t2[0] : defP2));
     }
-    safeSetInputValue('lobby-p3-name', isReal(roster.t3Name) ? roster.t3Name : defP3);
+    safeSetInputValue('lobby-p3-name', isRealCustomName(roster.t3Name) ? roster.t3Name : defP3);
 
-    safeSetInputValue('lobby-p1-d1', (roster.t1 && isRealDeck(roster.t1[0])) ? roster.t1[0] : defD1);
-    safeSetInputValue('lobby-p1-d2', (roster.t1 && isRealDeck(roster.t1[1])) ? roster.t1[1] : defD2);
-    safeSetInputValue('lobby-p1-d3', (roster.t1 && isRealDeck(roster.t1[2])) ? roster.t1[2] : defD3);
+    safeSetInputValue('lobby-p1-d1', (roster.t1 && isRealCustomName(roster.t1[0])) ? roster.t1[0] : defD1);
+    safeSetInputValue('lobby-p1-d2', (roster.t1 && isRealCustomName(roster.t1[1])) ? roster.t1[1] : defD2);
+    safeSetInputValue('lobby-p1-d3', (roster.t1 && isRealCustomName(roster.t1[2])) ? roster.t1[2] : defD3);
 
-    safeSetInputValue('lobby-p2-d1', (roster.t2 && isRealDeck(roster.t2[0])) ? roster.t2[0] : defD1);
-    safeSetInputValue('lobby-p2-d2', (roster.t2 && isRealDeck(roster.t2[1])) ? roster.t2[1] : defD2);
-    safeSetInputValue('lobby-p2-d3', (roster.t2 && isRealDeck(roster.t2[2])) ? roster.t2[2] : defD3);
+    safeSetInputValue('lobby-p2-d1', (roster.t2 && isRealCustomName(roster.t2[0])) ? roster.t2[0] : defD1);
+    safeSetInputValue('lobby-p2-d2', (roster.t2 && isRealCustomName(roster.t2[1])) ? roster.t2[1] : defD2);
+    safeSetInputValue('lobby-p2-d3', (roster.t2 && isRealCustomName(roster.t2[2])) ? roster.t2[2] : defD3);
 }
 
 function clearLobbySlot(slotNum) {
@@ -298,7 +320,7 @@ function clearLobbySlot(slotNum) {
     }
 
     isMatchLocked = false;
-    broadcastToClients({ type: 'LOBBY_WAITING' });
+    broadcastToClients({ type: P2P_EVENTS.LOBBY_WAITING });
 }
 
 function swapLobbySides() {
@@ -395,15 +417,9 @@ function startMatchFromLobby() {
     let p3Show = document.getElementById('p3-title') ? document.getElementById('p3-title').value : '';
 
     broadcastToClients({
-        type: 'MATCH_START_SYNC',
-        isMatchLocked: true,
-        roster: roster,
-        scoreP1, scoreP2, scoreP3,
-        foulsP1, foulsP2, foulsP3,
-        teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
-        battleCount, matchMode,
-        p1Show, p2Show, p3Show,
-        logs: logs
+        type: P2P_EVENTS.MATCH_START_SYNC,
+        ...getFullState(),
+        p1Show, p2Show, p3Show
     });
 
     triggerVersusAnimation(p1Show, p2Show, p3Show);
@@ -416,15 +432,44 @@ function joinP2PRoom(roleType) {
         return;
     }
 
+    const btnJoin = document.getElementById(roleType === 'player' ? 'btn-join-player' : 'btn-join-spectator');
+    const origBtnText = btnJoin ? btnJoin.innerText : '';
+    if (btnJoin) {
+        btnJoin.innerText = currentLang === 'zh' ? '⏳ 連線中...' : '⏳ Connecting...';
+        btnJoin.disabled = true;
+    }
+
+    const resetButtons = () => {
+        if (btnJoin) {
+            btnJoin.innerText = origBtnText;
+            btnJoin.disabled = false;
+        }
+        if (connectTimeoutTimer) {
+            clearTimeout(connectTimeoutTimer);
+            connectTimeoutTimer = null;
+        }
+    };
+
     if (peer) peer.destroy();
     peer = new Peer(PEER_CONFIG);
+
+    // 🎯 8 秒超時保護 + 銷毀殭屍 Peer 物件
+    connectTimeoutTimer = setTimeout(() => {
+        resetButtons();
+        if (peer) {
+            peer.destroy();
+            peer = null;
+        }
+        alert(currentLang === 'zh' ? "⚠️ 連線超時：請確認裁判手機處於【等候大廳】畫面，且雙方網絡正常後再試。" : "⚠️ Connection Timeout: Please check if Referee is in Lobby and retry.");
+    }, 8000);
 
     peer.on('open', () => {
         myPeerRole = roleType;
         let targetPeerId = `bx-${inputId}`;
-        hostConn = peer.connect(targetPeerId, { reliable: true });
+        hostConn = peer.connect(targetPeerId);
 
         hostConn.on('open', () => {
+            resetButtons();
             currentRoomId = inputId;
             safeSetDisplay('p2p-status-bar', 'block');
             safeSetDisplay('btn-open-lobby', 'none');
@@ -446,20 +491,26 @@ function joinP2PRoom(roleType) {
         });
 
         hostConn.on('data', (data) => {
-            if (data.type === 'PING') {
-                hostConn.send({ type: 'PONG' });
+            if (data.type === P2P_EVENTS.PING) {
+                hostConn.send({ type: P2P_EVENTS.PONG });
                 return;
             }
             handleClientReceivedData(data);
         });
 
         hostConn.on('error', (err) => {
-            if (err.type === 'peer-unavailable') {
-                alert(currentLang === 'zh' ? "⚠️ 連線失敗：找不到此房間！請確認裁判已建立房間且 8 位數 ID 正確。" : "⚠️ Connection Failed: Room not found! Please check Room ID.");
-            } else {
-                alert("Connection Error: " + err.type);
-            }
+            resetButtons();
+            console.error("Client HostConn Error:", err);
         });
+    });
+
+    peer.on('error', (err) => {
+        resetButtons();
+        if (err.type === 'peer-unavailable') {
+            alert(currentLang === 'zh' ? "⚠️ 連線失敗：找不到此房間！請確認裁判已建立房間且 8 位數 ID 正確。" : "⚠️ Connection Failed: Room not found! Please check Room ID.");
+        } else {
+            console.error("Client Peer Error:", err);
+        }
     });
 }
 
@@ -511,7 +562,7 @@ function sendClientDeckToHost() {
     let item3 = document.getElementById('p2p-item-3').value.trim() || '3';
 
     let payload = {
-        type: 'SUBMIT_DECK',
+        type: P2P_EVENTS.SUBMIT_DECK,
         formMode: mode,
         name: name,
         items: [item1, item2, item3]
@@ -522,15 +573,15 @@ function sendClientDeckToHost() {
 }
 
 function handleHostReceivedData(data, conn) {
-    if (data.type === 'SUBMIT_DECK') {
+    if (data.type === P2P_EVENTS.SUBMIT_DECK) {
         if (isMatchLocked) {
-            conn.send({ type: 'REJECT_FULL' });
+            conn.send({ type: P2P_EVENTS.REJECT_FULL });
             return;
         }
 
         let isFull = (occupiedSlots.slot1 && occupiedSlots.slot2 && occupiedSlots.slot3);
         if (isFull) {
-            conn.send({ type: 'REJECT_FULL' });
+            conn.send({ type: P2P_EVENTS.REJECT_FULL });
             return;
         }
 
@@ -608,9 +659,9 @@ function autoAcceptClientSubmission() {
 function handleLobbyModeChangeFromData(newMode) {
     const modeSelect = document.getElementById('lobby-match-mode');
     if (modeSelect) modeSelect.value = newMode;
-    setMatchMode(newMode, false);
+    setMatchMode(newMode, false, false);
     applyLobbyLayout();
-    broadcastToClients({ type: 'MODE_SYNC', mode: newMode });
+    broadcastToClients({ type: P2P_EVENTS.MODE_SYNC, mode: newMode });
 }
 
 function rejectClientSubmission() {
@@ -619,12 +670,12 @@ function rejectClientSubmission() {
 }
 
 function handleClientReceivedData(data) {
-    if (data.type === 'ROOM_CAPACITY_FULL') {
+    if (data.type === P2P_EVENTS.ROOM_CAPACITY_FULL) {
         alert(currentLang === 'zh' ? "⚠️ 本房間人數已達 15 人上限！無法加入。" : "⚠️ Room capacity reached (15/15 max)!");
         leaveP2PRoom();
-    } else if (data.type === 'DEVICE_COUNT_SYNC') {
+    } else if (data.type === P2P_EVENTS.DEVICE_COUNT_SYNC) {
         updateConnectedCount(data.count);
-    } else if (data.type === 'INIT_SYNC') {
+    } else if (data.type === P2P_EVENTS.INIT_SYNC) {
         isMatchLocked = data.isMatchLocked || false;
         if (isMatchLocked && myPeerRole === 'player') {
             myPeerRole = 'spectator';
@@ -638,7 +689,7 @@ function handleClientReceivedData(data) {
         }
         if (data.connectedCount) updateConnectedCount(data.connectedCount);
         applyStateSync(data);
-    } else if (data.type === 'LOBBY_WAITING') {
+    } else if (data.type === P2P_EVENTS.LOBBY_WAITING) {
         safeSetDisplay('win-modal', 'none');
         if (myPeerRole === 'player') {
             safeSetDisplay('p2p-client-submit-box', 'block');
@@ -646,32 +697,32 @@ function handleClientReceivedData(data) {
         } else {
             safeSetDisplay('spectator-waiting-overlay', 'flex');
         }
-    } else if (data.type === 'REJECT_FULL') {
+    } else if (data.type === P2P_EVENTS.REJECT_FULL) {
         alert(currentLang === 'zh' ? "⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。" : "⚠️ Match slots are full! Switched to Spectator mode.");
         myPeerRole = 'spectator';
         safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
         safeSetDisplay('p2p-client-submit-box', 'none');
         closeP2PModal();
         setUIPermissions();
-    } else if (data.type === 'STATE_SYNC' || data.type === 'MATCH_START_SYNC') {
+    } else if (data.type === P2P_EVENTS.STATE_SYNC || data.type === P2P_EVENTS.MATCH_START_SYNC) {
         safeSetDisplay('spectator-waiting-overlay', 'none');
-        if (data.isMatchLocked !== undefined) isMatchLocked = data.isMatchLocked;
         applyStateSync(data);
 
-        if (data.type === 'MATCH_START_SYNC') {
+        if (data.type === P2P_EVENTS.MATCH_START_SYNC) {
             triggerVersusAnimation(data.p1Show, data.p2Show, data.p3Show);
         }
-    } else if (data.type === 'WIN_SYNC') {
+    } else if (data.type === P2P_EVENTS.WIN_SYNC) {
         showWinModal(data.winner, data.isFinalTeamWin);
-    } else if (data.type === 'CLOSE_WIN_SYNC') {
+    } else if (data.type === P2P_EVENTS.CLOSE_WIN_SYNC) {
         safeSetDisplay('win-modal', 'none');
-    } else if (data.type === 'MODE_SYNC') {
-        setMatchMode(data.mode, false);
+    } else if (data.type === P2P_EVENTS.MODE_SYNC) {
+        setMatchMode(data.mode, false, false);
     }
 }
 
 function applyStateSync(data) {
     if (data.roster) roster = data.roster;
+    if (data.isMatchLocked !== undefined) isMatchLocked = data.isMatchLocked;
     scoreP1 = data.scoreP1 || 0;
     scoreP2 = data.scoreP2 || 0;
     scoreP3 = data.scoreP3 || 0;
