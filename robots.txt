@@ -1,0 +1,15 @@
+# ==============================================================================
+# ⚡ BX Score Keeper | robots.txt
+# Web App: https://jackylawck.github.io/BX-Score-Keeper/
+# Description: Official Asia 12th Ed Regulations Beyblade X Scoreboard & PWA
+# 說明：《爆旋陀螺X規則（亞洲版）》第12版 專用跨機對戰計分器
+# ==============================================================================
+
+# [EN] Allow all web crawlers, search engines, and AI bots full access to public assets.
+# [繁中] 允許所有搜尋引擎爬蟲、網頁檢索器及 AI 機器人存取本應用程式所有公開資源。
+User-agent: *
+Allow: /
+
+# [EN] Direct crawlers to the bilingual XML Sitemap.
+# [繁中] 引導爬蟲讀取中英雙語 XML 網站地圖。
+Sitemap: https://jackylawck.github.io/BX-Score-Keeper/sitemap.xml
