@@ -10,8 +10,8 @@ let history = [], logs = [];
 let currentLang = 'zh';
 
 let roster = {
-    t1Name: '', t1: ['1', '2', '3'],
-    t2Name: '', t2: ['A', 'B', 'C'],
+    t1Name: 'Team A', t1: ['1', '2', '3'],
+    t2Name: 'Team B', t2: ['A', 'B', 'C'],
     t3Name: 'PLAYER 3'
 };
 
@@ -61,7 +61,10 @@ function forceRefreshApp() {
 }
 
 /* 🌐 WebRTC P2P 邏輯實作 */
-function openP2PModal() { safeSetDisplay('p2p-modal', 'flex'); }
+function openP2PModal() { 
+    applyLanguage();
+    safeSetDisplay('p2p-modal', 'flex'); 
+}
 function closeP2PModal() { safeSetDisplay('p2p-modal', 'none'); }
 
 function updateP2PFormFields() {
@@ -71,19 +74,19 @@ function updateP2PFormFields() {
 
     if (mode === 'std' || mode === 'p3') {
         if (extraBox) extraBox.style.display = 'none';
-        if (nameInput) nameInput.placeholder = '選手姓名 (例如 Daddy)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 Daddy)' : 'Player Name (e.g. Daddy)';
     } else if (mode === '3v3') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = '選手姓名 (例如 Daddy)';
-        safeSetInputPlaceholder('p2p-item-1', '陀螺 1 號 (ITEM #1)');
-        safeSetInputPlaceholder('p2p-item-2', '陀螺 2 號 (ITEM #2)');
-        safeSetInputPlaceholder('p2p-item-3', '陀螺 3 號 (ITEM #3)');
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 Daddy)' : 'Player Name (e.g. Daddy)';
+        safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '陀螺 1 號 (ITEM #1)' : 'Bey #1 (ITEM #1)');
+        safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '陀螺 2 號 (ITEM #2)' : 'Bey #2 (ITEM #2)');
+        safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '陀螺 3 號 (ITEM #3)' : 'Bey #3 (ITEM #3)');
     } else if (mode === 'team') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = '隊伍名稱 (例如 Team A)';
-        safeSetInputPlaceholder('p2p-item-1', '先鋒 1 號');
-        safeSetInputPlaceholder('p2p-item-2', '中堅 2 號');
-        safeSetInputPlaceholder('p2p-item-3', '大將 3 號');
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 Team A)' : 'Team Name (e.g. Team A)';
+        safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '先鋒 1 號' : '1st Vanguard');
+        safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '中堅 2 號' : '2nd Middle');
+        safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '大將 3 號' : '3rd General');
     }
 }
 
@@ -105,10 +108,11 @@ function initP2PHost() {
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
         setUIPermissions();
         safeSetDisplay('p2p-status-bar', 'block');
-        safeSetText('p2p-role-badge', 'HOST (裁判)');
+        safeSetText('p2p-role-badge', currentLang === 'zh' ? 'HOST (裁判)' : 'HOST (Referee)');
         safeSetText('p2p-current-room', randomNum);
         safeSetText('p2p-connected-count', '0');
-        alert(`房間建立成功！房間 ID：${randomNum}\n請將此 ID 告知選手與觀眾加入。`);
+        let msg = currentLang === 'zh' ? `房間建立成功！房間 ID：${randomNum}\n請將此 ID 告知選手與觀眾加入。` : `Room created successfully! Room ID: ${randomNum}\nShare this ID with players and spectators.`;
+        alert(msg);
         closeP2PModal();
     });
 
@@ -127,11 +131,7 @@ function initP2PHost() {
     });
 
     peer.on('error', (err) => {
-        if (err.type === 'peer-unavailable') {
-            alert("⚠️ 房間建立失敗：房間 ID 重複，請再試一次。");
-        } else {
-            alert("房間建立失敗：" + err.type);
-        }
+        alert("Peer Error: " + err.type);
     });
 }
 
@@ -143,7 +143,7 @@ function updateConnectedCount() {
 function joinP2PRoom(roleType) {
     let inputId = document.getElementById('p2p-input-room').value.trim();
     if (!inputId || inputId.length < 8) {
-        alert("請輸入正確的 8 位數房間 ID！");
+        alert(currentLang === 'zh' ? "請輸入正確的 8 位數房間 ID！" : "Please enter a valid 8-digit Room ID!");
         return;
     }
 
@@ -160,20 +160,20 @@ function joinP2PRoom(roleType) {
             safeSetDisplay('p2p-status-bar', 'block');
             
             if (roleType === 'spectator') {
-                safeSetText('p2p-role-badge', '👁️ SPECTATOR (觀眾)');
+                safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
                 safeSetDisplay('p2p-client-submit-box', 'none');
                 closeP2PModal();
-                alert("已成功連線至裁判房間！你正處於【觀眾直播模式】。");
+                alert(currentLang === 'zh' ? "已成功連線至裁判房間！你正處於【觀眾直播模式】。" : "Connected to Referee! You are in Spectator Live mode.");
             } else {
-                safeSetText('p2p-role-badge', '🎮 PLAYER (選手)');
+                safeSetText('p2p-role-badge', currentLang === 'zh' ? '🎮 PLAYER (選手)' : '🎮 PLAYER');
                 safeSetDisplay('p2p-client-submit-box', 'block');
                 updateP2PFormFields();
-                alert("已成功連線至裁判房間！請填寫資料並送出。");
+                alert(currentLang === 'zh' ? "已成功連線至裁判房間！請填寫資料並送出。" : "Connected! Please fill in your roster and submit.");
             }
 
             setUIPermissions();
             safeSetText('p2p-current-room', inputId);
-            safeSetText('p2p-connected-count', '已連線');
+            safeSetText('p2p-connected-count', currentLang === 'zh' ? '已連線' : 'Connected');
         });
 
         hostConn.on('data', (data) => {
@@ -182,16 +182,17 @@ function joinP2PRoom(roleType) {
 
         hostConn.on('error', (err) => {
             if (err.type === 'peer-unavailable') {
-                alert("⚠️ 連線失敗：找不到此對戰房間！請確認裁判已建立房間且 8 位數 ID 正確。");
+                alert(currentLang === 'zh' ? "⚠️ 連線失敗：找不到此對戰房間！請確認裁判已建立房間且 8 位數 ID 正確。" : "⚠️ Connection Failed: Room not found! Please check Room ID.");
             } else {
-                alert("連線失敗：" + err.type);
+                alert("Connection Error: " + err.type);
             }
         });
     });
 }
 
 function leaveP2PRoom() {
-    if (confirm("確定要離開目前的對戰房間嗎？")) {
+    let confirmMsg = currentLang === 'zh' ? "確定要離開目前的對戰房間嗎？" : "Are you sure you want to leave the room?";
+    if (confirm(confirmMsg)) {
         if (peer) peer.destroy();
         peer = null;
         hostConn = null;
@@ -200,7 +201,7 @@ function leaveP2PRoom() {
         
         safeSetDisplay('p2p-status-bar', 'none');
         setUIPermissions();
-        alert("已離開房間，恢復單機計分模式。");
+        alert(currentLang === 'zh' ? "已離開房間，恢復單機計分模式。" : "Left room. Returned to offline mode.");
     }
 }
 
@@ -218,12 +219,12 @@ function setUIPermissions() {
 
 function sendClientDeckToHost() {
     if (!hostConn || !hostConn.open) {
-        alert("未連線至裁判端！");
+        alert(currentLang === 'zh' ? "未連線至裁判端！" : "Not connected to Referee!");
         return;
     }
 
     let mode = document.getElementById('p2p-form-type').value;
-    let name = document.getElementById('p2p-player-name').value.trim() || '選手';
+    let name = document.getElementById('p2p-player-name').value.trim() || (currentLang === 'zh' ? '選手' : 'Player');
     let item1 = document.getElementById('p2p-item-1').value.trim() || '1';
     let item2 = document.getElementById('p2p-item-2').value.trim() || '2';
     let item3 = document.getElementById('p2p-item-3').value.trim() || '3';
@@ -236,7 +237,7 @@ function sendClientDeckToHost() {
     };
 
     hostConn.send(payload);
-    alert("已送出給裁判，等待裁判審核並決定放置位置！");
+    alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並決定放置位置！" : "Submitted! Waiting for Referee approval.");
 }
 
 function handleHostReceivedData(data, conn) {
@@ -251,18 +252,18 @@ function handleHostReceivedData(data, conn) {
         }
 
         pendingClientData = data;
-        safeSetText('p2p-request-title', `收到 [ ${data.name} ] 的排陣提交`);
+        safeSetText('p2p-request-title', currentLang === 'zh' ? `收到 [ ${data.name} ] 的排陣提交` : `Received Roster from [ ${data.name} ]`);
         
-        let modeLabel = data.formMode === '3v3' ? '3on3 陀螺' : (data.formMode === 'team' ? 'Team 隊員' : '個人賽');
+        let modeLabel = data.formMode === '3v3' ? '3on3' : (data.formMode === 'team' ? 'Team' : '1v1 / 3-Player');
         let bodyHtml = `
-            <b>賽制類型:</b> ${modeLabel}<br>
-            <b>名稱:</b> ${data.name}<br>
+            <b>${currentLang === 'zh' ? '賽制類型' : 'Mode'}:</b> ${modeLabel}<br>
+            <b>${currentLang === 'zh' ? '名稱' : 'Name'}:</b> ${data.name}<br>
         `;
         if (data.formMode === '3v3' || data.formMode === 'team') {
             bodyHtml += `
-                <b>1 號:</b> ${data.items[0]}<br>
-                <b>2 號:</b> ${data.items[1]}<br>
-                <b>3 號:</b> ${data.items[2]}
+                <b>#1:</b> ${data.items[0]}<br>
+                <b>#2:</b> ${data.items[1]}<br>
+                <b>#3:</b> ${data.items[2]}
             `;
         }
         const modalBody = document.getElementById('p2p-request-body');
@@ -273,25 +274,23 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 關鍵修復：正確將連線名字帶入畫面的每一個輸入框！ */
 function acceptClientSubmission(targetSlot) {
     if (!pendingClientData) return;
 
     let data = pendingClientData;
     
-    // 自動將裁判端的賽事模式切換為選手所選賽制
     setMatchMode(data.formMode);
 
     if (targetSlot === 1) {
         roster.t1Name = data.name;
-        roster.t1[0] = data.name; // 修正：1v1 直取這個名字
-        roster.t1 = data.items.length ? data.items : [data.name, '2', '3'];
+        roster.t1[0] = data.name;
+        roster.t1 = (data.items && data.items.length) ? data.items : [data.name, '2', '3'];
         occupiedSlots.slot1 = true;
         safeSetInputValue('p1-title', data.name);
     } else if (targetSlot === 2) {
         roster.t2Name = data.name;
         roster.t2[0] = data.name;
-        roster.t2 = data.items.length ? data.items : [data.name, 'B', 'C'];
+        roster.t2 = (data.items && data.items.length) ? data.items : [data.name, 'B', 'C'];
         occupiedSlots.slot2 = true;
         safeSetInputValue('p2-title', data.name);
     } else if (targetSlot === 3) {
@@ -327,9 +326,9 @@ function safeSetInputValue(id, val) {
 
 function handleClientReceivedData(data) {
     if (data.type === 'REJECT_FULL') {
-        alert("⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。");
+        alert(currentLang === 'zh' ? "⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。" : "⚠️ Match slots are full! Switched to Spectator mode.");
         myPeerRole = 'spectator';
-        safeSetText('p2p-role-badge', '👁️ SPECTATOR (觀眾)');
+        safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
         safeSetDisplay('p2p-client-submit-box', 'none');
         closeP2PModal();
         setUIPermissions();
@@ -445,6 +444,24 @@ const i18n = {
         privacyNotice: "本應用程式為純前端工具，不會收集或上傳任何個人資料，所有數據僅保留於你的瀏覽器內。",
         vsSubMsg: "對決準備！",
         btnStartVs: "開始對戰",
+        p2pTitle: "🌐 WebRTC P2P 跨機連線",
+        btnCreateHost: "👑 建立對戰房間 (裁判主機)",
+        txtHostDesc: "建立房間後，將 8 位數 ID 告知對手與現場觀眾。",
+        btnJoinPlayer: "🎮 選手連線",
+        btnJoinSpectator: "👁️ 觀眾觀戰",
+        lblSubmitTitle: "📩 提交個人 / 隊伍排陣名單",
+        lblSelectMode: "選擇欲提交的賽制模式：",
+        btnSubmitDeck: "🔒 私密送出給裁判審核",
+        lblChoosePos: "請選擇放入畫面的位置並同步開賽：",
+        btnSlot1: "👈 放左邊 (Player 1)",
+        btnSlot2: "👉 放右邊 (Player 2)",
+        btnLeaveP2P: "🚪 離開房間",
+        p2pGuide: `
+            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南：</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：點擊「建立對戰房間」，將 8 位數 ID 告知現場，接收選手排陣並控制計分。</div>
+            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 點擊「選手連線」，在自己手機私密填寫陀螺/隊員，送出給裁判。</div>
+            <div>• <b>👁️ 觀眾端</b>：輸入房間 ID 點擊「觀眾觀戰」，畫面將即時同步大螢幕賽果與動畫！</div>
+        `,
         rulesBody: `
             <div style="margin-bottom:12px;">
                 <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. 得分與判定機制</h3>
@@ -477,6 +494,24 @@ const i18n = {
         privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
         vsSubMsg: "READY TO BATTLE!",
         btnStartVs: "START BATTLE",
+        p2pTitle: "🌐 WebRTC P2P Multi-Device Hub",
+        btnCreateHost: "👑 Host Room (Referee)",
+        txtHostDesc: "Create room and share the 8-digit ID with players & spectators.",
+        btnJoinPlayer: "🎮 Join as Player",
+        btnJoinSpectator: "👁️ Join as Spectator",
+        lblSubmitTitle: "📩 Submit Player / Team Roster",
+        lblSelectMode: "Select Match Mode:",
+        btnSubmitDeck: "🔒 Submit Privately to Referee",
+        lblChoosePos: "Assign player slot and start match:",
+        btnSlot1: "👈 Place Left (Player 1)",
+        btnSlot2: "👉 Place Right (Player 2)",
+        btnLeaveP2P: "🚪 Leave Room",
+        p2pGuide: `
+            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide:</div>
+            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room, receive rosters, assign slots, and control score.</div>
+            <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Enter Room ID & click 'Join as Player', submit secret deck to referee.</div>
+            <div>• <b>👁️ Spectator</b>: Enter Room ID & click 'Join as Spectator' for live sync scoreboard!</div>
+        `,
         rulesBody: `
             <div style="margin-bottom:12px;">
                 <h3 style="color:var(--neon-blue); margin-bottom:4px;">1. Scoring Systems</h3>
@@ -544,8 +579,8 @@ function updatePlayerNamesForMode() {
         let t2Name = roster.t2Name || 'Team B';
         let idx1 = Math.min(kofIndexP1, 2);
         let idx2 = Math.min(kofIndexP2, 2);
-        let p1Name = roster.t1[idx1] || `${idx1 + 1}`;
-        let p2Name = roster.t2[idx2] || `${String.fromCharCode(65 + idx2)}`;
+        let p1Name = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : `${idx1 + 1}`;
+        let p2Name = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : `${String.fromCharCode(65 + idx2)}`;
         
         if (p1Title) p1Title.value = `${p1Name} (${t1Name})`;
         if (p2Title) p2Title.value = `${p2Name} (${t2Name})`;
@@ -569,14 +604,14 @@ function closeVersusModal() { safeSetDisplay('versus-modal', 'none'); }
 function openRosterModal() { 
     const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
     setVal('roster-t1-name', roster.t1Name || '');
-    setVal('roster-t1-p1', roster.t1[0] || '');
-    setVal('roster-t1-p2', roster.t1[1] || '');
-    setVal('roster-t1-p3', roster.t1[2] || '');
+    setVal('roster-t1-p1', (roster.t1 && roster.t1[0]) || '');
+    setVal('roster-t1-p2', (roster.t1 && roster.t1[1]) || '');
+    setVal('roster-t1-p3', (roster.t1 && roster.t1[2]) || '');
 
     setVal('roster-t2-name', roster.t2Name || '');
-    setVal('roster-t2-p1', roster.t2[0] || '');
-    setVal('roster-t2-p2', roster.t2[1] || '');
-    setVal('roster-t2-p3', roster.t2[2] || '');
+    setVal('roster-t2-p1', (roster.t2 && roster.t2[0]) || '');
+    setVal('roster-t2-p2', (roster.t2 && roster.t2[1]) || '');
+    setVal('roster-t2-p3', (roster.t2 && roster.t2[2]) || '');
 
     safeSetDisplay('roster-modal', 'flex'); 
 }
@@ -955,6 +990,23 @@ function applyLanguage() {
     safeSetText('vs-sub-msg', lang.vsSubMsg);
     safeSetText('btn-start-vs', lang.btnStartVs);
 
+    /* 🌐 P2P Modal 雙語支援 */
+    safeSetText('p2p-modal-title', lang.p2pTitle);
+    safeSetText('btn-create-host', lang.btnCreateHost);
+    safeSetText('txt-host-desc', lang.txtHostDesc);
+    safeSetText('btn-join-player', lang.btnJoinPlayer);
+    safeSetText('btn-join-spectator', lang.btnJoinSpectator);
+    safeSetText('lbl-submit-title', lang.lblSubmitTitle);
+    safeSetText('lbl-select-mode', lang.lblSelectMode);
+    safeSetText('btn-submit-deck', lang.btnSubmitDeck);
+    safeSetText('lbl-choose-pos', lang.lblChoosePos);
+    safeSetText('btn-slot1', lang.btnSlot1);
+    safeSetText('btn-slot2', lang.btnSlot2);
+    safeSetText('btn-leave-p2p', lang.btnLeaveP2P);
+
+    const guideBox = document.getElementById('p2p-guide-box');
+    if (guideBox) guideBox.innerHTML = lang.p2pGuide;
+
     document.querySelectorAll('.txt-xtreme').forEach(el => el.innerText = lang.xtreme);
     document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
     document.querySelectorAll('.txt-burst').forEach(el => el.innerText = lang.burst);
@@ -970,7 +1022,7 @@ function saveState() {
     const state = {
         scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
-        teamWinsP1, teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
+        teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
         battleCount, matchMode, roster, isFinalTeamWinActive,
         p1Name: getVal('p1-title'),
         p2Name: getVal('p2-title'),
