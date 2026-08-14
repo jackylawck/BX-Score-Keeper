@@ -212,7 +212,7 @@
         </div>
     </div>
 
-    <!-- 🏟️ 裁判專屬：賽事等候大廳 (含 ⇄ 左右對調功能) -->
+    <!-- 🏟️ 裁判專屬：賽事等候大廳 (含 ⇄ 左右對調/三人輪調功能) -->
     <div class="modal" id="lobby-modal">
         <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 8px;">
@@ -249,9 +249,9 @@
                         <strong style="color: var(--neon-blue);" id="lbl-lobby-p1">👈 左邊 (選手一 / 隊伍 A)</strong>
                         <input type="text" id="lobby-p1-name" class="roster-input" style="margin-top:4px;" placeholder="選手一名稱" value="選手一">
                         <div id="lobby-p1-deck-box" style="display:none; margin-top:4px;">
-                            <input type="text" id="lobby-p1-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="陀螺一">
-                            <input type="text" id="lobby-p1-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="陀螺二">
-                            <input type="text" id="lobby-p1-d3" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 3號" value="陀螺三">
+                            <input type="text" id="lobby-p1-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="1">
+                            <input type="text" id="lobby-p1-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="2">
+                            <input type="text" id="lobby-p1-d3" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 3號" value="3">
                         </div>
                     </div>
 
@@ -260,9 +260,9 @@
                         <strong style="color: var(--neon-red);" id="lbl-lobby-p2">👉 右邊 (選手二 / 隊伍 B)</strong>
                         <input type="text" id="lobby-p2-name" class="roster-input" style="margin-top:4px;" placeholder="選手二名稱" value="選手二">
                         <div id="lobby-p2-deck-box" style="display:none; margin-top:4px;">
-                            <input type="text" id="lobby-p2-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="陀螺一">
-                            <input type="text" id="lobby-p2-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="陀螺二">
-                            <input type="text" id="lobby-p2-d3" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 3號" value="陀螺三">
+                            <input type="text" id="lobby-p2-d1" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 1號" value="A">
+                            <input type="text" id="lobby-p2-d2" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 2號" value="B">
+                            <input type="text" id="lobby-p2-d3" class="roster-input" style="margin-bottom:3px;" placeholder="陀螺 3號" value="C">
                         </div>
                     </div>
 
@@ -278,15 +278,18 @@
         </div>
     </div>
 
-    <!-- 📩 裁判接收單一選手提交確認 Modal (自動由左至右排) -->
+    <!-- 📩 裁判接收單一選手提交確認 Modal (含接收與拒絕按鈕) -->
     <div class="modal" id="p2p-confirm-modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 2rem; color: var(--neon-yellow);">📩</div>
             <h3 style="color: var(--neon-blue); margin: 8px 0;" id="p2p-request-title">收到選手排陣提交</h3>
             <div id="p2p-request-body" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; text-align: left; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;"></div>
             
-            <p style="font-size: 0.85rem; color: var(--neon-yellow); margin-bottom: 8px; font-weight: bold;" id="lbl-auto-assign-tip">系統將依序由左至右自動分配進大廳：</p>
-            <button class="ctrl-btn" onclick="autoAcceptClientSubmission()" style="background: var(--neon-green); color: #000; font-weight: 900; width: 100%; padding: 10px; font-size: 1rem;" id="btn-auto-accept">✅ 接收並放入大廳空位</button>
+            <p style="font-size: 0.85rem; color: var(--neon-yellow); margin-bottom: 8px; font-weight: bold;" id="lbl-auto-assign-tip">請裁判審核此排陣：</p>
+            <div style="display: flex; gap: 8px;">
+                <button class="ctrl-btn" onclick="autoAcceptClientSubmission()" style="background: var(--neon-green); color: #000; font-weight: 900; flex: 1.5; padding: 10px; font-size: 1rem;" id="btn-auto-accept">✅ 接收並放入大廳</button>
+                <button class="ctrl-btn" onclick="rejectClientSubmission()" style="background: #ef4444; color: #fff; font-weight: bold; flex: 1; padding: 10px; font-size: 0.9rem;" id="btn-reject-submit">❌ 拒絕/忽略</button>
+            </div>
         </div>
     </div>
 
