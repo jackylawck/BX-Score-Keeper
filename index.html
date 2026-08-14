@@ -23,12 +23,6 @@
     <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
     <meta property="og:site_name" content="BX Score Keeper">
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="BX Score Keeper | 爆旋計分器">
-    <meta name="twitter:description" content="專為《爆旋陀螺X》賽事規則設計的對戰計分器。">
-    <meta name="twitter:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
-
     <!-- PWA & Favicon Settings -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="BXScoreKeepericon-192.png">
@@ -156,7 +150,7 @@
         <ul class="log-list" id="log-list"></ul>
     </div>
 
-    <!-- 👥 隊伍與排陣 Modal -->
+    <!-- 👥 隊伍與排陣 Modal (支援上下搬動順序) -->
     <div class="modal" id="roster-modal">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a3852; padding-bottom: 10px;">
@@ -166,17 +160,39 @@
             <div style="margin-top:10px;">
                 <h4 style="color:var(--neon-blue); margin-bottom:4px;" id="lbl-t1-header">TEAM A (隊伍 1)</h4>
                 <input type="text" id="roster-t1-name" class="roster-input" placeholder="隊伍名稱 (預設 Team A)">
-                <input type="text" id="roster-t1-p1" class="roster-input" placeholder="先鋒 1號 (預設 1)">
-                <input type="text" id="roster-t1-p2" class="roster-input" placeholder="中堅 2號 (預設 2)">
-                <input type="text" id="roster-t1-p3" class="roster-input" placeholder="大將 3號 (預設 3)">
+                
+                <div style="display:flex; gap:4px; margin-bottom:4px;">
+                    <input type="text" id="roster-t1-p1" class="roster-input" style="margin:0;" placeholder="先鋒 1號">
+                    <button class="ctrl-btn" onclick="moveRosterItem('t1', 0, 1)">⬇️</button>
+                </div>
+                <div style="display:flex; gap:4px; margin-bottom:4px;">
+                    <input type="text" id="roster-t1-p2" class="roster-input" style="margin:0;" placeholder="中堅 2號">
+                    <button class="ctrl-btn" onclick="moveRosterItem('t1', 1, 0)">⬆️</button>
+                    <button class="ctrl-btn" onclick="moveRosterItem('t1', 1, 2)">⬇️</button>
+                </div>
+                <div style="display:flex; gap:4px; margin-bottom:10px;">
+                    <input type="text" id="roster-t1-p3" class="roster-input" style="margin:0;" placeholder="大將 3號">
+                    <button class="ctrl-btn" onclick="moveRosterItem('t1', 2, 1)">⬆️</button>
+                </div>
 
-                <h4 style="color:var(--neon-red); margin-top:10px; margin-bottom:4px;" id="lbl-t2-header">TEAM B (隊伍 2)</h4>
+                <h4 style="color:var(--neon-red); margin-bottom:4px;" id="lbl-t2-header">TEAM B (隊伍 2)</h4>
                 <input type="text" id="roster-t2-name" class="roster-input" placeholder="隊伍名稱 (預設 Team B)">
-                <input type="text" id="roster-t2-p1" class="roster-input" placeholder="先鋒 1號 (預設 A)">
-                <input type="text" id="roster-t2-p2" class="roster-input" placeholder="中堅 2號 (預設 B)">
-                <input type="text" id="roster-t2-p3" class="roster-input" placeholder="大將 3號 (預設 C)">
+                
+                <div style="display:flex; gap:4px; margin-bottom:4px;">
+                    <input type="text" id="roster-t2-p1" class="roster-input" style="margin:0;" placeholder="先鋒 1號">
+                    <button class="ctrl-btn" onclick="moveRosterItem('t2', 0, 1)">⬇️</button>
+                </div>
+                <div style="display:flex; gap:4px; margin-bottom:4px;">
+                    <input type="text" id="roster-t2-p2" class="roster-input" style="margin:0;" placeholder="中堅 2號">
+                    <button class="ctrl-btn" onclick="moveRosterItem('t2', 1, 0)">⬆️</button>
+                    <button class="ctrl-btn" onclick="moveRosterItem('t2', 1, 2)">⬇️</button>
+                </div>
+                <div style="display:flex; gap:4px; margin-bottom:10px;">
+                    <input type="text" id="roster-t2-p3" class="roster-input" style="margin:0;" placeholder="大將 3號">
+                    <button class="ctrl-btn" onclick="moveRosterItem('t2', 2, 1)">⬆️</button>
+                </div>
 
-                <button class="ctrl-btn" onclick="saveRoster()" id="btn-save-roster" style="margin-top:10px; width:100%; background:var(--neon-blue); color:#000; font-weight:900;">儲存排陣名單</button>
+                <button class="ctrl-btn" onclick="saveRoster()" id="btn-save-roster" style="margin-top:5px; width:100%; background:var(--neon-blue); color:#000; font-weight:900;">儲存排陣名單</button>
             </div>
         </div>
     </div>
