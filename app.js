@@ -118,7 +118,7 @@ function safeSetText(id, val) { const el = document.getElementById(id); if (el) 
 function safeSetInputValue(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function safeSetInputPlaceholder(id, txt) { const el = document.getElementById(id); if (el) el.placeholder = txt; }
 
-function setMatchMode(mode) {
+function setMatchMode(mode, shouldReset = false) {
     matchMode = mode;
     if (mode === 'team') targetScore = 2;
     else if (mode === 'p3') targetScore = 5;
@@ -138,7 +138,9 @@ function setMatchMode(mode) {
     safeSetDisplay('team-tracker-bar', mode === 'team' ? 'flex' : 'none');
     safeSetDisplay('next-kof-btn', mode === 'team' ? 'inline-block' : 'none');
 
-    resetMatch(false);
+    if (shouldReset) {
+        resetMatch(false);
+    }
 
     const scoreboard = document.getElementById('main-scoreboard');
     const p3Card = document.getElementById('p3-card');
@@ -260,7 +262,7 @@ function saveRoster() {
     isFinalTeamWinActive = false;
 
     closeRosterModal();
-    setMatchMode('team');
+    setMatchMode('team', false);
     
     let p1Show = `${roster.t1[0]} (${roster.t1Name})`;
     let p2Show = `${roster.t2[0]} (${roster.t2Name})`;
@@ -273,6 +275,7 @@ function broadcastCurrentState() {
     if (typeof broadcastToClients === 'function') {
         broadcastToClients({
             type: 'STATE_SYNC',
+            isMatchLocked: typeof isMatchLocked !== 'undefined' ? isMatchLocked : false,
             roster: roster,
             scoreP1, scoreP2, scoreP3,
             foulsP1, foulsP2, foulsP3,
@@ -456,8 +459,12 @@ function undo() {
         battleCount = last.battle; logs = last.logs;
         isFinalTeamWinActive = false;
 
-        updatePlayerNamesForMode();
+        safeSetDisplay('win-modal', 'none');
+        if (typeof broadcastToClients === 'function') {
+            broadcastToClients({ type: 'CLOSE_WIN_SYNC' });
+        }
 
+        updatePlayerNamesForMode();
         updateDisplay();
         saveState();
         broadcastCurrentState();
@@ -475,6 +482,7 @@ function resetMatch(askConfirm = true) {
         isFinalTeamWinActive = false;
         
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
+        if (typeof isMatchLocked !== 'undefined') isMatchLocked = false;
 
         localStorage.removeItem('bx_score_state');
         updatePlayerNamesForMode();
@@ -534,16 +542,25 @@ function checkWinner() {
         playBeep(880, 'triangle', 0.3);
         let isFinal = matchMode !== 'team'; 
         showWinModal(name1, isFinal);
+        if (typeof broadcastToClients === 'function') {
+            broadcastToClients({ type: 'WIN_SYNC', winner: name1, isFinalTeamWin: isFinal });
+        }
         return true;
     } else if (scoreP2 >= targetScore) {
         if (matchMode === 'team') teamWinsP2++;
         playBeep(880, 'triangle', 0.3);
         let isFinal = matchMode !== 'team'; 
         showWinModal(name2, isFinal);
+        if (typeof broadcastToClients === 'function') {
+            broadcastToClients({ type: 'WIN_SYNC', winner: name2, isFinalTeamWin: isFinal });
+        }
         return true;
     } else if (matchMode === 'p3' && scoreP3 >= targetScore) {
         playBeep(880, 'triangle', 0.3);
         showWinModal(name3, true);
+        if (typeof broadcastToClients === 'function') {
+            broadcastToClients({ type: 'WIN_SYNC', winner: name3, isFinalTeamWin: true });
+        }
         return true;
     }
     return false;
@@ -566,6 +583,11 @@ function showWinModal(winner, isFinalTeamWin = false) {
 
 function closeWinModal() {
     safeSetDisplay('win-modal', 'none');
+    
+    if (typeof broadcastToClients === 'function') {
+        broadcastToClients({ type: 'CLOSE_WIN_SYNC' });
+    }
+
     if (matchMode === 'team') {
         if (isFinalTeamWinActive) {
             kofIndexP1 = 0;
@@ -637,9 +659,9 @@ function applyLanguage() {
     safeSetText('lbl-lobby-p2', lang.lblLobbyP2);
     safeSetText('lbl-lobby-p3', lang.lblLobbyP3);
     safeSetText('btn-lobby-start', lang.btnLobbyStart);
-    safeSetText('btn-swap-sides', lang.btnSwapSides);
     safeSetText('lbl-auto-assign-tip', lang.lblAutoAssignTip);
     safeSetText('btn-auto-accept', lang.btnAutoAccept);
+    safeSetText('txt-spectator-waiting', lang.spectatorWaiting);
 
     const guideBox = document.getElementById('p2p-guide-box');
     if (guideBox) guideBox.innerHTML = lang.p2pGuide;
@@ -695,14 +717,14 @@ const i18n = {
         lblLobbyP2: "👉 右邊 (選手二 / 隊伍 B)",
         lblLobbyP3: "👆 中間 (選手三)",
         btnLobbyStart: "🔒 鎖定排陣並邀請全場開賽！",
-        btnSwapSides: "⇄ 左右對調",
-        lblAutoAssignTip: "系統將依序由左至右自動分配進大廳：",
-        btnAutoAccept: "✅ 接收並放入大廳空位",
+        lblAutoAssignTip: "請裁判審核此排陣：",
+        btnAutoAccept: "✅ 接收並放入大廳",
+        spectatorWaiting: "⏳ 裁判正在大廳排陣準備中，請稍候...",
         p2pGuide: `
-            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南：</div>
-            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：點擊「建立對戰房間」，進入等候大廳，接收選手排陣（自動由左至右填入），可點「左右對調」微調並一鍵全場開賽。</div>
-            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 點擊「選手連線」，在自己手機私密填寫陀螺/隊員送出。</div>
-            <div>• <b>👁️ 觀眾端</b>：輸入房間 ID 點擊「觀眾觀戰」，畫面將即時同步大螢幕賽果與對局紀錄！</div>
+            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南 (上限 28 人)：</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：建立房間後 Code 全天有效！可看剩餘名額倒數，一鍵全場開賽。</div>
+            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 私密填寫陀螺/隊員送出，開賽後自動鎖定。</div>
+            <div>• <b>👁️ 觀眾端</b>：輸入一次 ID 即可全程即時同步比分、獲勝彈窗與對局紀錄！</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
@@ -756,14 +778,14 @@ const i18n = {
         lblLobbyP2: "👉 Right Side (Player 2 / Team B)",
         lblLobbyP3: "👆 Middle (Player 3)",
         btnLobbyStart: "🔒 Lock Rosters & Start Match (All Screens)!",
-        btnSwapSides: "⇄ Swap Sides",
-        lblAutoAssignTip: "System will auto-assign from left to right slots:",
+        lblAutoAssignTip: "Please review submitted roster:",
         btnAutoAccept: "✅ Accept & Place in Lobby",
+        spectatorWaiting: "⏳ Referee is setting up next match in Lobby, please wait...",
         p2pGuide: `
-            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide:</div>
-            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room, manage lobby, auto-receive rosters (left to right), click 'Swap Sides' if needed, and start match.</div>
+            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide (Max 28 Devices):</div>
+            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room once! Manage lobby, view capacity countdown, and start match.</div>
             <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Enter Room ID & click 'Join as Player', submit secret deck to referee.</div>
-            <div>• <b>👁️ Spectator</b>: Enter Room ID & click 'Join as Spectator' for live sync scoreboard and battle logs!</div>
+            <div>• <b>👁️ Spectator</b>: Enter Room ID once to enjoy live sync scores, popups & battle logs!</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
@@ -822,7 +844,7 @@ function loadState() {
             if (state.p2Name) setVal('p2-title', state.p2Name);
             if (state.p3Name) setVal('p3-title', state.p3Name);
 
-            setMatchMode(matchMode);
+            setMatchMode(matchMode, false);
         } catch(e) {
             console.error("State restore failed:", e);
         }
