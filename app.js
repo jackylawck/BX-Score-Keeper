@@ -9,10 +9,11 @@ let targetScore = 4;
 let history = [], logs = [];
 let currentLang = 'zh';
 
+// 🎯 全面將 Default 改為「選手一 / 選手二」或「Player 1 / Player 2」
 let roster = {
-    t1Name: 'Team A', t1: ['1', '2', '3'],
-    t2Name: 'Team B', t2: ['A', 'B', 'C'],
-    t3Name: 'PLAYER 3'
+    t1Name: '隊伍 A', t1: ['選手一', '陀螺二', '陀螺三'],
+    t2Name: '隊伍 B', t2: ['選手二', '陀螺二', '陀螺三'],
+    t3Name: '選手三'
 };
 
 /* 🌐 WebRTC P2P 全局變數 */
@@ -74,16 +75,16 @@ function updateP2PFormFields() {
 
     if (mode === 'std' || mode === 'p3') {
         if (extraBox) extraBox.style.display = 'none';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 Daddy)' : 'Player Name (e.g. Daddy)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 選手一)' : 'Player Name (e.g. Player 1)';
     } else if (mode === '3v3') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 Daddy)' : 'Player Name (e.g. Daddy)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 選手一)' : 'Player Name (e.g. Player 1)';
         safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '陀螺 1 號 (ITEM #1)' : 'Bey #1 (ITEM #1)');
         safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '陀螺 2 號 (ITEM #2)' : 'Bey #2 (ITEM #2)');
         safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '陀螺 3 號 (ITEM #3)' : 'Bey #3 (ITEM #3)');
     } else if (mode === 'team') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 Team A)' : 'Team Name (e.g. Team A)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 隊伍 A)' : 'Team Name (e.g. Team A)';
         safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '先鋒 1 號' : '1st Vanguard');
         safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '中堅 2 號' : '2nd Middle');
         safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '大將 3 號' : '3rd General');
@@ -95,7 +96,7 @@ function safeSetInputPlaceholder(id, txt) {
     if (el) el.placeholder = txt;
 }
 
-/* 👑 裁判建立房間 ➔ 直接進入【🏟️ 裁判等候大廳】 */
+/* 👑 裁判建立房間 ➔ 進入【🏟️ 裁判等候大廳】 */
 function initP2PHost() {
     if (peer) peer.destroy();
     
@@ -176,24 +177,32 @@ function applyLobbyLayout() {
 }
 
 function syncRosterToLobbyUI() {
-    safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (matchMode === 'team' ? roster.t1Name : '1'));
-    safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (matchMode === 'team' ? roster.t2Name : 'A'));
-    safeSetInputValue('lobby-p3-name', roster.t3Name || 'PLAYER 3');
+    let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
+    let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
+    let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
 
-    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || '1');
-    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || '2');
-    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || '3');
+    safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (matchMode === 'team' ? roster.t1Name : defP1));
+    safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (matchMode === 'team' ? roster.t2Name : defP2));
+    safeSetInputValue('lobby-p3-name', roster.t3Name || defP3);
 
-    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || 'A');
-    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || 'B');
-    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
+    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'));
+    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'));
+    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || (currentLang === 'zh' ? '陀螺三' : 'Bey 3'));
+
+    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'));
+    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'));
+    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || (currentLang === 'zh' ? '陀螺三' : 'Bey 3'));
 }
 
 /* 裁判在等候大廳按下「🔒 鎖定排陣並邀請全場開賽！」 */
 function startMatchFromLobby() {
-    let p1Val = document.getElementById('lobby-p1-name').value.trim() || '1';
-    let p2Val = document.getElementById('lobby-p2-name').value.trim() || 'A';
-    let p3Val = document.getElementById('lobby-p3-name').value.trim() || 'PLAYER 3';
+    let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
+    let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
+    let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
+
+    let p1Val = document.getElementById('lobby-p1-name').value.trim() || defP1;
+    let p2Val = document.getElementById('lobby-p2-name').value.trim() || defP2;
+    let p3Val = document.getElementById('lobby-p3-name').value.trim() || defP3;
 
     roster.t1Name = p1Val;
     roster.t2Name = p2Val;
@@ -201,14 +210,14 @@ function startMatchFromLobby() {
 
     if (matchMode === '3v3' || matchMode === 'team') {
         roster.t1 = [
-            document.getElementById('lobby-p1-d1').value.trim() || '1',
-            document.getElementById('lobby-p1-d2').value.trim() || '2',
-            document.getElementById('lobby-p1-d3').value.trim() || '3'
+            document.getElementById('lobby-p1-d1').value.trim() || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'),
+            document.getElementById('lobby-p1-d2').value.trim() || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'),
+            document.getElementById('lobby-p1-d3').value.trim() || (currentLang === 'zh' ? '陀螺三' : 'Bey 3')
         ];
         roster.t2 = [
-            document.getElementById('lobby-p2-d1').value.trim() || 'A',
-            document.getElementById('lobby-p2-d2').value.trim() || 'B',
-            document.getElementById('lobby-p2-d3').value.trim() || 'C'
+            document.getElementById('lobby-p2-d1').value.trim() || (currentLang === 'zh' ? '陀螺一' : 'Bey 1'),
+            document.getElementById('lobby-p2-d2').value.trim() || (currentLang === 'zh' ? '陀螺二' : 'Bey 2'),
+            document.getElementById('lobby-p2-d3').value.trim() || (currentLang === 'zh' ? '陀螺三' : 'Bey 3')
         ];
     } else {
         roster.t1[0] = p1Val;
@@ -257,7 +266,7 @@ function joinP2PRoom(roleType) {
         hostConn.on('open', () => {
             currentRoomId = inputId;
             safeSetDisplay('p2p-status-bar', 'block');
-            safeSetDisplay('btn-open-lobby', 'none'); // 選手和觀眾不顯示等候大廳按鈕
+            safeSetDisplay('btn-open-lobby', 'none');
             
             if (roleType === 'spectator') {
                 safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
@@ -324,10 +333,11 @@ function sendClientDeckToHost() {
     }
 
     let mode = document.getElementById('p2p-form-type').value;
-    let name = document.getElementById('p2p-player-name').value.trim() || (currentLang === 'zh' ? '選手' : 'Player');
-    let item1 = document.getElementById('p2p-item-1').value.trim() || '1';
-    let item2 = document.getElementById('p2p-item-2').value.trim() || '2';
-    let item3 = document.getElementById('p2p-item-3').value.trim() || '3';
+    let defName = currentLang === 'zh' ? '選手一' : 'Player 1';
+    let name = document.getElementById('p2p-player-name').value.trim() || defName;
+    let item1 = document.getElementById('p2p-item-1').value.trim() || (currentLang === 'zh' ? '陀螺一' : 'Bey 1');
+    let item2 = document.getElementById('p2p-item-2').value.trim() || (currentLang === 'zh' ? '陀螺二' : 'Bey 2');
+    let item3 = document.getElementById('p2p-item-3').value.trim() || (currentLang === 'zh' ? '陀螺三' : 'Bey 3');
 
     let payload = {
         type: 'SUBMIT_DECK',
@@ -374,7 +384,6 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 裁判將選手提交分配到 Slot 1 / 2 / 3 ➔ 自動帶入等候大廳 */
 function acceptClientSubmission(targetSlot) {
     if (!pendingClientData) return;
 
@@ -553,8 +562,8 @@ const i18n = {
         lblSelectMode: "選擇欲提交的賽制模式：",
         btnSubmitDeck: "🔒 私密送出給裁判審核",
         lblChoosePos: "請選擇放入大廳的位置：",
-        btnSlot1: "👈 放左邊 (Player 1)",
-        btnSlot2: "👉 放右邊 (Player 2)",
+        btnSlot1: "👈 放左邊 (選手一)",
+        btnSlot2: "👉 放右邊 (選手二)",
         btnLeaveP2P: "🚪 離開房間",
         btnOpenLobby: "🏟️ 等候大廳",
         lblRoom: "房間 ID",
@@ -563,6 +572,9 @@ const i18n = {
         lobbyRoomTip: "請告知選手與觀眾輸入此 8 位數房間 ID：",
         lobbySelectMode: "👑 選擇本局賽事模式：",
         lobbySlotsTip: "選手連線送出後將自動填入，裁判亦可直接手動修改：",
+        lblLobbyP1: "👈 左邊 (選手一 / 隊伍 A)",
+        lblLobbyP2: "👉 右邊 (選手二 / 隊伍 B)",
+        lblLobbyP3: "👆 中間 (選手三)",
         btnLobbyStart: "🔒 鎖定排陣並邀請全場開賽！",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南：</div>
@@ -621,6 +633,9 @@ const i18n = {
         lobbyRoomTip: "Share this 8-digit Room ID with players & spectators:",
         lobbySelectMode: "👑 Select Match Mode:",
         lobbySlotsTip: "Rosters auto-fill upon submission, referee can also tweak manually:",
+        lblLobbyP1: "👈 Left Side (Player 1 / Team A)",
+        lblLobbyP2: "👉 Right Side (Player 2 / Team B)",
+        lblLobbyP3: "👆 Middle (Player 3)",
         btnLobbyStart: "🔒 Lock Rosters & Start Match (All Screens)!",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide:</div>
@@ -690,23 +705,27 @@ function updatePlayerNamesForMode() {
     const p2Title = document.getElementById('p2-title');
     const p3Title = document.getElementById('p3-title');
 
+    let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
+    let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
+    let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
+
     if (matchMode === 'team') {
-        let t1Name = roster.t1Name || 'Team A';
-        let t2Name = roster.t2Name || 'Team B';
+        let t1Name = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
+        let t2Name = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         let idx1 = Math.min(kofIndexP1, 2);
         let idx2 = Math.min(kofIndexP2, 2);
-        let p1Name = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : `${idx1 + 1}`;
-        let p2Name = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : `${String.fromCharCode(65 + idx2)}`;
+        let p1Name = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : `${defP1}`;
+        let p2Name = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : `${defP2}`;
         
         if (p1Title) p1Title.value = `${p1Name} (${t1Name})`;
         if (p2Title) p2Title.value = `${p2Name} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        if (p1Title && roster.t1[0]) p1Title.value = roster.t1[0];
-        if (p2Title && roster.t2[0]) p2Title.value = roster.t2[0];
+        if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : defP1;
+        if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : defP2;
     } else if (matchMode === 'p3') {
-        if (p1Title && roster.t1[0]) p1Title.value = roster.t1[0];
-        if (p2Title && roster.t2[0]) p2Title.value = roster.t2[0];
-        if (p3Title) p3Title.value = roster.t3Name || 'PLAYER 3';
+        if (p1Title) p1Title.value = (roster.t1 && roster.t1[0]) ? roster.t1[0] : defP1;
+        if (p2Title) p2Title.value = (roster.t2 && roster.t2[0]) ? roster.t2[0] : defP2;
+        if (p3Title) p3Title.value = roster.t3Name || defP3;
     }
 }
 
@@ -751,15 +770,15 @@ function moveRosterItem(teamKey, fromIdx, toIndex) {
 
 function saveRoster() {
     const getVal = (id, def) => { const el = document.getElementById(id); return el && el.value.trim() ? el.value.trim() : def; };
-    roster.t1Name = getVal('roster-t1-name', 'Team A');
-    roster.t1[0] = getVal('roster-t1-p1', '1');
-    roster.t1[1] = getVal('roster-t1-p2', '2');
-    roster.t1[2] = getVal('roster-t1-p3', '3');
+    roster.t1Name = getVal('roster-t1-name', currentLang === 'zh' ? '隊伍 A' : 'Team A');
+    roster.t1[0] = getVal('roster-t1-p1', currentLang === 'zh' ? '選手一' : 'Player 1');
+    roster.t1[1] = getVal('roster-t1-p2', currentLang === 'zh' ? '陀螺二' : 'Bey 2');
+    roster.t1[2] = getVal('roster-t1-p3', currentLang === 'zh' ? '陀螺三' : 'Bey 3');
 
-    roster.t2Name = getVal('roster-t2-name', 'Team B');
-    roster.t2[0] = getVal('roster-t2-p1', 'A');
-    roster.t2[1] = getVal('roster-t2-p2', 'B');
-    roster.t2[2] = getVal('roster-t2-p3', 'C');
+    roster.t2Name = getVal('roster-t2-name', currentLang === 'zh' ? '隊伍 B' : 'Team B');
+    roster.t2[0] = getVal('roster-t2-p1', currentLang === 'zh' ? '選手二' : 'Player 2');
+    roster.t2[1] = getVal('roster-t2-p2', currentLang === 'zh' ? '陀螺二' : 'Bey 2');
+    roster.t2[2] = getVal('roster-t2-p3', currentLang === 'zh' ? '陀螺三' : 'Bey 3');
 
     kofIndexP1 = 0;
     kofIndexP2 = 0;
@@ -907,11 +926,11 @@ function nextKOFRound() {
     }
 
     if (kofIndexP1 >= 3) {
-        let winnerTeam = roster.t2Name || 'Team B';
+        let winnerTeam = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         showWinModal(winnerTeam, true);
         return;
     } else if (kofIndexP2 >= 3) {
-        let winnerTeam = roster.t1Name || 'Team A';
+        let winnerTeam = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
         showWinModal(winnerTeam, true);
         return;
     }
@@ -996,8 +1015,8 @@ function updateDisplay() {
     }
 
     if (matchMode === 'team') {
-        let t1Label = roster.t1Name || 'Team A';
-        let t2Label = roster.t2Name || 'Team B';
+        let t1Label = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
+        let t2Label = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         safeSetText('team-wins-p1', `${t1Label}: ${teamWinsP1}`);
         safeSetText('team-wins-p2', `${t2Label}: ${teamWinsP2}`);
     }
@@ -1128,6 +1147,9 @@ function applyLanguage() {
     safeSetText('lbl-lobby-room-tip', lang.lobbyRoomTip);
     safeSetText('lbl-lobby-select-mode', lang.lobbySelectMode);
     safeSetText('lbl-lobby-slots-tip', lang.lobbySlotsTip);
+    safeSetText('lbl-lobby-p1', lang.lblLobbyP1);
+    safeSetText('lbl-lobby-p2', lang.lblLobbyP2);
+    safeSetText('lbl-lobby-p3', lang.lblLobbyP3);
     safeSetText('btn-lobby-start', lang.btnLobbyStart);
 
     const guideBox = document.getElementById('p2p-guide-box');
