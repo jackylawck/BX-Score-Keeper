@@ -9,6 +9,8 @@
 
 本專案是為我和兒子共渡美好時光而開發的非商業個人專案！我們特別打造了這個專業計分工具，讓每一次陀螺對戰都更流暢、更有儀式感，並完美貼合亞洲官方賽事標準。誠摯邀請所有大朋友和小朋友一起使用，享受公平對戰的樂趣，共創無價的回憶！
 
+---
+
 ### ✨ 核心功能
 * **完美對應《爆旋陀螺X規則（亞洲版）》第 12 版官方標準**：
   * 🔴 **極限終結 (Xtreme Finish)**：+3 分
@@ -38,47 +40,95 @@
 
 ---
 
+### 📲 如何安裝與使用 (Installation & Setup)
+
+#### 1. 手機端即開即用（推薦：PWA 捷徑安裝）
+本專案支援 PWA（漸進式 Web 應用），**毋須經由 App Store / Google Play 下載**即可享受原生 App 體驗：
+* **iOS (iPhone / iPad)**：
+  1. 使用 **Safari** 瀏覽器開啟專案網址。
+  2. 點擊底部工具列的 **「分享」** 圖示（帶箭頭的方框）。
+  3. 向下捲動並選擇 **「加入主畫面」 (Add to Home Screen)**。
+* **Android (Chrome)**：
+  1. 使用 **Chrome** 瀏覽器開啟專案網址。
+  2. 點擊右上角 **選單**（三個點）。
+  3. 選擇 **「安裝應用程式」** 或 **「加至主螢幕」 (Install App / Add to Home screen)**。
+
+#### 2. 本機開發與部署 (Local Development)
+如果您想在電腦運行或自行調整功能：
+```bash
+# 1. 複製專案庫 (Clone repository)
+git clone [https://github.com/your-username/bx-score-keeper.git](https://github.com/your-username/bx-score-keeper.git)
+
+# 2. 進入專案資料夾
+cd bx-score-keeper
+
+# 3. 安裝相依套件 (Install dependencies)
+npm install
+
+# 4. 啟動本機開發伺服器 (Start local server)
+npm run dev
+
+```
 <a name="english"></a>
 ## 📖 About This Project
-
 This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by our shared passion for competitive play, we built this tool to make every battle seamless, engaging, and fully aligned with official tournament standards across Asia. We warmly invite parents, kids, and bladers of all ages to use it, enjoy fair battles, and create unforgettable memories together!
-
 ### ✨ Features
-* **Official 12th Edition Scoring Alignment (Asia Version)**:
-  * 🔴 **Xtreme Finish**: +3 pts
-  * 🟠 **Over Finish**: +2 pts
-  * 🟡 **Burst Finish**: +2 pts
-  * 🟢 **Spin Finish**: +1 pt
-  * 🟣 **Shooting Error / Foul Penalty**: 2 fouls in a single battle automatically award +1 pt to the opponent.
-* **🌐 WebRTC P2P Multi-Device Live Hub (Major Feature)**:
-  * 👑 **Referee Host Lobby**: Host persistent all-day rooms, review secret rosters, clear/swap slots, and start matches simultaneously.
-  * 🎮 **Player Secret Submission**: Players privately enter Beyblade deck / team member lineups and submit directly to the referee.
-  * 👁️ **Spectator Live Sync**: Supports up to 15 concurrent devices! Scoreboard, Versus animations, Battle Logs, and Victory Popups sync seamlessly in real time.
-  * 💓 **Heartbeat Keepalive**: Auto-pings every 5 seconds to prevent mobile browser background sleep/disconnects.
-* **Multiple Tournament Formats**:
-  * ⚔️ **1v1 Standard**: Classic first-to-4 points format.
-  * 🛡️ **3on3 Battle**: 3-Bey deck battle format with auto prompt for order re-arrangement after 3 battles if under 4 points.
-  * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. 1st Vanguard ➔ 2nd Middle ➔ 3rd General rotation. Winner stays, loser rotates out.
-  * 🌀 **3-Player Battle (5-pt System)**: Official 3-blader battle royale format! First to 5 points wins. Features 3-way Versus animation (XX VS YY VS ZZ).
-* **Tournament Utilities & Visual Enhancements**:
-  * 📢 **Voice Countdown**: Built-in "3, 2, 1, Go Shoot!" vocal and audio tone countdown.
-  * 📱 **Mobile Landscape Fullscreen**: Rotating your phone horizontally maximizes the scoreboard into a clean, fullscreen dual-card layout.
-  * ⚡ **Versus & Victory Popups**: Anime-styled Versus intro and winner celebration modals synchronized across all screens.
-  * 🤝 **Draw Support**: One-tap draw recording for simultaneous finishes.
-  * 📜 **Real-time Battle Log** and **Undo** support.
-  * 💾 **State Persistence**: Auto-saves current score state to `localStorage`.
-  * 🌐 **100% Bilingual Support**: Instant toggle between Traditional Chinese and International English.
-* **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional for offline single-device scoring without internet access.
+ * **Official 12th Edition Scoring Alignment (Asia Version)**:
+   * 🔴 **Xtreme Finish**: +3 pts
+   * 🟠 **Over Finish**: +2 pts
+   * 🟡 **Burst Finish**: +2 pts
+   * 🟢 **Spin Finish**: +1 pt
+   * 🟣 **Shooting Error / Foul Penalty**: 2 fouls in a single battle automatically award +1 pt to the opponent.
+ * **🌐 WebRTC P2P Multi-Device Live Hub (Major Feature)**:
+   * 👑 **Referee Host Lobby**: Host persistent all-day rooms, review secret rosters, clear/swap slots, and start matches simultaneously.
+   * 🎮 **Player Secret Submission**: Players privately enter Beyblade deck / team member lineups and submit directly to the referee.
+   * 👁️ **Spectator Live Sync**: Supports up to 15 concurrent devices! Scoreboard, Versus animations, Battle Logs, and Victory Popups sync seamlessly in real time.
+   * 💓 **Heartbeat Keepalive**: Auto-pings every 5 seconds to prevent mobile browser background sleep/disconnects.
+ * **Multiple Tournament Formats**:
+   * ⚔️ **1v1 Standard**: Classic first-to-4 points format.
+   * 🛡️ **3on3 Battle**: 3-Bey deck battle format with auto prompt for order re-arrangement after 3 battles if under 4 points.
+   * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. 1st Vanguard ➔ 2nd Middle ➔ 3rd General rotation. Winner stays, loser rotates out.
+   * 🌀 **3-Player Battle (5-pt System)**: Official 3-blader battle royale format! First to 5 points wins. Features 3-way Versus animation (XX VS YY VS ZZ).
+ * **Tournament Utilities & Visual Enhancements**:
+   * 📢 **Voice Countdown**: Built-in "3, 2, 1, Go Shoot!" vocal and audio tone countdown.
+   * 📱 **Mobile Landscape Fullscreen**: Rotating your phone horizontally maximizes the scoreboard into a clean, fullscreen dual-card layout.
+   * ⚡ **Versus & Victory Popups**: Anime-styled Versus intro and winner celebration modals synchronized across all screens.
+   * 🤝 **Draw Support**: One-tap draw recording for simultaneous finishes.
+   * 📜 **Real-time Battle Log** and **Undo** support.
+   * 💾 **State Persistence**: Auto-saves current score state to localStorage.
+   * 🌐 **100% Bilingual Support**: Instant toggle between Traditional Chinese and International English.
+ * **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional for offline single-device scoring without internet access.
+### 📲 How to Install & Run
+#### 1. Instant Mobile Setup (Recommended: PWA)
+This project is built as a Progressive Web App (PWA) — **no App Store / Google Play download required**:
+ * **iOS (Safari)**:
+   1. Open the web link in **Safari**.
+   2. Tap the **Share** button at the bottom.
+   3. Scroll down and tap **"Add to Home Screen"**.
+ * **Android (Chrome)**:
+   1. Open the web link in **Chrome**.
+   2. Tap the top-right menu (three dots).
+   3. Select **"Install app"** or **"Add to Home screen"**.
+#### 2. Local Development & Hosting
+To clone, run, or customize the project locally:
+```bash
+# 1. Clone the repository
+git clone [https://github.com/your-username/bx-score-keeper.git](https://github.com/your-username/bx-score-keeper.git)
 
----
+# 2. Navigate to project root
+cd bx-score-keeper
 
+# 3. Install dependencies
+npm install
+
+# 4. Start local development server
+npm run dev
+
+```
 ### 🛡️ Privacy & Security / 私隱聲明
-* **Zero-Backend (純前端架構)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
-* **P2P Direct Connection (端對端直連)**：所有跨機數據透過 WebRTC Peer-to-Peer 於裝置間直連傳輸，不經由第三方伺服器儲存。
-* **Privacy by Design**：所有對戰數據僅儲存於使用者本地瀏覽器 (`localStorage`) 中。
-
----
-
+ * **Zero-Backend (純前端架構)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
+ * **P2P Direct Connection (端對端直連)**：所有跨機數據透過 WebRTC Peer-to-Peer 於裝置間直連傳輸，不經由第三方伺服器儲存。
+ * **Privacy by Design**：所有對戰數據僅儲存於使用者本地瀏覽器 (localStorage) 中。
 ### 📄 Disclaimer / 免責聲明
-This is an unofficial fan-made tool created for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition. All product names and trademarks belong to their respective owners.  
+This is an unofficial fan-made tool created for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition. All product names and trademarks belong to their respective owners.
 本工具為玩家自製非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。版權歸原著作權所有者所有。
