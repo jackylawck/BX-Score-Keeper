@@ -30,7 +30,7 @@ function updateP2PFormFields() {
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
     } else if (mode === 'p3') {
         if (extraBox) extraBox.style.display = 'none';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 tyujj)' : 'Player Name (e.g. tyujj)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 嚟沒火)' : 'Player Name (e.g. Player 3)';
     } else if (mode === '3v3') {
         if (extraBox) extraBox.style.display = 'block';
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
@@ -76,7 +76,6 @@ function initP2PHost() {
     peer.on('connection', (conn) => {
         let currentCount = Object.keys(p2pConnMap).length;
 
-        // 🛡️ 15 人硬上限
         if (currentCount >= MAX_DEVICES) {
             conn.on('open', () => {
                 conn.send({ type: 'ROOM_CAPACITY_FULL' });
@@ -193,7 +192,6 @@ function applyLobbyLayout() {
     }
 }
 
-/* 🎯 關鍵修復：大廳名字完全忠於使用者輸入的 Daddy / BB，絕不被覆蓋為 A 或 1 */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -279,6 +277,7 @@ function swapLobbySides() {
     }
 }
 
+/* 🎯 鎖定開賽：支持 3-Player 登場動畫 XX vs YY vs ZZ */
 function startMatchFromLobby() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -330,6 +329,7 @@ function startMatchFromLobby() {
 
     let p1Show = document.getElementById('p1-title').value;
     let p2Show = document.getElementById('p2-title').value;
+    let p3Show = document.getElementById('p3-title') ? document.getElementById('p3-title').value : '';
 
     broadcastToClients({
         type: 'MATCH_START_SYNC',
@@ -339,11 +339,11 @@ function startMatchFromLobby() {
         foulsP1, foulsP2, foulsP3,
         teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
         battleCount, matchMode,
-        p1Show, p2Show,
+        p1Show, p2Show, p3Show,
         logs: logs
     });
 
-    triggerVersusAnimation(p1Show, p2Show);
+    triggerVersusAnimation(p1Show, p2Show, p3Show);
 }
 
 function joinP2PRoom(roleType) {
@@ -500,7 +500,6 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 🎯 關鍵修復：按「接收」時準確填入 Slot 1、2、3，絕不丟失名字 */
 function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
@@ -597,7 +596,7 @@ function handleClientReceivedData(data) {
         applyStateSync(data);
 
         if (data.type === 'MATCH_START_SYNC') {
-            triggerVersusAnimation(data.p1Show, data.p2Show);
+            triggerVersusAnimation(data.p1Show, data.p2Show, data.p3Show);
         }
     } else if (data.type === 'WIN_SYNC') {
         showWinModal(data.winner, data.isFinalTeamWin);
@@ -608,6 +607,7 @@ function handleClientReceivedData(data) {
     }
 }
 
+/* 🎯 關鍵修復：保證 3-Player 模式在所有連線手機上完整展開 3 張卡片 */
 function applyStateSync(data) {
     if (data.roster) roster = data.roster;
     scoreP1 = data.scoreP1 || 0;
@@ -621,7 +621,13 @@ function applyStateSync(data) {
     kofIndexP1 = data.kofIndexP1 || 0;
     kofIndexP2 = data.kofIndexP2 || 0;
     battleCount = data.battleCount || 1;
-    if (data.matchMode) matchMode = data.matchMode;
+    if (data.matchMode) {
+        matchMode = data.matchMode;
+        const scoreboard = document.getElementById('main-scoreboard');
+        const p3Card = document.getElementById('p3-card');
+        if (scoreboard) scoreboard.classList.toggle('p3-mode', matchMode === 'p3');
+        if (p3Card) p3Card.style.display = (matchMode === 'p3') ? 'flex' : 'none';
+    }
     if (Array.isArray(data.logs)) logs = data.logs;
 
     updatePlayerNamesForMode();
