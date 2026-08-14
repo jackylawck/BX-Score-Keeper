@@ -28,29 +28,62 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     } catch(e) {}
 }
 
+/* 📢 語音與文字 100% 精準同步倒數機制 */
 function startShootCountdown() {
-    playBeep(800, 'square', 0.15);
-    let btn = document.getElementById('shoot-btn');
-    btn.innerText = "3...";
-    
-    const speak = (txt) => {
-        if ('speechSynthesis' in window) {
-            let u = new SpeechSynthesisUtterance(txt);
-            u.lang = 'en-US';
-            u.rate = 1.2;
-            window.speechSynthesis.speak(u);
-        }
-    };
+    const btn = document.getElementById('shoot-btn');
+    btn.disabled = true; // 防止重複點擊
 
-    speak("Three");
-    setTimeout(() => { btn.innerText = "2..."; speak("Two"); }, 1000);
-    setTimeout(() => { btn.innerText = "1..."; speak("One"); }, 2000);
-    setTimeout(() => { 
-        btn.innerText = "GO SHOOT!"; 
-        speak("Go Shoot!"); 
-        playBeep(1200, 'triangle', 0.4);
-    }, 3000);
-    setTimeout(() => { btn.innerText = "📢 3, 2, 1, Go Shoot!"; }, 4500);
+    const steps = [
+        { txt: "Three", label: "3...", freq: 523.25 },
+        { txt: "Two", label: "2...", freq: 523.25 },
+        { txt: "One", label: "1...", freq: 523.25 },
+        { txt: "Go Shoot!", label: "GO SHOOT!", freq: 1046.50 }
+    ];
+
+    let stepIndex = 0;
+
+    function playStep() {
+        if (stepIndex >= steps.length) {
+            setTimeout(() => {
+                btn.innerText = "📢 3, 2, 1, Go Shoot!";
+                btn.disabled = false;
+            }, 1200);
+            return;
+        }
+
+        const current = steps[stepIndex];
+        playBeep(current.freq, 'square', stepIndex === 3 ? 0.35 : 0.15);
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            let u = new SpeechSynthesisUtterance(current.txt);
+            u.lang = 'en-US';
+            u.rate = 1.3;
+
+            u.onstart = () => {
+                btn.innerText = current.label;
+            };
+
+            u.onend = () => {
+                stepIndex++;
+                setTimeout(playStep, stepIndex === 3 ? 100 : 200);
+            };
+
+            u.onerror = () => {
+                btn.innerText = current.label;
+                stepIndex++;
+                setTimeout(playStep, 800);
+            };
+
+            window.speechSynthesis.speak(u);
+        } else {
+            btn.innerText = current.label;
+            stepIndex++;
+            setTimeout(playStep, 800);
+        }
+    }
+
+    playStep();
 }
 
 const i18n = {
@@ -144,7 +177,6 @@ function setMatchMode(mode) {
     applyLanguage();
 }
 
-/* 根據當前模式更換選手卡片名稱（避免混淆） */
 function updatePlayerNamesForMode() {
     if (matchMode === 'team') {
         let p1Name = roster.t1[kofIndexP1] || `PLAYER ${kofIndexP1 + 1}`;
@@ -302,13 +334,10 @@ function addDraw() {
     saveState();
 }
 
-/* 👥 Team KOF 自動換人機制 (輪換 1 ➔ 2 ➔ 3) */
 function nextKOFRound() {
     if (scoreP1 >= targetScore) {
-        // P1 勝，P2 (敗方) 換下一位隊員
         kofIndexP2 = (kofIndexP2 + 1) % 3;
     } else if (scoreP2 >= targetScore) {
-        // P2 勝，P1 (敗方) 換下一位隊員
         kofIndexP1 = (kofIndexP1 + 1) % 3;
     }
 
@@ -396,7 +425,7 @@ function updateDisplay() {
         li.textContent = l;
         logList.appendChild(li);
     });
-    logList.scrollTop = 0; // 自動捲動至最頂部最新紀錄
+    logList.scrollTop = 0; // 最新紀錄自動置頂
 }
 
 function checkWinner() {
