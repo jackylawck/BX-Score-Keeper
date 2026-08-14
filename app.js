@@ -1,5 +1,5 @@
 /* =========================================================================
- * ⚡ app.js - BX Score Keeper Main Application Logic (100% Bilingual)
+ * ⚡ app.js - BX Score Keeper Main Application Logic (100% Bilingual & Official Rhythm)
  * ========================================================================= */
 
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
@@ -55,16 +55,17 @@ function forceRefreshApp() {
     }
 }
 
+/* 📢 完美還原官方比賽節奏：3, 2, 1 沉穩定拍，Go~~~ Shoot! 帶起全場爆發 */
 function startShootCountdown() {
     const btn = document.getElementById('shoot-btn');
     if (!btn) return;
     btn.disabled = true;
 
     const steps = [
-        { txt: "Three", label: "3...", freq: 523.25 },
-        { txt: "Two", label: "2...", freq: 523.25 },
-        { txt: "One", label: "1...", freq: 523.25 },
-        { txt: "Go Shoot!", label: "GO SHOOT!", freq: 1046.50 }
+        { speech: "Three", label: "3...", freq: 523.25, dur: 0.15, pause: 900 },
+        { speech: "Two",   label: "2...", freq: 523.25, dur: 0.15, pause: 900 },
+        { speech: "One",   label: "1...", freq: 523.25, dur: 0.15, pause: 900 },
+        { speech: "Go... Shoot!", label: "GO SHOOT!", freq: 1046.50, dur: 0.5, pause: 1500 }
     ];
 
     let stepIndex = 0;
@@ -74,18 +75,19 @@ function startShootCountdown() {
             setTimeout(() => {
                 btn.innerText = "📢 3, 2, 1, Go Shoot!";
                 btn.disabled = false;
-            }, 1200);
+            }, 1000);
             return;
         }
 
         const current = steps[stepIndex];
-        playBeep(current.freq, 'square', stepIndex === 3 ? 0.35 : 0.15);
+        playBeep(current.freq, 'square', current.dur);
 
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            let u = new SpeechSynthesisUtterance(current.txt);
+            let u = new SpeechSynthesisUtterance(current.speech);
             u.lang = 'en-US';
-            u.rate = 1.3;
+            u.rate = stepIndex === 3 ? 0.95 : 0.9; // 沉穩有力的官方大賽語速
+            u.pitch = stepIndex === 3 ? 1.2 : 1.0; // Shoot 時高亢熱血
 
             u.onstart = () => {
                 btn.innerText = current.label;
@@ -93,20 +95,20 @@ function startShootCountdown() {
 
             u.onend = () => {
                 stepIndex++;
-                setTimeout(playStep, stepIndex === 3 ? 100 : 200);
+                setTimeout(playStep, stepIndex === 4 ? 200 : 150);
             };
 
             u.onerror = () => {
                 btn.innerText = current.label;
                 stepIndex++;
-                setTimeout(playStep, 800);
+                setTimeout(playStep, current.pause);
             };
 
             window.speechSynthesis.speak(u);
         } else {
             btn.innerText = current.label;
             stepIndex++;
-            setTimeout(playStep, 800);
+            setTimeout(playStep, current.pause);
         }
     }
 
@@ -160,7 +162,7 @@ function setMatchMode(mode, shouldReset = false) {
     }
 }
 
-/* 🎯 關鍵修復：嚴格區分自訂名字與預設佔位符，英文模式下絕不帶出「先鋒 / 隊伍」 */
+/* 🎯 嚴格區分自訂名字與預設佔位符，英文模式下絕不帶出「先鋒 / 隊伍」 */
 function updatePlayerNamesForMode() {
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
@@ -534,11 +536,14 @@ function updateDisplay() {
     const f2 = document.getElementById('btn-foul-p2'); if (f2) f2.classList.toggle('active-foul', foulsP2 > 0);
     const f3 = document.getElementById('btn-foul-p3'); if (f3) f3.classList.toggle('active-foul', foulsP3 > 0);
 
-    /* 🎯 關鍵修復：大分條雙語連動（Team A / Team B） */
     if (matchMode === 'team') {
-        let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B' && val !== 'Team A' && val !== 'Team B';
-        let t1Label = isReal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
-        let t2Label = isReal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
+        let isDefaultVal = (val) => {
+            if (!val) return true;
+            let v = val.trim();
+            return (v === '1' || v === 'A' || v === '隊伍 A' || v === '隊伍 B' || v === 'Team A' || v === 'Team B');
+        };
+        let t1Label = !isDefaultVal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
+        let t2Label = !isDefaultVal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         safeSetText('team-wins-p1', `${t1Label}: ${teamWinsP1}`);
         safeSetText('team-wins-p2', `${t2Label}: ${teamWinsP2}`);
     }
@@ -945,6 +950,11 @@ function loadState() {
             currentLang = state.currentLang || 'zh';
 
             if (state.roster) roster = state.roster;
+
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            if (state.p1Name) setVal('p1-title', state.p1Name);
+            if (state.p2Name) setVal('p2-title', state.p2Name);
+            if (state.p3Name) setVal('p3-title', state.p3Name);
 
             setMatchMode(matchMode, false);
         } catch(e) {
