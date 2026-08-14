@@ -1,5 +1,5 @@
 /* =========================================================================
- * ⚡ app.js - BX Score Keeper Main Application Logic
+ * ⚡ app.js - BX Score Keeper Main Application Logic (100% Bilingual)
  * ========================================================================= */
 
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
@@ -14,9 +14,9 @@ let history = [], logs = [];
 let currentLang = 'zh';
 
 let roster = {
-    t1Name: '隊伍 A', t1: ['先鋒', '中堅', '大將'],
-    t2Name: '隊伍 B', t2: ['先鋒', '中堅', '大將'],
-    t3Name: '選手三'
+    t1Name: '', t1: ['', '', ''],
+    t2Name: '', t2: ['', '', ''],
+    t3Name: ''
 };
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -160,6 +160,7 @@ function setMatchMode(mode, shouldReset = false) {
     }
 }
 
+/* 🎯 關鍵修復：嚴格區分自訂名字與預設佔位符，英文模式下絕不帶出「先鋒 / 隊伍」 */
 function updatePlayerNamesForMode() {
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
@@ -172,35 +173,43 @@ function updatePlayerNamesForMode() {
     let rolesZh = ['先鋒', '中堅', '大將'];
     let rolesEn = ['1st Vanguard', '2nd Middle', '3rd General'];
 
-    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B' && val !== 'Team A' && val !== 'Team B' && !val.startsWith('選手') && !val.startsWith('Player');
+    let isDefaultVal = (val) => {
+        if (!val) return true;
+        let v = val.trim();
+        return (
+            v === '1' || v === '2' || v === '3' || v === 'A' || v === 'B' || v === 'C' ||
+            v === '選手一' || v === '選手二' || v === '選手三' ||
+            v === 'Player 1' || v === 'Player 2' || v === 'Player 3' ||
+            v === '先鋒' || v === '中堅' || v === '大將' ||
+            v.includes('Vanguard') || v.includes('Middle') || v.includes('General') ||
+            v === '隊伍 A' || v === '隊伍 B' || v === 'Team A' || v === 'Team B'
+        );
+    };
 
     if (matchMode === 'team') {
-        let t1Name = isReal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
-        let t2Name = isReal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
+        let t1Name = !isDefaultVal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
+        let t2Name = !isDefaultVal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         let idx1 = Math.min(kofIndexP1, 2);
         let idx2 = Math.min(kofIndexP2, 2);
 
         let rawP1 = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : '';
         let rawP2 = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : '';
 
-        let isDefault1 = (!rawP1 || rawP1 === '1' || rawP1 === '2' || rawP1 === '3' || rawP1.startsWith('選手') || rawP1.startsWith('Player') || rawP1 === '先鋒' || rawP1 === '中堅' || rawP1 === '大將' || rawP1.includes('Vanguard') || rawP1.includes('Middle') || rawP1.includes('General'));
-        let isDefault2 = (!rawP2 || rawP2 === 'A' || rawP2 === 'B' || rawP2 === 'C' || rawP2.startsWith('選手') || rawP2.startsWith('Player') || rawP2 === '先鋒' || rawP2 === '中堅' || rawP2 === '大將' || rawP2.includes('Vanguard') || rawP2.includes('Middle') || rawP2.includes('General'));
-
-        let p1Display = isDefault1 ? (currentLang === 'zh' ? rolesZh[idx1] : rolesEn[idx1]) : rawP1;
-        let p2Display = isDefault2 ? (currentLang === 'zh' ? rolesZh[idx2] : rolesEn[idx2]) : rawP2;
+        let p1Display = isDefaultVal(rawP1) ? (currentLang === 'zh' ? rolesZh[idx1] : rolesEn[idx1]) : rawP1;
+        let p2Display = isDefaultVal(rawP2) ? (currentLang === 'zh' ? rolesZh[idx2] : rolesEn[idx2]) : rawP2;
         
         if (p1Title) p1Title.value = `${p1Display} (${t1Name})`;
         if (p2Title) p2Title.value = `${p2Display} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        let name1 = isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1);
-        let name2 = isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2);
+        let name1 = !isDefaultVal(roster.t1Name) ? roster.t1Name : ((roster.t1 && !isDefaultVal(roster.t1[0])) ? roster.t1[0] : defP1);
+        let name2 = !isDefaultVal(roster.t2Name) ? roster.t2Name : ((roster.t2 && !isDefaultVal(roster.t2[0])) ? roster.t2[0] : defP2);
 
         if (p1Title) p1Title.value = name1;
         if (p2Title) p2Title.value = name2;
     } else if (matchMode === 'p3') {
-        let name1 = isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1);
-        let name2 = isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2);
-        let name3 = isReal(roster.t3Name) ? roster.t3Name : defP3;
+        let name1 = !isDefaultVal(roster.t1Name) ? roster.t1Name : ((roster.t1 && !isDefaultVal(roster.t1[0])) ? roster.t1[0] : defP1);
+        let name2 = !isDefaultVal(roster.t2Name) ? roster.t2Name : ((roster.t2 && !isDefaultVal(roster.t2[0])) ? roster.t2[0] : defP2);
+        let name3 = !isDefaultVal(roster.t3Name) ? roster.t3Name : defP3;
 
         if (p1Title) p1Title.value = name1;
         if (p2Title) p2Title.value = name2;
@@ -525,9 +534,11 @@ function updateDisplay() {
     const f2 = document.getElementById('btn-foul-p2'); if (f2) f2.classList.toggle('active-foul', foulsP2 > 0);
     const f3 = document.getElementById('btn-foul-p3'); if (f3) f3.classList.toggle('active-foul', foulsP3 > 0);
 
+    /* 🎯 關鍵修復：大分條雙語連動（Team A / Team B） */
     if (matchMode === 'team') {
-        let t1Label = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
-        let t2Label = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
+        let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B' && val !== 'Team A' && val !== 'Team B';
+        let t1Label = isReal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
+        let t2Label = isReal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         safeSetText('team-wins-p1', `${t1Label}: ${teamWinsP1}`);
         safeSetText('team-wins-p2', `${t2Label}: ${teamWinsP2}`);
     }
@@ -622,13 +633,13 @@ function toggleLanguage() {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     applyLanguage();
     updatePlayerNamesForMode();
+    updateDisplay();
     if (typeof syncRosterToLobbyUI === 'function') {
         syncRosterToLobbyUI();
     }
     saveState();
 }
 
-/* 🎯 100% 完整雙語切換字典 */
 function applyLanguage() {
     const lang = i18n[currentLang];
 
@@ -934,11 +945,6 @@ function loadState() {
             currentLang = state.currentLang || 'zh';
 
             if (state.roster) roster = state.roster;
-
-            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-            if (state.p1Name) setVal('p1-title', state.p1Name);
-            if (state.p2Name) setVal('p2-title', state.p2Name);
-            if (state.p3Name) setVal('p3-title', state.p3Name);
 
             setMatchMode(matchMode, false);
         } catch(e) {
