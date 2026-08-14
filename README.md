@@ -42,7 +42,7 @@
 
 ### 📲 如何安裝與使用 (Installation & Setup)
 
-#### 1. 手機端即開即用（推薦：PWA 捷徑安裝）
+#### 手機端即開即用（推薦：PWA 捷徑安裝）
 本專案支援 PWA（漸進式 Web 應用），**毋須經由 App Store / Google Play 下載**即可享受原生 App 體驗：
 * **iOS (iPhone / iPad)**：
   1. 使用 **Safari** 瀏覽器開啟專案網址。
@@ -53,23 +53,6 @@
   2. 點擊右上角 **選單**（三個點）。
   3. 選擇 **「安裝應用程式」** 或 **「加至主螢幕」 (Install App / Add to Home screen)**。
 
-#### 2. 本機開發與部署 (Local Development)
-如果您想在電腦運行或自行調整功能：
-```bash
-# 1. 複製專案庫 (Clone repository)
-git clone [https://github.com/your-username/bx-score-keeper.git](https://github.com/your-username/bx-score-keeper.git)
-
-# 2. 進入專案資料夾
-cd bx-score-keeper
-
-# 3. 安裝相依套件 (Install dependencies)
-npm install
-
-# 4. 啟動本機開發伺服器 (Start local server)
-npm run dev
-
-```
-<a name="english"></a>
 ## 📖 About This Project
 This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by our shared passion for competitive play, we built this tool to make every battle seamless, engaging, and fully aligned with official tournament standards across Asia. We warmly invite parents, kids, and bladers of all ages to use it, enjoy fair battles, and create unforgettable memories together!
 ### ✨ Features
@@ -99,7 +82,7 @@ This repository is a non-commercial personal project created to capture precious
    * 🌐 **100% Bilingual Support**: Instant toggle between Traditional Chinese and International English.
  * **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional for offline single-device scoring without internet access.
 ### 📲 How to Install & Run
-#### 1. Instant Mobile Setup (Recommended: PWA)
+#### Instant Mobile Setup (Recommended: PWA)
 This project is built as a Progressive Web App (PWA) — **no App Store / Google Play download required**:
  * **iOS (Safari)**:
    1. Open the web link in **Safari**.
@@ -109,22 +92,7 @@ This project is built as a Progressive Web App (PWA) — **no App Store / Google
    1. Open the web link in **Chrome**.
    2. Tap the top-right menu (three dots).
    3. Select **"Install app"** or **"Add to Home screen"**.
-#### 2. Local Development & Hosting
-To clone, run, or customize the project locally:
-```bash
-# 1. Clone the repository
-git clone [https://github.com/your-username/bx-score-keeper.git](https://github.com/your-username/bx-score-keeper.git)
 
-# 2. Navigate to project root
-cd bx-score-keeper
-
-# 3. Install dependencies
-npm install
-
-# 4. Start local development server
-npm run dev
-
-```
 ### 🛡️ Privacy & Security / 私隱聲明
  * **Zero-Backend (純前端架構)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
  * **P2P Direct Connection (端對端直連)**：所有跨機數據透過 WebRTC Peer-to-Peer 於裝置間直連傳輸，不經由第三方伺服器儲存。
