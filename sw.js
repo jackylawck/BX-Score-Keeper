@@ -1,7 +1,9 @@
-const CACHE_NAME = 'bx-score-v10';
+const CACHE_NAME = 'bx-score-v13';
 const ASSETS = [
   './',
   './index.html',
+  './style.css',
+  './app.js',
   './manifest.json',
   './BXScoreKeepericon-192.png',
   './BXScoreKeepericon-512.png'
