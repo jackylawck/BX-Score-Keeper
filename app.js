@@ -28,9 +28,10 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     } catch(e) {}
 }
 
-/* 🔄 強制清除 Service Worker 快取並重新載入 App */
+/* 🔄 強制清除 Service Worker 快取與 LocalStorage 並重新載入 App */
 function forceRefreshApp() {
-    if (confirm(currentLang === 'zh' ? "是否重新載入並檢查最新版本？" : "Reload and check for updates?")) {
+    if (confirm(currentLang === 'zh' ? "是否重新載入並清除舊資料？" : "Reload and clear cache?")) {
+        localStorage.removeItem('bx_score_state');
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 for (let registration of registrations) {
@@ -210,12 +211,12 @@ function updatePlayerNamesForMode() {
         document.getElementById('p1-title').value = `${p1Name} (${t1Name})`;
         document.getElementById('p2-title').value = `${p2Name} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
-        document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
+        document.getElementById('p1-title').value = roster.t1[0] || '1';
+        document.getElementById('p2-title').value = roster.t2[0] || 'A';
     } else if (matchMode === 'p3') {
-        document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
-        document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
-        document.getElementById('p3-title').value = roster.t3Name || 'PLAYER 3';
+        document.getElementById('p1-title').value = roster.t1[0] || '1';
+        document.getElementById('p2-title').value = roster.t2[0] || 'A';
+        document.getElementById('p3-title').value = 'PLAYER 3';
     }
 }
 
@@ -249,7 +250,10 @@ function saveRoster() {
 }
 
 function addScore(player, pts, typeName) {
-    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) return;
+    // 若已達勝負標準，先檢查防卡死
+    if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore)) {
+        return;
+    }
 
     playBeep(600, 'square', 0.08);
 
@@ -415,6 +419,7 @@ function resetMatch(askConfirm = true) {
         kofIndexP1 = 0; kofIndexP2 = 0;
         battleCount = 1;
         history = []; logs = [];
+        localStorage.removeItem('bx_score_state'); // 解除鎖定
         updatePlayerNamesForMode();
         updateDisplay();
         saveState();
