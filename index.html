@@ -23,6 +23,12 @@
     <meta property="og:url" content="https://jackylawck.github.io/BX-Score-Keeper/">
     <meta property="og:site_name" content="BX Score Keeper">
 
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BX Score Keeper | 爆旋計分器">
+    <meta name="twitter:description" content="專為《爆旋陀螺X》賽事規則設計的對戰計分器。">
+    <meta name="twitter:image" content="https://jackylawck.github.io/BX-Score-Keeper/BXScoreKeepericon-512.png">
+
     <!-- PWA & Favicon Settings -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="BXScoreKeepericon-192.png">
@@ -42,6 +48,7 @@
             <div class="subtitle" id="rules-tag">《爆旋陀螺X規則（亞洲版）》第 12 版</div>
         </div>
         <div class="nav-btns">
+            <button class="top-btn" onclick="forceRefreshApp()" title="重新載入 / 檢查更新">🔄 <span id="btn-refresh-txt">更新</span></button>
             <button class="top-btn" onclick="openRosterModal()">👥 <span id="btn-roster-txt">隊伍排陣</span></button>
             <button class="top-btn" onclick="openRules()">📖 <span id="btn-rules-txt">規則</span></button>
             <button class="top-btn" onclick="toggleLanguage()" id="lang-btn">EN</button>
@@ -159,15 +166,15 @@
             <div style="margin-top:10px;">
                 <h4 style="color:var(--neon-blue); margin-bottom:4px;" id="lbl-t1-header">TEAM A (隊伍 1)</h4>
                 <input type="text" id="roster-t1-name" class="roster-input" placeholder="隊伍名稱 (預設 Team A)">
-                <input type="text" id="roster-t1-p1" class="roster-input" placeholder="先鋒 1號 (預設 PLAYER 1)">
-                <input type="text" id="roster-t1-p2" class="roster-input" placeholder="中堅 2號 (預設 PLAYER 2)">
-                <input type="text" id="roster-t1-p3" class="roster-input" placeholder="大將 3號 (預設 PLAYER 3)">
+                <input type="text" id="roster-t1-p1" class="roster-input" placeholder="先鋒 1號 (預設 1)">
+                <input type="text" id="roster-t1-p2" class="roster-input" placeholder="中堅 2號 (預設 2)">
+                <input type="text" id="roster-t1-p3" class="roster-input" placeholder="大將 3號 (預設 3)">
 
                 <h4 style="color:var(--neon-red); margin-top:10px; margin-bottom:4px;" id="lbl-t2-header">TEAM B (隊伍 2)</h4>
                 <input type="text" id="roster-t2-name" class="roster-input" placeholder="隊伍名稱 (預設 Team B)">
-                <input type="text" id="roster-t2-p1" class="roster-input" placeholder="先鋒 1號 (預設 PLAYER 1)">
-                <input type="text" id="roster-t2-p2" class="roster-input" placeholder="中堅 2號 (預設 PLAYER 2)">
-                <input type="text" id="roster-t2-p3" class="roster-input" placeholder="大將 3號 (預設 PLAYER 3)">
+                <input type="text" id="roster-t2-p1" class="roster-input" placeholder="先鋒 1號 (預設 A)">
+                <input type="text" id="roster-t2-p2" class="roster-input" placeholder="中堅 2號 (預設 B)">
+                <input type="text" id="roster-t2-p3" class="roster-input" placeholder="大將 3號 (預設 C)">
 
                 <button class="ctrl-btn" onclick="saveRoster()" id="btn-save-roster" style="margin-top:10px; width:100%; background:var(--neon-blue); color:#000; font-weight:900;">儲存排陣名單</button>
             </div>
