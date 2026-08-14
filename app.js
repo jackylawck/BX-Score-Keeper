@@ -18,9 +18,12 @@ let roster = {
 let peer = null;
 let p2pConnMap = {}; 
 let hostConn = null;  
-let myPeerRole = 'none'; 
+let myPeerRole = 'none'; // 'host', 'player', 'spectator'
 let currentRoomId = '';
 let pendingClientData = null;
+
+/* 🛡️ 方案 B 關鍵：追蹤位置佔用狀態 */
+let occupiedSlots = { slot1: false, slot2: false, slot3: false };
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBeep(freq = 440, type = 'sine', duration = 0.1) {
@@ -58,9 +61,37 @@ function forceRefreshApp() {
     }
 }
 
-/* 🌐 WebRTC P2P 邏輯 */
+/* 🌐 WebRTC P2P 邏輯實作 */
 function openP2PModal() { safeSetDisplay('p2p-modal', 'flex'); }
 function closeP2PModal() { safeSetDisplay('p2p-modal', 'none'); }
+
+function updateP2PFormFields() {
+    let mode = document.getElementById('p2p-form-type').value;
+    let extraBox = document.getElementById('p2p-extra-items');
+    let nameInput = document.getElementById('p2p-player-name');
+
+    if (mode === 'std' || mode === 'p3') {
+        if (extraBox) extraBox.style.display = 'none';
+        if (nameInput) nameInput.placeholder = '選手姓名 (例如 BB)';
+    } else if (mode === '3v3') {
+        if (extraBox) extraBox.style.display = 'block';
+        if (nameInput) nameInput.placeholder = '選手姓名 (例如 BB)';
+        safeSetInputPlaceholder('p2p-item-1', '陀螺 1 號 (ITEM #1)');
+        safeSetInputPlaceholder('p2p-item-2', '陀螺 2 號 (ITEM #2)');
+        safeSetInputPlaceholder('p2p-item-3', '陀螺 3 號 (ITEM #3)');
+    } else if (mode === 'team') {
+        if (extraBox) extraBox.style.display = 'block';
+        if (nameInput) nameInput.placeholder = '隊伍名稱 (例如 Team A)';
+        safeSetInputPlaceholder('p2p-item-1', '先鋒 1 號');
+        safeSetInputPlaceholder('p2p-item-2', '中堅 2 號');
+        safeSetInputPlaceholder('p2p-item-3', '大將 3 號');
+    }
+}
+
+function safeSetInputPlaceholder(id, txt) {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = txt;
+}
 
 function initP2PHost() {
     if (peer) peer.destroy();
@@ -72,11 +103,13 @@ function initP2PHost() {
     
     peer.on('open', (id) => {
         myPeerRole = 'host';
+        occupiedSlots = { slot1: false, slot2: false, slot3: false };
+        setUIPermissions();
         safeSetDisplay('p2p-status-bar', 'block');
         safeSetText('p2p-role-badge', 'HOST (裁判)');
         safeSetText('p2p-current-room', randomNum);
         safeSetText('p2p-connected-count', '0');
-        alert(`房間建立成功！房間 ID：${randomNum}\n請讓選手輸入此 ID 加入。`);
+        alert(`房間建立成功！房間 ID：${randomNum}\n請將此 ID 告知選手與觀眾加入。`);
         closeP2PModal();
     });
 
@@ -104,7 +137,7 @@ function updateConnectedCount() {
     safeSetText('p2p-connected-count', count);
 }
 
-function joinP2PRoom() {
+function joinP2PRoom(roleType) {
     let inputId = document.getElementById('p2p-input-room').value.trim();
     if (!inputId || inputId.length < 8) {
         alert("請輸入正確的 8 位數房間 ID！");
@@ -115,18 +148,29 @@ function joinP2PRoom() {
     peer = new Peer();
 
     peer.on('open', () => {
-        myPeerRole = 'client';
+        myPeerRole = roleType;
         let targetPeerId = `bx-${inputId}`;
         hostConn = peer.connect(targetPeerId);
 
         hostConn.on('open', () => {
             currentRoomId = inputId;
             safeSetDisplay('p2p-status-bar', 'block');
-            safeSetText('p2p-role-badge', 'CLIENT (選手)');
+            
+            if (roleType === 'spectator') {
+                safeSetText('p2p-role-badge', '👁️ SPECTATOR (觀眾)');
+                safeSetDisplay('p2p-client-submit-box', 'none');
+                closeP2PModal();
+                alert("已成功連線至裁判房間！你正處於【觀眾直播模式】。");
+            } else {
+                safeSetText('p2p-role-badge', '🎮 PLAYER (選手)');
+                safeSetDisplay('p2p-client-submit-box', 'block');
+                updateP2PFormFields();
+                alert("已成功連線至裁判房間！請填寫資料並送出。");
+            }
+
+            setUIPermissions();
             safeSetText('p2p-current-room', inputId);
             safeSetText('p2p-connected-count', '已連線');
-            safeSetDisplay('p2p-client-submit-box', 'block');
-            alert("已成功連線至裁判房間！請填寫排陣資料並送出。");
         });
 
         hostConn.on('data', (data) => {
@@ -139,12 +183,39 @@ function joinP2PRoom() {
     });
 }
 
+function leaveP2PRoom() {
+    if (confirm("確定要離開目前的對戰房間嗎？")) {
+        if (peer) peer.destroy();
+        peer = null;
+        hostConn = null;
+        p2pConnMap = {};
+        myPeerRole = 'none';
+        
+        safeSetDisplay('p2p-status-bar', 'none');
+        setUIPermissions();
+        alert("已離開房間，恢復單機計分模式。");
+    }
+}
+
+function setUIPermissions() {
+    const isReadOnly = (myPeerRole === 'spectator');
+    
+    document.querySelectorAll('.score-btn').forEach(btn => {
+        btn.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+        btn.style.opacity = isReadOnly ? '0.6' : '1';
+    });
+
+    const mainControls = document.getElementById('main-controls');
+    if (mainControls) mainControls.style.display = isReadOnly ? 'none' : 'flex';
+}
+
 function sendClientDeckToHost() {
     if (!hostConn || !hostConn.open) {
         alert("未連線至裁判端！");
         return;
     }
 
+    let mode = document.getElementById('p2p-form-type').value;
     let name = document.getElementById('p2p-player-name').value.trim() || '選手';
     let item1 = document.getElementById('p2p-item-1').value.trim() || '1';
     let item2 = document.getElementById('p2p-item-2').value.trim() || '2';
@@ -152,69 +223,100 @@ function sendClientDeckToHost() {
 
     let payload = {
         type: 'SUBMIT_DECK',
+        formMode: mode,
         name: name,
         items: [item1, item2, item3]
     };
 
     hostConn.send(payload);
-    alert("已送出給裁判，等待裁判決定放置位置與鎖定！");
+    alert("已送出給裁判，等待裁判審核並決定放置位置！");
 }
 
-/* 裁判收到資料，彈窗供裁判選擇「放左 (1) / 放右 (2) / 放中 (3)」 */
+/* 裁判端收到請求：如果名額已滿，直接拒絕，保護裁判不被洗版 */
 function handleHostReceivedData(data, conn) {
     if (data.type === 'SUBMIT_DECK') {
+        let isFull = (matchMode === 'p3') 
+            ? (occupiedSlots.slot1 && occupiedSlots.slot2 && occupiedSlots.slot3)
+            : (occupiedSlots.slot1 && occupiedSlots.slot2);
+
+        if (isFull) {
+            conn.send({ type: 'REJECT_FULL' });
+            return;
+        }
+
         pendingClientData = data;
         safeSetText('p2p-request-title', `收到 [ ${data.name} ] 的排陣提交`);
         
+        let modeLabel = data.formMode === '3v3' ? '3on3 陀螺' : (data.formMode === 'team' ? 'Team 隊員' : '個人賽');
         let bodyHtml = `
-            <b>選手/隊伍:</b> ${data.name}<br>
-            <b>1 號:</b> ${data.items[0]}<br>
-            <b>2 號:</b> ${data.items[1]}<br>
-            <b>3 號:</b> ${data.items[2]}
+            <b>賽制類型:</b> ${modeLabel}<br>
+            <b>名稱:</b> ${data.name}<br>
         `;
+        if (data.formMode === '3v3' || data.formMode === 'team') {
+            bodyHtml += `
+                <b>1 號:</b> ${data.items[0]}<br>
+                <b>2 號:</b> ${data.items[1]}<br>
+                <b>3 號:</b> ${data.items[2]}
+            `;
+        }
         const modalBody = document.getElementById('p2p-request-body');
         if (modalBody) modalBody.innerHTML = bodyHtml;
 
-        // 如果是 3人亂鬥模式，顯示「放中間 (Slot 3)」按鈕
-        safeSetDisplay('p2p-slot3-btn', matchMode === 'p3' ? 'inline-block' : 'none');
-
+        safeSetDisplay('p2p-slot3-btn', data.formMode === 'p3' || matchMode === 'p3' ? 'inline-block' : 'none');
         safeSetDisplay('p2p-confirm-modal', 'flex');
     }
 }
 
-/* 裁判點擊指定位置 (targetSlot = 1, 2, 3) 接受提交 */
+/* 裁判點擊按鈕分配位置：更新佔用狀態 */
 function acceptClientSubmission(targetSlot) {
     if (!pendingClientData) return;
 
     let data = pendingClientData;
+    
+    setMatchMode(data.formMode);
+
     if (targetSlot === 1) {
         roster.t1Name = data.name;
         roster.t1 = data.items;
+        occupiedSlots.slot1 = true;
     } else if (targetSlot === 2) {
         roster.t2Name = data.name;
         roster.t2 = data.items;
+        occupiedSlots.slot2 = true;
     } else if (targetSlot === 3) {
         roster.t3Name = data.name;
+        occupiedSlots.slot3 = true;
     }
+
+    safeSetDisplay('p2p-confirm-modal', 'none');
 
     updatePlayerNamesForMode();
     saveState();
     updateDisplay();
 
+    let p1Show = document.getElementById('p1-title').value;
+    let p2Show = document.getElementById('p2-title').value;
+
     broadcastToClients({
-        type: 'STATE_SYNC',
+        type: 'MATCH_START_SYNC',
         roster: roster,
         scoreP1, scoreP2, scoreP3,
-        battleCount, matchMode
+        battleCount, matchMode,
+        p1Show, p2Show
     });
 
-    safeSetDisplay('p2p-confirm-modal', 'none');
-    let posText = targetSlot === 1 ? '左邊 (Player 1)' : (targetSlot === 2 ? '右邊 (Player 2)' : '中間 (Player 3)');
-    alert(`已成功將 [ ${data.name} ] 分配至 ${posText} 並鎖定！`);
+    triggerVersusAnimation(p1Show, p2Show);
 }
 
 function handleClientReceivedData(data) {
-    if (data.type === 'STATE_SYNC') {
+    if (data.type === 'REJECT_FULL') {
+        alert("⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。");
+        myPeerRole = 'spectator';
+        safeSetText('p2p-role-badge', '👁️ SPECTATOR (觀眾)');
+        safeSetDisplay('p2p-client-submit-box', 'none');
+        closeP2PModal();
+        setUIPermissions();
+    } else if (data.type === 'STATE_SYNC') {
         roster = data.roster;
         scoreP1 = data.scoreP1;
         scoreP2 = data.scoreP2;
@@ -224,6 +326,19 @@ function handleClientReceivedData(data) {
 
         updatePlayerNamesForMode();
         updateDisplay();
+    } else if (data.type === 'MATCH_START_SYNC') {
+        roster = data.roster;
+        scoreP1 = data.scoreP1;
+        scoreP2 = data.scoreP2;
+        scoreP3 = data.scoreP3;
+        battleCount = data.battleCount;
+        matchMode = data.matchMode;
+
+        updatePlayerNamesForMode();
+        updateDisplay();
+        triggerVersusAnimation(data.p1Show, data.p2Show);
+    } else if (data.type === 'MODE_SYNC') {
+        setMatchMode(data.mode);
     }
 }
 
@@ -396,6 +511,10 @@ function setMatchMode(mode) {
 
     updatePlayerNamesForMode();
     applyLanguage();
+
+    if (myPeerRole === 'host') {
+        broadcastToClients({ type: 'MODE_SYNC', mode });
+    }
 }
 
 function updatePlayerNamesForMode() {
@@ -669,6 +788,7 @@ function undo() {
     }
 }
 
+/* 重置賽事：解鎖位置名額，迎接新對局 */
 function resetMatch(askConfirm = true) {
     if (!askConfirm || confirm("Reset entire match/scores? / 確定重置賽事？")) {
         scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
@@ -678,6 +798,10 @@ function resetMatch(askConfirm = true) {
         battleCount = 1;
         history = []; logs = [];
         isFinalTeamWinActive = false;
+        
+        // 🛡️ 重置佔用名額
+        occupiedSlots = { slot1: false, slot2: false, slot3: false };
+
         localStorage.removeItem('bx_score_state');
         updatePlayerNamesForMode();
         updateDisplay();
@@ -831,7 +955,7 @@ function saveState() {
     const state = {
         scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
-        teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
+        teamWinsP1, teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
         battleCount, matchMode, roster, isFinalTeamWinActive,
         p1Name: getVal('p1-title'),
         p2Name: getVal('p2-title'),
