@@ -1,5 +1,5 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync (Max 28 Devices)
+ * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync & Flexible 3-Slot Lobby
  * ========================================================================= */
 
 const MAX_DEVICES = 28;
@@ -144,7 +144,6 @@ function broadcastDeviceCount() {
     broadcastToClients({ type: 'DEVICE_COUNT_SYNC', count });
 }
 
-/* 🎯 進入等候大廳：保證賽制下拉選單與裁判當前模式 100% 同步 */
 function openLobbyModal() {
     if (myPeerRole !== 'host') return;
     
@@ -190,20 +189,19 @@ function applyLobbyLayout() {
     }
 }
 
-/* 🎯 關鍵修復：正確將收到的 Daddy / BB 隊名同步到大廳輸入框 */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
     let defP3 = currentLang === 'zh' ? '選手三' : 'Player 3';
 
     if (matchMode === 'team') {
-        safeSetInputValue('lobby-p1-name', roster.t1Name || defP1);
-        safeSetInputValue('lobby-p2-name', roster.t2Name || defP2);
+        safeSetInputValue('lobby-p1-name', (roster.t1Name && roster.t1Name !== '1') ? roster.t1Name : defP1);
+        safeSetInputValue('lobby-p2-name', (roster.t2Name && roster.t2Name !== '1') ? roster.t2Name : defP2);
     } else {
-        safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || defP1));
-        safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || defP2));
+        safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0] && roster.t1[0] !== '1') ? roster.t1[0] : (roster.t1Name || defP1));
+        safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0] && roster.t2[0] !== '1') ? roster.t2[0] : (roster.t2Name || defP2));
     }
-    safeSetInputValue('lobby-p3-name', roster.t3Name || defP3);
+    safeSetInputValue('lobby-p3-name', (roster.t3Name && roster.t3Name !== '1') ? roster.t3Name : defP3);
 
     safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || '1');
     safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || '2');
@@ -464,6 +462,7 @@ function sendClientDeckToHost() {
     alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並排入大廳！" : "Submitted! Waiting for Referee approval.");
 }
 
+/* 🎯 關鍵修復：解除名額限制！只要未開賽鎖定，永遠允許最多 3 位選手提交進來供裁判審核 */
 function handleHostReceivedData(data, conn) {
     if (data.type === 'SUBMIT_DECK') {
         if (isMatchLocked) {
@@ -471,10 +470,8 @@ function handleHostReceivedData(data, conn) {
             return;
         }
 
-        let isFull = (matchMode === 'p3') 
-            ? (occupiedSlots.slot1 && occupiedSlots.slot2 && occupiedSlots.slot3)
-            : (occupiedSlots.slot1 && occupiedSlots.slot2);
-
+        // 3 個位置全部被佔滿才拒絕，第 3 位選手永遠收得到！
+        let isFull = (occupiedSlots.slot1 && occupiedSlots.slot2 && occupiedSlots.slot3);
         if (isFull) {
             conn.send({ type: 'REJECT_FULL' });
             return;
@@ -502,7 +499,7 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 🎯 關鍵修復：自動分配進 Slot 時，確實把隊伍名存入 roster.t1Name 或 roster.t2Name */
+/* 🎯 依序排入 Slot 1 ➔ Slot 2 ➔ Slot 3，並自動調整大廳賽制 */
 function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
@@ -513,7 +510,7 @@ function autoAcceptClientSubmission() {
         targetSlot = 1;
     } else if (!occupiedSlots.slot2) {
         targetSlot = 2;
-    } else if (matchMode === 'p3' && !occupiedSlots.slot3) {
+    } else if (!occupiedSlots.slot3) {
         targetSlot = 3;
     } else {
         targetSlot = 1;
@@ -530,10 +527,22 @@ function autoAcceptClientSubmission() {
     } else if (targetSlot === 3) {
         roster.t3Name = data.name;
         occupiedSlots.slot3 = true;
+        // 如果收到第 3 位選手，自動將大廳切換為 3-Player 模式並展開中間欄位！
+        if (matchMode !== 'p3') {
+            handleLobbyModeChangeFromData('p3');
+        }
     }
 
     safeSetDisplay('p2p-confirm-modal', 'none');
     openLobbyModal();
+}
+
+function handleLobbyModeChangeFromData(newMode) {
+    const modeSelect = document.getElementById('lobby-match-mode');
+    if (modeSelect) modeSelect.value = newMode;
+    setMatchMode(newMode, false);
+    applyLobbyLayout();
+    broadcastToClients({ type: 'MODE_SYNC', mode: newMode });
 }
 
 function rejectClientSubmission() {
