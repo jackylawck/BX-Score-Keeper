@@ -95,6 +95,7 @@ function safeSetInputPlaceholder(id, txt) {
     if (el) el.placeholder = txt;
 }
 
+/* 👑 裁判建立房間 ➔ 直接進入【🏟️ 裁判等候大廳】 */
 function initP2PHost() {
     if (peer) peer.destroy();
     
@@ -107,13 +108,14 @@ function initP2PHost() {
         myPeerRole = 'host';
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
         setUIPermissions();
+        
         safeSetDisplay('p2p-status-bar', 'block');
         safeSetText('p2p-role-badge', currentLang === 'zh' ? 'HOST (裁判)' : 'HOST (Referee)');
         safeSetText('p2p-current-room', randomNum);
         safeSetText('p2p-connected-count', '0');
-        let msg = currentLang === 'zh' ? `房間建立成功！房間 ID：${randomNum}\n請將此 ID 告知選手與觀眾加入。` : `Room created successfully! Room ID: ${randomNum}\nShare this ID with players and spectators.`;
-        alert(msg);
+
         closeP2PModal();
+        openLobbyModal();
     });
 
     peer.on('connection', (conn) => {
@@ -138,6 +140,103 @@ function initP2PHost() {
 function updateConnectedCount() {
     let count = Object.keys(p2pConnMap).length;
     safeSetText('p2p-connected-count', count);
+    safeSetText('lobby-connected-count', count);
+}
+
+/* 🏟️ 裁判等候大廳 (Lobby) 邏輯 */
+function openLobbyModal() {
+    if (myPeerRole !== 'host') return;
+    
+    let rawRoomNum = currentRoomId.replace('bx-', '');
+    safeSetText('lobby-display-room', rawRoomNum);
+    updateConnectedCount();
+
+    const modeSelect = document.getElementById('lobby-match-mode');
+    if (modeSelect) modeSelect.value = matchMode;
+
+    syncRosterToLobbyUI();
+    applyLobbyLayout();
+    safeSetDisplay('lobby-modal', 'flex');
+}
+
+function closeLobbyModal() { safeSetDisplay('lobby-modal', 'none'); }
+
+function handleLobbyModeChange() {
+    let newMode = document.getElementById('lobby-match-mode').value;
+    setMatchMode(newMode);
+    applyLobbyLayout();
+    broadcastToClients({ type: 'MODE_SYNC', mode: newMode });
+}
+
+function applyLobbyLayout() {
+    let is3v3OrTeam = (matchMode === '3v3' || matchMode === 'team');
+    safeSetDisplay('lobby-p1-deck-box', is3v3OrTeam ? 'block' : 'none');
+    safeSetDisplay('lobby-p2-deck-box', is3v3OrTeam ? 'block' : 'none');
+    safeSetDisplay('lobby-p3-box', (matchMode === 'p3') ? 'block' : 'none');
+}
+
+function syncRosterToLobbyUI() {
+    safeSetInputValue('lobby-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (matchMode === 'team' ? roster.t1Name : '1'));
+    safeSetInputValue('lobby-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (matchMode === 'team' ? roster.t2Name : 'A'));
+    safeSetInputValue('lobby-p3-name', roster.t3Name || 'PLAYER 3');
+
+    safeSetInputValue('lobby-p1-d1', (roster.t1 && roster.t1[0]) || '1');
+    safeSetInputValue('lobby-p1-d2', (roster.t1 && roster.t1[1]) || '2');
+    safeSetInputValue('lobby-p1-d3', (roster.t1 && roster.t1[2]) || '3');
+
+    safeSetInputValue('lobby-p2-d1', (roster.t2 && roster.t2[0]) || 'A');
+    safeSetInputValue('lobby-p2-d2', (roster.t2 && roster.t2[1]) || 'B');
+    safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
+}
+
+/* 裁判在等候大廳按下「🔒 鎖定排陣並邀請全場開賽！」 */
+function startMatchFromLobby() {
+    let p1Val = document.getElementById('lobby-p1-name').value.trim() || '1';
+    let p2Val = document.getElementById('lobby-p2-name').value.trim() || 'A';
+    let p3Val = document.getElementById('lobby-p3-name').value.trim() || 'PLAYER 3';
+
+    roster.t1Name = p1Val;
+    roster.t2Name = p2Val;
+    roster.t3Name = p3Val;
+
+    if (matchMode === '3v3' || matchMode === 'team') {
+        roster.t1 = [
+            document.getElementById('lobby-p1-d1').value.trim() || '1',
+            document.getElementById('lobby-p1-d2').value.trim() || '2',
+            document.getElementById('lobby-p1-d3').value.trim() || '3'
+        ];
+        roster.t2 = [
+            document.getElementById('lobby-p2-d1').value.trim() || 'A',
+            document.getElementById('lobby-p2-d2').value.trim() || 'B',
+            document.getElementById('lobby-p2-d3').value.trim() || 'C'
+        ];
+    } else {
+        roster.t1[0] = p1Val;
+        roster.t2[0] = p2Val;
+    }
+
+    occupiedSlots.slot1 = true;
+    occupiedSlots.slot2 = true;
+    if (matchMode === 'p3') occupiedSlots.slot3 = true;
+
+    closeLobbyModal();
+
+    updatePlayerNamesForMode();
+    saveState();
+    updateDisplay();
+
+    let p1Show = document.getElementById('p1-title').value;
+    let p2Show = document.getElementById('p2-title').value;
+
+    broadcastToClients({
+        type: 'MATCH_START_SYNC',
+        roster: roster,
+        scoreP1, scoreP2, scoreP3,
+        battleCount, matchMode,
+        p1Show, p2Show
+    });
+
+    triggerVersusAnimation(p1Show, p2Show);
 }
 
 function joinP2PRoom(roleType) {
@@ -158,6 +257,7 @@ function joinP2PRoom(roleType) {
         hostConn.on('open', () => {
             currentRoomId = inputId;
             safeSetDisplay('p2p-status-bar', 'block');
+            safeSetDisplay('btn-open-lobby', 'none'); // 選手和觀眾不顯示等候大廳按鈕
             
             if (roleType === 'spectator') {
                 safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
@@ -237,7 +337,7 @@ function sendClientDeckToHost() {
     };
 
     hostConn.send(payload);
-    alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並決定放置位置！" : "Submitted! Waiting for Referee approval.");
+    alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並排入大廳！" : "Submitted! Waiting for Referee approval.");
 }
 
 function handleHostReceivedData(data, conn) {
@@ -274,7 +374,7 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
-/* 裁判將選手放入指定 Slot，然後開啟總結審核 Modal */
+/* 裁判將選手提交分配到 Slot 1 / 2 / 3 ➔ 自動帶入等候大廳 */
 function acceptClientSubmission(targetSlot) {
     if (!pendingClientData) return;
 
@@ -297,87 +397,7 @@ function acceptClientSubmission(targetSlot) {
     }
 
     safeSetDisplay('p2p-confirm-modal', 'none');
-    openRefereeReviewModal();
-}
-
-/* 🏆 開啟裁判最終審核與手動微調 Modal */
-function openRefereeReviewModal() {
-    safeSetInputValue('review-p1-name', (roster.t1 && roster.t1[0]) ? roster.t1[0] : (matchMode === 'team' ? roster.t1Name : '1'));
-    safeSetInputValue('review-p2-name', (roster.t2 && roster.t2[0]) ? roster.t2[0] : (matchMode === 'team' ? roster.t2Name : 'A'));
-    safeSetInputValue('review-p3-name', roster.t3Name || 'PLAYER 3');
-
-    const p1Deck = document.getElementById('review-p1-deck-box');
-    const p2Deck = document.getElementById('review-p2-deck-box');
-    const p3Box = document.getElementById('review-p3-box');
-
-    let is3v3OrTeam = (matchMode === '3v3' || matchMode === 'team');
-    if (p1Deck) p1Deck.style.display = is3v3OrTeam ? 'block' : 'none';
-    if (p2Deck) p2Deck.style.display = is3v3OrTeam ? 'block' : 'none';
-    if (p3Box) p3Box.style.display = (matchMode === 'p3') ? 'block' : 'none';
-
-    if (is3v3OrTeam) {
-        safeSetInputValue('review-p1-d1', roster.t1[0] || '1');
-        safeSetInputValue('review-p1-d2', roster.t1[1] || '2');
-        safeSetInputValue('review-p1-d3', roster.t1[2] || '3');
-
-        safeSetInputValue('review-p2-d1', roster.t2[0] || 'A');
-        safeSetInputValue('review-p2-d2', roster.t2[1] || 'B');
-        safeSetInputValue('review-p2-d3', roster.t2[2] || 'C');
-    }
-
-    safeSetDisplay('referee-review-modal', 'flex');
-}
-
-function closeRefereeReviewModal() { safeSetDisplay('referee-review-modal', 'none'); }
-
-/* 裁判最終確認鎖定並開賽 */
-function confirmLockAndStartMatch() {
-    let p1Val = document.getElementById('review-p1-name').value.trim() || '1';
-    let p2Val = document.getElementById('review-p2-name').value.trim() || 'A';
-    let p3Val = document.getElementById('review-p3-name').value.trim() || 'PLAYER 3';
-
-    roster.t1Name = p1Val;
-    roster.t2Name = p2Val;
-    roster.t3Name = p3Val;
-
-    if (matchMode === '3v3' || matchMode === 'team') {
-        roster.t1 = [
-            document.getElementById('review-p1-d1').value.trim() || '1',
-            document.getElementById('review-p1-d2').value.trim() || '2',
-            document.getElementById('review-p1-d3').value.trim() || '3'
-        ];
-        roster.t2 = [
-            document.getElementById('review-p2-d1').value.trim() || 'A',
-            document.getElementById('review-p2-d2').value.trim() || 'B',
-            document.getElementById('review-p2-d3').value.trim() || 'C'
-        ];
-    } else {
-        roster.t1[0] = p1Val;
-        roster.t2[0] = p2Val;
-    }
-
-    occupiedSlots.slot1 = true;
-    occupiedSlots.slot2 = true;
-    if (matchMode === 'p3') occupiedSlots.slot3 = true;
-
-    safeSetDisplay('referee-review-modal', 'none');
-
-    updatePlayerNamesForMode();
-    saveState();
-    updateDisplay();
-
-    let p1Show = document.getElementById('p1-title').value;
-    let p2Show = document.getElementById('p2-title').value;
-
-    broadcastToClients({
-        type: 'MATCH_START_SYNC',
-        roster: roster,
-        scoreP1, scoreP2, scoreP3,
-        battleCount, matchMode,
-        p1Show, p2Show
-    });
-
-    triggerVersusAnimation(p1Show, p2Show);
+    openLobbyModal();
 }
 
 function handleManualNameChange(slot) {
@@ -532,19 +552,22 @@ const i18n = {
         lblSubmitTitle: "📩 提交個人 / 隊伍排陣名單",
         lblSelectMode: "選擇欲提交的賽制模式：",
         btnSubmitDeck: "🔒 私密送出給裁判審核",
-        lblChoosePos: "請選擇放入畫面的位置：",
+        lblChoosePos: "請選擇放入大廳的位置：",
         btnSlot1: "👈 放左邊 (Player 1)",
         btnSlot2: "👉 放右邊 (Player 2)",
         btnLeaveP2P: "🚪 離開房間",
+        btnOpenLobby: "🏟️ 等候大廳",
         lblRoom: "房間 ID",
         lblConnected: "已連線設備",
-        reviewTitle: "🏆 賽事名單確認與鎖定",
-        reviewIntro: "裁判可在此檢視或微調雙方選手/陀螺名單。無連線之一方將採用預設值或由裁判手動填寫：",
-        btnLockStart: "🔒 鎖定名單並邀請全場開賽！",
+        lobbyTitle: "🏟️ 裁判等候大廳 (Host Lobby)",
+        lobbyRoomTip: "請告知選手與觀眾輸入此 8 位數房間 ID：",
+        lobbySelectMode: "👑 選擇本局賽事模式：",
+        lobbySlotsTip: "選手連線送出後將自動填入，裁判亦可直接手動修改：",
+        btnLobbyStart: "🔒 鎖定排陣並邀請全場開賽！",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南：</div>
-            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：點擊「建立對戰房間」，將 8 位數 ID 告知現場，接收選手排陣並控制計分。</div>
-            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 點擊「選手連線」，在自己手機私密填寫陀螺/隊員，送出給裁判。</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：點擊「建立對戰房間」，進入等候大廳，可選賽制、修改雙方排陣並一鍵全場開賽。</div>
+            <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 點擊「選手連線」，在自己手機私密填寫陀螺/隊員送出。</div>
             <div>• <b>👁️ 觀眾端</b>：輸入房間 ID 點擊「觀眾觀戰」，畫面將即時同步大螢幕賽果與動畫！</div>
         `,
         rulesBody: `
@@ -587,18 +610,21 @@ const i18n = {
         lblSubmitTitle: "📩 Submit Player / Team Roster",
         lblSelectMode: "Select Match Mode:",
         btnSubmitDeck: "🔒 Submit Privately to Referee",
-        lblChoosePos: "Assign player slot:",
+        lblChoosePos: "Assign player to Lobby slot:",
         btnSlot1: "👈 Place Left (Player 1)",
         btnSlot2: "👉 Place Right (Player 2)",
         btnLeaveP2P: "🚪 Leave Room",
+        btnOpenLobby: "🏟️ Host Lobby",
         lblRoom: "Room ID",
         lblConnected: "Devices",
-        reviewTitle: "🏆 Match Roster Review & Lock",
-        reviewIntro: "Referee can review or tweak both sides' rosters. Unconnected slots use defaults or referee manual inputs:",
-        btnLockStart: "🔒 Lock Rosters & Start Match (All Screens)!",
+        lobbyTitle: "🏟️ Referee Host Lobby",
+        lobbyRoomTip: "Share this 8-digit Room ID with players & spectators:",
+        lobbySelectMode: "👑 Select Match Mode:",
+        lobbySlotsTip: "Rosters auto-fill upon submission, referee can also tweak manually:",
+        btnLobbyStart: "🔒 Lock Rosters & Start Match (All Screens)!",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide:</div>
-            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room, receive rosters, assign slots, and control score.</div>
+            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room, manage lobby, select mode, tweak rosters, and start match.</div>
             <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Enter Room ID & click 'Join as Player', submit secret deck to referee.</div>
             <div>• <b>👁️ Spectator</b>: Enter Room ID & click 'Join as Spectator' for live sync scoreboard!</div>
         `,
@@ -931,7 +957,7 @@ function undo() {
 }
 
 function resetMatch(askConfirm = true) {
-    if (!askConfirm || confirm("Reset entire match/scores? / 確定重置賽事？")) {
+    if (!askConfirm || confirm(currentLang === 'zh' ? "確定重置賽事？" : "Reset entire match/scores?")) {
         scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
         foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
         teamWinsP1 = 0; teamWinsP2 = 0;
@@ -1080,7 +1106,7 @@ function applyLanguage() {
     safeSetText('vs-sub-msg', lang.vsSubMsg);
     safeSetText('btn-start-vs', lang.btnStartVs);
 
-    /* 🌐 P2P Modal 雙語支援 */
+    /* 🌐 P2P Modal 雙語 */
     safeSetText('p2p-modal-title', lang.p2pTitle);
     safeSetText('btn-create-host', lang.btnCreateHost);
     safeSetText('txt-host-desc', lang.txtHostDesc);
@@ -1093,13 +1119,16 @@ function applyLanguage() {
     safeSetText('btn-slot1', lang.btnSlot1);
     safeSetText('btn-slot2', lang.btnSlot2);
     safeSetText('btn-leave-p2p', lang.btnLeaveP2P);
+    safeSetText('btn-open-lobby', lang.btnOpenLobby);
     safeSetText('p2p-lbl-room', lang.lblRoom);
     safeSetText('p2p-lbl-connected', lang.lblConnected);
 
-    /* 🏆 Review Modal 雙語 */
-    safeSetText('lbl-review-title', lang.reviewTitle);
-    safeSetText('txt-review-intro', lang.reviewIntro);
-    safeSetText('btn-confirm-lock-start', lang.btnLockStart);
+    /* 🏟️ Lobby 雙語 */
+    safeSetText('lbl-lobby-title', lang.lobbyTitle);
+    safeSetText('lbl-lobby-room-tip', lang.lobbyRoomTip);
+    safeSetText('lbl-lobby-select-mode', lang.lobbySelectMode);
+    safeSetText('lbl-lobby-slots-tip', lang.lobbySlotsTip);
+    safeSetText('btn-lobby-start', lang.btnLobbyStart);
 
     const guideBox = document.getElementById('p2p-guide-box');
     if (guideBox) guideBox.innerHTML = lang.p2pGuide;
