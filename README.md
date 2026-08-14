@@ -7,63 +7,78 @@
 <a name="繁體中文"></a>
 ## 📖 關於本專案 (About This Project)
 
-本專案是為我和兒子共渡美好時光而開發的非商業個人專案！特別打造了這個計分工具，讓每一次對戰都更流暢、更有儀式感，並完美貼合官方賽事標準。誠摯邀請所有大朋友和小朋友一起使用，享受公平對戰的樂趣，共創無價的回憶！
+本專案是為我和兒子共渡美好時光而開發的非商業個人專案！我們特別打造了這個專業計分工具，讓每一次陀螺對戰都更流暢、更有儀式感，並完美貼合亞洲官方賽事標準。誠摯邀請所有大朋友和小朋友一起使用，享受公平對戰的樂趣，共創無價的回憶！
 
 ### ✨ 核心功能
-* **完美對應官方第 12 版規則 (2026年3月最新標準)**：
-  * 🔴 **極致收尾 (Xtreme Finish)**：+3 分
-  * 🟠 **完工 / 超區 (Over Finish)**：+2 分
+* **完美對應《爆旋陀螺X規則（亞洲版）》第 12 版官方標準**：
+  * 🔴 **極限終結 (Xtreme Finish)**：+3 分
+  * 🟠 **擊出終結 (Over Finish)**：+2 分
   * 🟡 **爆裂終結 (Burst Finish)**：+2 分
-  * 🟢 **旋轉收尾 (Spin Finish)**：+1 分
-  * 🟣 **犯規罰分 (Opponent Penalty)**：對方發射失誤/犯規累積時，獲得 +1 分
+  * 🟢 **迴轉勝利 (Spin Finish)**：+1 分
+  * 🟣 **發射失誤/罰分 (Shooting Error / Foul)**：同一局累積 2 次失誤，對手自動獲得 +1 分。
+* **🌐 WebRTC P2P 跨機連線與裁判等候大廳 (全新重大功能)**：
+  * 👑 **裁判主機 (Host Lobby)**：建立全天通用 8 位數房間，自由審核、清空、一鍵左右/三人輪調並鎖定全場開賽。
+  * 🎮 **選手私密提交 (Player)**：選手在自己手機填寫陀螺/隊伍排陣，私密送出給裁判審核。
+  * 👁️ **現場觀眾同步直播 (Spectator)**：最多支援 15 部設備同時在線，比分、登場動畫、對局紀錄（Log）與金光勝利彈窗 100% 秒速同步！
+  * 💓 **心跳防休眠 (Keepalive)**：每 5 秒 Ping/Pong 保持連線，徹底防止手機背景休眠斷線。
 * **全賽事模式支援**：
-  * ⚔️ **1v1 Standard**：經典 4 分獲勝制。
-  * 🛡️ **3on3 Battle**：自動追蹤 3 陀螺 Deck 順序（ITEM #1 ~ #3）；打完 3 場若未滿 4 分，自動提示並重置出場順序（保留比分）。
-  * 👥 **Team Battle (KOF 模式)**：每局 2 分制，勝方留場、敗方換人，自動重置局比分（0-0）並累計團隊總勝場。
-  * 🌀 **3-Player Battle (5-pt System)**：3人同場大亂鬥！依據官方 5 分制規則，淘汰對手獲得相應分數，率先累積 5 分者勝。
-* **PWA & Offline-First (離線優先)**：可直接加至手機主畫面當作原生 App 使用，無網路環境亦可順暢運作。
-* **賽事輔助工具**：
+  * ⚔️ **1v1 Standard**：經典單人 4 分獲勝制。
+  * 🛡️ **3on3 Battle**：支援 3 隻陀螺排陣對決，打完 3 戰未滿 4 分自動提示重新組合順序。
+  * 👥 **Team Battle (KOF 模式)**：每局 2 分制，先鋒 ➔ 中堅 ➔ 大將輪替登場，勝方留場、敗方換人，自動累計團隊總勝場。
+  * 🌀 **3-Player Battle (三人亂鬥 5分制)**：官方 3 人大亂鬥專用！率先累積 5 分者獲勝，支援三方登場動畫（XX VS YY VS ZZ）。
+* **賽事輔助與視覺特效**：
+  * 📢 **官方語音發射倒數**：內建「3, 2, 1, Go Shoot!」語音與音頻倒數提示。
+  * 📱 **手機橫屏滿版 (Landscape)**：手機一打橫自動隱藏贅餘頂格顯示，兩張卡片左右滿版排開。
+  * ⚡ **動漫風登場與獲勝動畫**：開賽 Versus 動畫與勝利金光彈窗全場同步。
   * 🤝 **平手機制 (Draw)**：一鍵記錄同分重賽。
-  * 🔊 **Web Audio 聲效**：加分與勝利時播放科技感音效。
   * 📜 **實時對局紀錄 (Battle Log)** 與 **Undo (復原)** 功能。
   * 💾 **LocalStorage 自動儲存**：防止意外重新整理掉資料。
-  * 📖 **內建雙語規則摘要彈窗**。
+  * 🌐 **100% 完整雙語切換**：繁體中文與亞洲官方英文一鍵無縫切換。
+* **PWA & Offline-First (離線優先)**：可直接加至手機主畫面當作原生 App 使用，無網路環境亦可順暢單機計分。
 
 ---
 
 <a name="english"></a>
 ## 📖 About This Project
 
-This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by a shared passion for top-tier competitive play, we built this scorekeeper to make every battle seamless, engaging, and fully aligned with official tournament standards. We warmly invite parents, kids, and players of all ages to use it, enjoy fair battles, and create unforgettable memories together!
+This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by our shared passion for competitive play, we built this tool to make every battle seamless, engaging, and fully aligned with official tournament standards across Asia. We warmly invite parents, kids, and bladers of all ages to use it, enjoy fair battles, and create unforgettable memories together!
 
 ### ✨ Features
-* **Official 12th Edition Scoring Alignment**:
+* **Official 12th Edition Scoring Alignment (Asia Version)**:
   * 🔴 **Xtreme Finish**: +3 pts
   * 🟠 **Over Finish**: +2 pts
   * 🟡 **Burst Finish**: +2 pts
   * 🟢 **Spin Finish**: +1 pt
-  * 🟣 **Opponent Penalty**: +1 pt awarded upon opponent's accumulated shooting errors
+  * 🟣 **Shooting Error / Foul Penalty**: 2 fouls in a single battle automatically award +1 pt to the opponent.
+* **🌐 WebRTC P2P Multi-Device Live Hub (Major Feature)**:
+  * 👑 **Referee Host Lobby**: Host persistent all-day rooms, review secret rosters, clear/swap slots, and start matches simultaneously.
+  * 🎮 **Player Secret Submission**: Players privately enter Beyblade deck / team member lineups and submit directly to the referee.
+  * 👁️ **Spectator Live Sync**: Supports up to 15 concurrent devices! Scoreboard, Versus animations, Battle Logs, and Victory Popups sync seamlessly in real time.
+  * 💓 **Heartbeat Keepalive**: Auto-pings every 5 seconds to prevent mobile browser background sleep/disconnects.
 * **Multiple Tournament Formats**:
-  * ⚔️ **1v1 Standard**: First to 4 points.
-  * 🛡️ **3on3 Battle**: Tracks 3-Bey Deck order (ITEM #1 ~ #3). Automatically prompts for order re-arrangement after 3 rounds if no player reaches 4 points (scores retained).
-  * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. Winner stays, loser rotates out. Resets round scores to 0-0 while tracking cumulative team wins.
-  * 🌀 **3-Player Battle**: 5-point System for 3-blader matches according to official regulations. First to 5 points wins.
-* **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional without an internet connection.
-* **Tournament Utilities**:
+  * ⚔️ **1v1 Standard**: Classic first-to-4 points format.
+  * 🛡️ **3on3 Battle**: 3-Bey deck battle format with auto prompt for order re-arrangement after 3 battles if under 4 points.
+  * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. 1st Vanguard ➔ 2nd Middle ➔ 3rd General rotation. Winner stays, loser rotates out.
+  * 🌀 **3-Player Battle (5-pt System)**: Official 3-blader battle royale format! First to 5 points wins. Features 3-way Versus animation (XX VS YY VS ZZ).
+* **Tournament Utilities & Visual Enhancements**:
+  * 📢 **Voice Countdown**: Built-in "3, 2, 1, Go Shoot!" vocal and audio tone countdown.
+  * 📱 **Mobile Landscape Fullscreen**: Rotating your phone horizontally maximizes the scoreboard into a clean, fullscreen dual-card layout.
+  * ⚡ **Versus & Victory Popups**: Anime-styled Versus intro and winner celebration modals synchronized across all screens.
   * 🤝 **Draw Support**: One-tap draw recording for simultaneous finishes.
-  * 🔊 **Web Audio Sound Effects**: Instant sound feedback for scoring and match victory.
   * 📜 **Real-time Battle Log** and **Undo** support.
-  * 💾 **State Persistence**: Auto-saves current score state to `localStorage` to prevent data loss.
-  * 📖 **Built-in Bilingual Rules Summary Modal**.
+  * 💾 **State Persistence**: Auto-saves current score state to `localStorage`.
+  * 🌐 **100% Bilingual Support**: Instant toggle between Traditional Chinese and International English.
+* **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional for offline single-device scoring without internet access.
 
 ---
 
 ### 🛡️ Privacy & Security / 私隱聲明
-* **Zero-Backend (純前端)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
-* **Privacy by Design**：所有對戰比分與選手自訂名稱僅儲存於使用者本地瀏覽器 (`localStorage`) 中。
+* **Zero-Backend (純前端架構)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
+* **P2P Direct Connection (端對端直連)**：所有跨機數據透過 WebRTC Peer-to-Peer 於裝置間直連傳輸，不經由第三方伺服器儲存。
+* **Privacy by Design**：所有對戰數據僅儲存於使用者本地瀏覽器 (`localStorage`) 中。
 
 ---
 
 ### 📄 Disclaimer / 免責聲明
-This is an unofficial fan-made tool created for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition. All product names and trademarks belong to their respective owners.
-本工具為玩家自製非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。
+This is an unofficial fan-made tool created for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition. All product names and trademarks belong to their respective owners.  
+本工具為玩家自製非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。版權歸原著作權所有者所有。
