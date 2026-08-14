@@ -14,6 +14,14 @@ let roster = {
     t2Name: '', t2: ['', '', '']
 };
 
+/* 🌐 WebRTC P2P 全局變數 */
+let peer = null;
+let p2pConnMap = {}; 
+let hostConn = null;  
+let myPeerRole = 'none'; 
+let currentRoomId = '';
+let pendingClientData = null;
+
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     try {
@@ -48,6 +56,184 @@ function forceRefreshApp() {
             window.location.reload(true);
         }
     }
+}
+
+/* 🌐 WebRTC P2P 邏輯 */
+function openP2PModal() { safeSetDisplay('p2p-modal', 'flex'); }
+function closeP2PModal() { safeSetDisplay('p2p-modal', 'none'); }
+
+function initP2PHost() {
+    if (peer) peer.destroy();
+    
+    let randomNum = Math.floor(10000000 + Math.random() * 90000000).toString();
+    currentRoomId = `bx-${randomNum}`;
+
+    peer = new Peer(currentRoomId);
+    
+    peer.on('open', (id) => {
+        myPeerRole = 'host';
+        safeSetDisplay('p2p-status-bar', 'block');
+        safeSetText('p2p-role-badge', 'HOST (裁判)');
+        safeSetText('p2p-current-room', randomNum);
+        safeSetText('p2p-connected-count', '0');
+        alert(`房間建立成功！房間 ID：${randomNum}\n請讓選手輸入此 ID 加入。`);
+        closeP2PModal();
+    });
+
+    peer.on('connection', (conn) => {
+        p2pConnMap[conn.peer] = conn;
+        updateConnectedCount();
+
+        conn.on('data', (data) => {
+            handleHostReceivedData(data, conn);
+        });
+
+        conn.on('close', () => {
+            delete p2pConnMap[conn.peer];
+            updateConnectedCount();
+        });
+    });
+
+    peer.on('error', (err) => {
+        alert("房間建立失敗：" + err.type);
+    });
+}
+
+function updateConnectedCount() {
+    let count = Object.keys(p2pConnMap).length;
+    safeSetText('p2p-connected-count', count);
+}
+
+function joinP2PRoom() {
+    let inputId = document.getElementById('p2p-input-room').value.trim();
+    if (!inputId || inputId.length < 8) {
+        alert("請輸入正確的 8 位數房間 ID！");
+        return;
+    }
+
+    if (peer) peer.destroy();
+    peer = new Peer();
+
+    peer.on('open', () => {
+        myPeerRole = 'client';
+        let targetPeerId = `bx-${inputId}`;
+        hostConn = peer.connect(targetPeerId);
+
+        hostConn.on('open', () => {
+            currentRoomId = inputId;
+            safeSetDisplay('p2p-status-bar', 'block');
+            safeSetText('p2p-role-badge', 'CLIENT (選手)');
+            safeSetText('p2p-current-room', inputId);
+            safeSetText('p2p-connected-count', '已連線');
+            safeSetDisplay('p2p-client-submit-box', 'block');
+            alert("已成功連線至裁判房間！請填寫排陣資料並送出。");
+        });
+
+        hostConn.on('data', (data) => {
+            handleClientReceivedData(data);
+        });
+
+        hostConn.on('error', (err) => {
+            alert("連線裁判失敗，請檢查房間 ID！");
+        });
+    });
+}
+
+function sendClientDeckToHost() {
+    if (!hostConn || !hostConn.open) {
+        alert("未連線至裁判端！");
+        return;
+    }
+
+    let name = document.getElementById('p2p-player-name').value.trim() || '選手';
+    let item1 = document.getElementById('p2p-item-1').value.trim() || '1';
+    let item2 = document.getElementById('p2p-item-2').value.trim() || '2';
+    let item3 = document.getElementById('p2p-item-3').value.trim() || '3';
+
+    let payload = {
+        type: 'SUBMIT_DECK',
+        name: name,
+        items: [item1, item2, item3]
+    };
+
+    hostConn.send(payload);
+    alert("已送出給裁判，等待裁判決定放置位置與鎖定！");
+}
+
+/* 裁判收到資料，彈窗供裁判選擇「放左 (1) / 放右 (2) / 放中 (3)」 */
+function handleHostReceivedData(data, conn) {
+    if (data.type === 'SUBMIT_DECK') {
+        pendingClientData = data;
+        safeSetText('p2p-request-title', `收到 [ ${data.name} ] 的排陣提交`);
+        
+        let bodyHtml = `
+            <b>選手/隊伍:</b> ${data.name}<br>
+            <b>1 號:</b> ${data.items[0]}<br>
+            <b>2 號:</b> ${data.items[1]}<br>
+            <b>3 號:</b> ${data.items[2]}
+        `;
+        const modalBody = document.getElementById('p2p-request-body');
+        if (modalBody) modalBody.innerHTML = bodyHtml;
+
+        // 如果是 3人亂鬥模式，顯示「放中間 (Slot 3)」按鈕
+        safeSetDisplay('p2p-slot3-btn', matchMode === 'p3' ? 'inline-block' : 'none');
+
+        safeSetDisplay('p2p-confirm-modal', 'flex');
+    }
+}
+
+/* 裁判點擊指定位置 (targetSlot = 1, 2, 3) 接受提交 */
+function acceptClientSubmission(targetSlot) {
+    if (!pendingClientData) return;
+
+    let data = pendingClientData;
+    if (targetSlot === 1) {
+        roster.t1Name = data.name;
+        roster.t1 = data.items;
+    } else if (targetSlot === 2) {
+        roster.t2Name = data.name;
+        roster.t2 = data.items;
+    } else if (targetSlot === 3) {
+        roster.t3Name = data.name;
+    }
+
+    updatePlayerNamesForMode();
+    saveState();
+    updateDisplay();
+
+    broadcastToClients({
+        type: 'STATE_SYNC',
+        roster: roster,
+        scoreP1, scoreP2, scoreP3,
+        battleCount, matchMode
+    });
+
+    safeSetDisplay('p2p-confirm-modal', 'none');
+    let posText = targetSlot === 1 ? '左邊 (Player 1)' : (targetSlot === 2 ? '右邊 (Player 2)' : '中間 (Player 3)');
+    alert(`已成功將 [ ${data.name} ] 分配至 ${posText} 並鎖定！`);
+}
+
+function handleClientReceivedData(data) {
+    if (data.type === 'STATE_SYNC') {
+        roster = data.roster;
+        scoreP1 = data.scoreP1;
+        scoreP2 = data.scoreP2;
+        scoreP3 = data.scoreP3;
+        battleCount = data.battleCount;
+        matchMode = data.matchMode;
+
+        updatePlayerNamesForMode();
+        updateDisplay();
+    }
+}
+
+function broadcastToClients(payload) {
+    if (myPeerRole !== 'host') return;
+    Object.values(p2pConnMap).forEach(conn => {
+        if (conn && conn.open) {
+            conn.send(payload);
+        }
+    });
 }
 
 function startShootCountdown() {
@@ -173,17 +359,8 @@ const i18n = {
     }
 };
 
-/* 安全設定元素樣式 */
-function safeSetDisplay(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.style.display = val;
-}
-
-/* 安全設定元素文字 */
-function safeSetText(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = val;
-}
+function safeSetDisplay(id, val) { const el = document.getElementById(id); if (el) el.style.display = val; }
+function safeSetText(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }
 
 function setMatchMode(mode) {
     matchMode = mode;
@@ -242,7 +419,7 @@ function updatePlayerNamesForMode() {
     } else if (matchMode === 'p3') {
         if (p1Title) p1Title.value = roster.t1[0] || '1';
         if (p2Title) p2Title.value = roster.t2[0] || 'A';
-        if (p3Title) p3Title.value = 'PLAYER 3';
+        if (p3Title) p3Title.value = roster.t3Name || 'PLAYER 3';
     }
 }
 
@@ -307,6 +484,8 @@ function saveRoster() {
     let p1Show = `${roster.t1[0]} (${roster.t1Name})`;
     let p2Show = `${roster.t2[0]} (${roster.t2Name})`;
     triggerVersusAnimation(p1Show, p2Show);
+
+    broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
 }
 
 function addScore(player, pts, typeName) {
@@ -346,6 +525,7 @@ function addScore(player, pts, typeName) {
     battleCount++;
     updateDisplay();
     saveState();
+    broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
 
     if (checkWinner()) return;
 
@@ -356,6 +536,7 @@ function addScore(player, pts, typeName) {
                 battleCount = 1;
                 updateDisplay();
                 saveState();
+                broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
             }, 100);
         }
     }
@@ -409,6 +590,7 @@ function addFoul(player) {
 
     updateDisplay();
     saveState();
+    broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
     checkWinner();
 }
 
@@ -425,6 +607,7 @@ function addDraw() {
     battleCount++;
     updateDisplay();
     saveState();
+    broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
 }
 
 function nextKOFRound() {
@@ -454,6 +637,7 @@ function nextKOFRound() {
 
     updateDisplay();
     saveState();
+    broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
     triggerVersusAnimation(document.getElementById('p1-title').value, document.getElementById('p2-title').value);
 }
 
@@ -462,6 +646,7 @@ function resetBattleCounter() {
         battleCount = 1;
         updateDisplay();
         saveState();
+        broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
     }
 }
 
@@ -480,6 +665,7 @@ function undo() {
 
         updateDisplay();
         saveState();
+        broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
     }
 }
 
@@ -497,6 +683,7 @@ function resetMatch(askConfirm = true) {
         updateDisplay();
         saveState();
         applyLanguage();
+        broadcastToClients({ type: 'STATE_SYNC', roster, scoreP1, scoreP2, scoreP3, battleCount, matchMode });
     }
 }
 
