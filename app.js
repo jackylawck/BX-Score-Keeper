@@ -14,8 +14,8 @@ let history = [], logs = [];
 let currentLang = 'zh';
 
 let roster = {
-    t1Name: '隊伍 A', t1: ['選手一', '陀螺二', '陀螺三'],
-    t2Name: '隊伍 B', t2: ['選手二', '陀螺二', '陀螺三'],
+    t1Name: '隊伍 A', t1: ['先鋒', '中堅', '大將'],
+    t2Name: '隊伍 B', t2: ['先鋒', '中堅', '大將'],
     t3Name: '選手三'
 };
 
@@ -183,8 +183,8 @@ function updatePlayerNamesForMode() {
         let rawP1 = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : '';
         let rawP2 = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : '';
 
-        let isDefault1 = (!rawP1 || rawP1 === '1' || rawP1 === '2' || rawP1 === '3' || rawP1.startsWith('選手') || rawP1.startsWith('Player'));
-        let isDefault2 = (!rawP2 || rawP2 === 'A' || rawP2 === 'B' || rawP2 === 'C' || rawP2.startsWith('選手') || rawP2.startsWith('Player'));
+        let isDefault1 = (!rawP1 || rawP1 === '1' || rawP1 === '2' || rawP1 === '3' || rawP1.startsWith('選手') || rawP1.startsWith('Player') || rawP1 === '先鋒' || rawP1 === '中堅' || rawP1 === '大將' || rawP1.includes('Vanguard') || rawP1.includes('Middle') || rawP1.includes('General'));
+        let isDefault2 = (!rawP2 || rawP2 === 'A' || rawP2 === 'B' || rawP2 === 'C' || rawP2.startsWith('選手') || rawP2.startsWith('Player') || rawP2 === '先鋒' || rawP2 === '中堅' || rawP2 === '大將' || rawP2.includes('Vanguard') || rawP2.includes('Middle') || rawP2.includes('General'));
 
         let p1Display = isDefault1 ? (currentLang === 'zh' ? rolesZh[idx1] : rolesEn[idx1]) : rawP1;
         let p2Display = isDefault2 ? (currentLang === 'zh' ? rolesZh[idx2] : rolesEn[idx2]) : rawP2;
@@ -622,10 +622,13 @@ function toggleLanguage() {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     applyLanguage();
     updatePlayerNamesForMode();
+    if (typeof syncRosterToLobbyUI === 'function') {
+        syncRosterToLobbyUI();
+    }
     saveState();
 }
 
-/* 🎯 100% 深度全英 / 全中多語言字典切換 */
+/* 🎯 100% 完整雙語切換字典 */
 function applyLanguage() {
     const lang = i18n[currentLang];
 
@@ -649,6 +652,8 @@ function applyLanguage() {
     if (modalBody) modalBody.innerHTML = lang.rulesBody;
 
     safeSetText('roster-modal-title', lang.rosterModalTitle);
+    safeSetText('lbl-t1-header', lang.lblT1Header);
+    safeSetText('lbl-t2-header', lang.lblT2Header);
     safeSetText('btn-save-roster', lang.saveRosterBtn);
     safeSetText('vs-sub-msg', lang.vsSubMsg);
     safeSetText('btn-start-vs', lang.btnStartVs);
@@ -717,6 +722,14 @@ function applyLanguage() {
 
     safeSetInputPlaceholder('p2p-input-room', currentLang === 'zh' ? '輸入 8 位數房間 ID' : 'Enter 8-digit Room ID');
     safeSetInputPlaceholder('p2p-player-name', currentLang === 'zh' ? '選手 / 隊伍名稱 (例如 BB)' : 'Player / Team Name (e.g. BB)');
+    safeSetInputPlaceholder('roster-t1-name', currentLang === 'zh' ? '隊伍名稱 (預設 隊伍 A)' : 'Team Name (Default: Team A)');
+    safeSetInputPlaceholder('roster-t2-name', currentLang === 'zh' ? '隊伍名稱 (預設 隊伍 B)' : 'Team Name (Default: Team B)');
+    safeSetInputPlaceholder('roster-t1-p1', currentLang === 'zh' ? '先鋒 1號' : '1st Vanguard');
+    safeSetInputPlaceholder('roster-t1-p2', currentLang === 'zh' ? '中堅 2號' : '2nd Middle');
+    safeSetInputPlaceholder('roster-t1-p3', currentLang === 'zh' ? '大將 3號' : '3rd General');
+    safeSetInputPlaceholder('roster-t2-p1', currentLang === 'zh' ? '先鋒 1號' : '1st Vanguard');
+    safeSetInputPlaceholder('roster-t2-p2', currentLang === 'zh' ? '中堅 2號' : '2nd Middle');
+    safeSetInputPlaceholder('roster-t2-p3', currentLang === 'zh' ? '大將 3號' : '3rd General');
 }
 
 const i18n = {
@@ -728,6 +741,8 @@ const i18n = {
         refreshBtn: "更新",
         modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
         rosterModalTitle: "👥 隊伍名單與對戰排序",
+        lblT1Header: "隊伍 A",
+        lblT2Header: "隊伍 B",
         saveRosterBtn: "儲存排陣名單",
         teamWinsTitle: "TEAM WINS:",
         xtreme: "極限終結", over: "擊出終結", burst: "爆裂終結", spin: "迴轉勝利", foulTxt: "發射失誤",
@@ -808,6 +823,8 @@ const i18n = {
         refreshBtn: "Refresh",
         modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
         rosterModalTitle: "👥 Team Roster & Order Setup",
+        lblT1Header: "Team A",
+        lblT2Header: "Team B",
         saveRosterBtn: "Save Roster",
         teamWinsTitle: "TEAM WINS:",
         xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish", foulTxt: "Shooting Error",
