@@ -3,7 +3,7 @@ let foulsP1 = 0, foulsP2 = 0, foulsP3 = 0;
 let teamWinsP1 = 0, teamWinsP2 = 0;
 let kofIndexP1 = 0, kofIndexP2 = 0;
 let battleCount = 1;
-let matchMode = 'std';
+let matchMode = 'std'; // 'std', '3v3', 'team', 'p3'
 let targetScore = 4;
 let history = [], logs = [];
 let currentLang = 'zh';
@@ -140,7 +140,21 @@ function setMatchMode(mode) {
     }
 
     resetMatch(false);
+    updatePlayerNamesForMode();
     applyLanguage();
+}
+
+/* 根據當前模式更換選手卡片名稱（避免混淆） */
+function updatePlayerNamesForMode() {
+    if (matchMode === 'team') {
+        let p1Name = roster.t1[kofIndexP1] || `PLAYER ${kofIndexP1 + 1}`;
+        let p2Name = roster.t2[kofIndexP2] || `PLAYER ${kofIndexP2 + 1}`;
+        document.getElementById('p1-title').value = `${p1Name} (${roster.t1Name || 'Team A'})`;
+        document.getElementById('p2-title').value = `${p2Name} (${roster.t2Name || 'Team B'})`;
+    } else if (matchMode === '3v3') {
+        document.getElementById('p1-title').value = roster.t1[0] || 'PLAYER 1';
+        document.getElementById('p2-title').value = roster.t2[0] || 'PLAYER 2';
+    }
 }
 
 function triggerVersusAnimation(p1, p2) {
@@ -155,22 +169,21 @@ function closeRosterModal() { document.getElementById('roster-modal').style.disp
 
 function saveRoster() {
     roster.t1Name = document.getElementById('roster-t1-name').value.trim() || 'Team A';
-    roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || 'PLAYER 1';
-    roster.t1[1] = document.getElementById('roster-t1-p2').value.trim() || 'PLAYER 2';
-    roster.t1[2] = document.getElementById('roster-t1-p3').value.trim() || 'PLAYER 3';
+    roster.t1[0] = document.getElementById('roster-t1-p1').value.trim() || '1';
+    roster.t1[1] = document.getElementById('roster-t1-p2').value.trim() || '2';
+    roster.t1[2] = document.getElementById('roster-t1-p3').value.trim() || '3';
 
     roster.t2Name = document.getElementById('roster-t2-name').value.trim() || 'Team B';
-    roster.t2[0] = document.getElementById('roster-t2-p1').value.trim() || 'PLAYER 1';
-    roster.t2[1] = document.getElementById('roster-t2-p2').value.trim() || 'PLAYER 2';
-    roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'PLAYER 3';
+    roster.t2[0] = document.getElementById('roster-t2-p1').value.trim() || 'A';
+    roster.t2[1] = document.getElementById('roster-t2-p2').value.trim() || 'B';
+    roster.t2[2] = document.getElementById('roster-t2-p3').value.trim() || 'C';
 
-    document.getElementById('p1-title').value = roster.t1[kofIndexP1];
-    document.getElementById('p2-title').value = roster.t2[kofIndexP2];
+    updatePlayerNamesForMode();
 
     closeRosterModal();
     saveState();
     updateDisplay();
-    triggerVersusAnimation(roster.t1[kofIndexP1], roster.t2[kofIndexP2]);
+    triggerVersusAnimation(document.getElementById('p1-title').value, document.getElementById('p2-title').value);
 }
 
 function addScore(player, pts, typeName) {
@@ -289,15 +302,17 @@ function addDraw() {
     saveState();
 }
 
+/* 👥 Team KOF 自動換人機制 (輪換 1 ➔ 2 ➔ 3) */
 function nextKOFRound() {
     if (scoreP1 >= targetScore) {
+        // P1 勝，P2 (敗方) 換下一位隊員
         kofIndexP2 = (kofIndexP2 + 1) % 3;
     } else if (scoreP2 >= targetScore) {
+        // P2 勝，P1 (敗方) 換下一位隊員
         kofIndexP1 = (kofIndexP1 + 1) % 3;
     }
 
-    document.getElementById('p1-title').value = roster.t1[kofIndexP1] || 'PLAYER 1';
-    document.getElementById('p2-title').value = roster.t2[kofIndexP2] || 'PLAYER 2';
+    updatePlayerNamesForMode();
 
     scoreP1 = 0; scoreP2 = 0; scoreP3 = 0;
     foulsP1 = 0; foulsP2 = 0; foulsP3 = 0;
@@ -326,8 +341,7 @@ function undo() {
         kofIndexP1 = last.k1 || 0; kofIndexP2 = last.k2 || 0;
         battleCount = last.battle; logs = last.logs;
 
-        document.getElementById('p1-title').value = roster.t1[kofIndexP1] || 'PLAYER 1';
-        document.getElementById('p2-title').value = roster.t2[kofIndexP2] || 'PLAYER 2';
+        updatePlayerNamesForMode();
 
         updateDisplay();
         saveState();
@@ -342,6 +356,7 @@ function resetMatch(askConfirm = true) {
         kofIndexP1 = 0; kofIndexP2 = 0;
         battleCount = 1;
         history = []; logs = [];
+        updatePlayerNamesForMode();
         updateDisplay();
         saveState();
         applyLanguage();
@@ -381,6 +396,7 @@ function updateDisplay() {
         li.textContent = l;
         logList.appendChild(li);
     });
+    logList.scrollTop = 0; // 自動捲動至最頂部最新紀錄
 }
 
 function checkWinner() {
