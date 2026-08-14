@@ -13,7 +13,6 @@ let targetScore = 4;
 let history = [], logs = [];
 let currentLang = 'zh';
 
-// 🎯 全面標準化預設陣容
 let roster = {
     t1Name: '隊伍 A', t1: ['選手一', '陀螺二', '陀螺三'],
     t2Name: '隊伍 B', t2: ['選手二', '陀螺二', '陀螺三'],
@@ -161,7 +160,7 @@ function setMatchMode(mode, shouldReset = false) {
     }
 }
 
-/* 🎯 關鍵修復：乾淨統一所有賽制的名稱顯示 */
+/* 🎯 乾淨呈現隊名與選手名 */
 function updatePlayerNamesForMode() {
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
@@ -174,13 +173,14 @@ function updatePlayerNamesForMode() {
     let rolesZh = ['先鋒', '中堅', '大將'];
     let rolesEn = ['1st Vanguard', '2nd Middle', '3rd General'];
 
+    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B';
+
     if (matchMode === 'team') {
-        let t1Name = roster.t1Name || (currentLang === 'zh' ? '隊伍 A' : 'Team A');
-        let t2Name = roster.t2Name || (currentLang === 'zh' ? '隊伍 B' : 'Team B');
+        let t1Name = isReal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
+        let t2Name = isReal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         let idx1 = Math.min(kofIndexP1, 2);
         let idx2 = Math.min(kofIndexP2, 2);
 
-        // 如果隊員名字還是 1 或 選手一 等預設名，直接展示標準角色 (先鋒 / 中堅 / 大將)
         let rawP1 = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : '';
         let rawP2 = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : '';
 
@@ -193,18 +193,19 @@ function updatePlayerNamesForMode() {
         if (p1Title) p1Title.value = `${p1Display} (${t1Name})`;
         if (p2Title) p2Title.value = `${p2Display} (${t2Name})`;
     } else if (matchMode === '3v3' || matchMode === 'std') {
-        let rawP1 = (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || '');
-        let rawP2 = (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || '');
+        let name1 = isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1);
+        let name2 = isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2);
 
-        if (p1Title) p1Title.value = (rawP1 && rawP1 !== '1') ? rawP1 : defP1;
-        if (p2Title) p2Title.value = (rawP2 && rawP2 !== 'A') ? rawP2 : defP2;
+        if (p1Title) p1Title.value = name1;
+        if (p2Title) p2Title.value = name2;
     } else if (matchMode === 'p3') {
-        let rawP1 = (roster.t1 && roster.t1[0]) ? roster.t1[0] : (roster.t1Name || '');
-        let rawP2 = (roster.t2 && roster.t2[0]) ? roster.t2[0] : (roster.t2Name || '');
+        let name1 = isReal(roster.t1Name) ? roster.t1Name : ((roster.t1 && isReal(roster.t1[0])) ? roster.t1[0] : defP1);
+        let name2 = isReal(roster.t2Name) ? roster.t2Name : ((roster.t2 && isReal(roster.t2[0])) ? roster.t2[0] : defP2);
+        let name3 = isReal(roster.t3Name) ? roster.t3Name : defP3;
 
-        if (p1Title) p1Title.value = (rawP1 && rawP1 !== '1') ? rawP1 : defP1;
-        if (p2Title) p2Title.value = (rawP2 && rawP2 !== 'A') ? rawP2 : defP2;
-        if (p3Title) p3Title.value = roster.t3Name || defP3;
+        if (p1Title) p1Title.value = name1;
+        if (p2Title) p2Title.value = name2;
+        if (p3Title) p3Title.value = name3;
     }
 }
 
@@ -740,8 +741,8 @@ const i18n = {
         btnAutoAccept: "✅ 接收並放入大廳",
         spectatorWaiting: "⏳ 裁判正在大廳排陣準備中，請稍候...",
         p2pGuide: `
-            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南 (上限 28 人)：</div>
-            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：建立房間後 Code 全天有效！可看剩餘名額倒數，一鍵全場開賽。</div>
+            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南 (上限 15 人)：</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：建立房間後 Code 全天有效！可看剩餘名額倒數 (上限15人)，一鍵全場開賽。</div>
             <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：輸入房間 ID 私密填寫陀螺/隊員送出，開賽後自動鎖定。</div>
             <div>• <b>👁️ 觀眾端</b>：輸入一次 ID 即可全程即時同步比分、獲勝彈窗與對局紀錄！</div>
         `,
@@ -801,8 +802,8 @@ const i18n = {
         btnAutoAccept: "✅ Accept & Place in Lobby",
         spectatorWaiting: "⏳ Referee is setting up next match in Lobby, please wait...",
         p2pGuide: `
-            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide (Max 28 Devices):</div>
-            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room once! Manage lobby, view capacity countdown, and start match.</div>
+            <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide (Max 15 Devices):</div>
+            <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Create room once! Manage lobby, view capacity countdown (max 15), and start match.</div>
             <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Enter Room ID & click 'Join as Player', submit secret deck to referee.</div>
             <div>• <b>👁️ Spectator</b>: Enter Room ID once to enjoy live sync scores, popups & battle logs!</div>
         `,
