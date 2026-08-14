@@ -1,5 +1,5 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync with Single-Slot Clearing
+ * 🌐 p2p.js - WebRTC PeerJS Multi-Device Sync (Max 28 Devices)
  * ========================================================================= */
 
 const MAX_DEVICES = 28;
@@ -36,7 +36,7 @@ function updateP2PFormFields() {
         safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '陀螺 3 號 (ITEM #3)' : 'Bey #3 (ITEM #3)');
     } else if (mode === 'team') {
         if (extraBox) extraBox.style.display = 'block';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 BB)' : 'Team Name (e.g. BB)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '隊伍名稱 (例如 Daddy)' : 'Team Name (e.g. Daddy)';
         safeSetInputPlaceholder('p2p-item-1', currentLang === 'zh' ? '先鋒 1 號' : '1st Vanguard');
         safeSetInputPlaceholder('p2p-item-2', currentLang === 'zh' ? '中堅 2 號' : '2nd Middle');
         safeSetInputPlaceholder('p2p-item-3', currentLang === 'zh' ? '大將 3 號' : '3rd General');
@@ -144,6 +144,7 @@ function broadcastDeviceCount() {
     broadcastToClients({ type: 'DEVICE_COUNT_SYNC', count });
 }
 
+/* 🎯 進入等候大廳：保證賽制下拉選單與裁判當前模式 100% 同步 */
 function openLobbyModal() {
     if (myPeerRole !== 'host') return;
     
@@ -189,6 +190,7 @@ function applyLobbyLayout() {
     }
 }
 
+/* 🎯 關鍵修復：正確將收到的 Daddy / BB 隊名同步到大廳輸入框 */
 function syncRosterToLobbyUI() {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -212,7 +214,6 @@ function syncRosterToLobbyUI() {
     safeSetInputValue('lobby-p2-d3', (roster.t2 && roster.t2[2]) || 'C');
 }
 
-/* 🎯 裁判在大廳單獨清空某個 Slot，並重新釋放名額！ */
 function clearLobbySlot(slotNum) {
     let defP1 = currentLang === 'zh' ? '選手一' : 'Player 1';
     let defP2 = currentLang === 'zh' ? '選手二' : 'Player 2';
@@ -240,7 +241,6 @@ function clearLobbySlot(slotNum) {
         safeSetInputValue('lobby-p3-name', defP3);
     }
 
-    // 廣播名額釋放：讓剛剛被擠掉的選手端可以重新送出！
     isMatchLocked = false;
     broadcastToClients({ type: 'LOBBY_WAITING' });
 }
@@ -502,6 +502,7 @@ function handleHostReceivedData(data, conn) {
     }
 }
 
+/* 🎯 關鍵修復：自動分配進 Slot 時，確實把隊伍名存入 roster.t1Name 或 roster.t2Name */
 function autoAcceptClientSubmission() {
     if (!pendingClientData) return;
 
@@ -562,7 +563,6 @@ function handleClientReceivedData(data) {
         applyStateSync(data);
     } else if (data.type === 'LOBBY_WAITING') {
         safeSetDisplay('win-modal', 'none');
-        // 🎯 重新開放選手提交區，允許被誤判的選手重新送出排陣！
         if (myPeerRole === 'player') {
             safeSetDisplay('p2p-client-submit-box', 'block');
             safeSetDisplay('spectator-waiting-overlay', 'none');
