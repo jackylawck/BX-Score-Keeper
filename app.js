@@ -172,7 +172,7 @@ function updatePlayerNamesForMode() {
     let rolesZh = ['先鋒', '中堅', '大將'];
     let rolesEn = ['1st Vanguard', '2nd Middle', '3rd General'];
 
-    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B';
+    let isReal = (val) => val && val !== '1' && val !== 'A' && val !== '隊伍 A' && val !== '隊伍 B' && val !== 'Team A' && val !== 'Team B' && !val.startsWith('選手') && !val.startsWith('Player');
 
     if (matchMode === 'team') {
         let t1Name = isReal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
@@ -183,8 +183,8 @@ function updatePlayerNamesForMode() {
         let rawP1 = (roster.t1 && roster.t1[idx1]) ? roster.t1[idx1] : '';
         let rawP2 = (roster.t2 && roster.t2[idx2]) ? roster.t2[idx2] : '';
 
-        let isDefault1 = (!rawP1 || rawP1 === '1' || rawP1 === '2' || rawP1 === '3' || rawP1.startsWith('選手'));
-        let isDefault2 = (!rawP2 || rawP2 === 'A' || rawP2 === 'B' || rawP2 === 'C' || rawP2.startsWith('選手'));
+        let isDefault1 = (!rawP1 || rawP1 === '1' || rawP1 === '2' || rawP1 === '3' || rawP1.startsWith('選手') || rawP1.startsWith('Player'));
+        let isDefault2 = (!rawP2 || rawP2 === 'A' || rawP2 === 'B' || rawP2 === 'C' || rawP2.startsWith('選手') || rawP2.startsWith('Player'));
 
         let p1Display = isDefault1 ? (currentLang === 'zh' ? rolesZh[idx1] : rolesEn[idx1]) : rawP1;
         let p2Display = isDefault2 ? (currentLang === 'zh' ? rolesZh[idx2] : rolesEn[idx2]) : rawP2;
@@ -225,7 +225,6 @@ function handleManualNameChange(slot) {
     broadcastCurrentState();
 }
 
-/* 🎯 關鍵修復：支持 3-Player 登場動畫 XX VS YY VS ZZ */
 function triggerVersusAnimation(p1, p2, p3 = '') {
     if (matchMode === 'p3' && p3) {
         safeSetText('vs-player-names', `${p1} VS ${p2} VS ${p3}`);
@@ -334,6 +333,11 @@ function addScore(player, pts, typeName) {
         else if (typeName === 'Over') displayType = '擊出終結';
         else if (typeName === 'Burst') displayType = '爆裂終結';
         else if (typeName === 'Spin') displayType = '迴轉勝利';
+    } else {
+        if (typeName === 'Xtreme') displayType = 'Xtreme Finish';
+        else if (typeName === 'Over') displayType = 'Over Finish';
+        else if (typeName === 'Burst') displayType = 'Burst Finish';
+        else if (typeName === 'Spin') displayType = 'Spin Finish';
     }
 
     logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${displayType})`);
@@ -461,15 +465,6 @@ function nextKOFRound() {
     saveState();
     broadcastCurrentState();
     triggerVersusAnimation(document.getElementById('p1-title').value, document.getElementById('p2-title').value);
-}
-
-function resetBattleCounter() {
-    if (matchMode === '3v3') {
-        battleCount = 1;
-        updateDisplay();
-        saveState();
-        broadcastCurrentState();
-    }
 }
 
 function undo() {
@@ -626,13 +621,16 @@ function closeRules() { safeSetDisplay('rules-modal', 'none'); }
 function toggleLanguage() {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     applyLanguage();
+    updatePlayerNamesForMode();
     saveState();
 }
 
+/* 🎯 100% 深度全英 / 全中多語言字典切換 */
 function applyLanguage() {
     const lang = i18n[currentLang];
 
     safeSetText('rules-tag', lang.rulesTag);
+    safeSetText('btn-p2p-txt', lang.p2pBtn);
     safeSetText('btn-rules-txt', lang.rulesBtn);
     safeSetText('btn-roster-txt', lang.rosterBtn);
     safeSetText('btn-refresh-txt', lang.refreshBtn);
@@ -645,6 +643,7 @@ function applyLanguage() {
     safeSetText('disclaimer', lang.disclaimer);
     safeSetText('privacy-notice', lang.privacyNotice);
     safeSetText('modal-title', lang.modalTitle);
+    safeSetText('lbl-team-wins-title', lang.teamWinsTitle);
     
     const modalBody = document.getElementById('modal-body');
     if (modalBody) modalBody.innerHTML = lang.rulesBody;
@@ -668,21 +667,44 @@ function applyLanguage() {
     safeSetText('p2p-lbl-room', lang.lblRoom);
     safeSetText('p2p-lbl-connected', lang.lblConnected);
 
+    /* 下拉選項雙語 */
+    safeSetText('opt-std', lang.optStd);
+    safeSetText('opt-3v3', lang.opt3v3);
+    safeSetText('opt-team', lang.optTeam);
+    safeSetText('opt-p3', lang.optP3);
+
+    safeSetText('lobby-opt-std', lang.lobbyOptStd);
+    safeSetText('lobby-opt-3v3', lang.lobbyOpt3v3);
+    safeSetText('lobby-opt-team', lang.lobbyOptTeam);
+    safeSetText('lobby-opt-p3', lang.lobbyOptP3);
+
     /* 🏟️ Lobby 雙語 */
     safeSetText('lbl-lobby-title', lang.lobbyTitle);
     safeSetText('lbl-lobby-room-tip', lang.lobbyRoomTip);
+    safeSetText('lbl-lobby-dev-count', lang.lblConnected);
     safeSetText('lbl-lobby-select-mode', lang.lobbySelectMode);
-    safeSetText('lbl-lobby-slots-tip', lang.lobbySlotsTip);
     safeSetText('lbl-lobby-p1', lang.lblLobbyP1);
     safeSetText('lbl-lobby-p2', lang.lblLobbyP2);
     safeSetText('lbl-lobby-p3', lang.lblLobbyP3);
     safeSetText('btn-lobby-start', lang.btnLobbyStart);
+    safeSetText('btn-swap-sides', lang.btnSwapSides);
+    safeSetText('btn-clear-slot1', lang.btnClear);
+    safeSetText('btn-clear-slot2', lang.btnClear);
+    safeSetText('btn-clear-slot3', lang.btnClear);
+
     safeSetText('lbl-auto-assign-tip', lang.lblAutoAssignTip);
     safeSetText('btn-auto-accept', lang.btnAutoAccept);
+    safeSetText('btn-reject-submit', lang.btnRejectSubmit);
+
     safeSetText('txt-spectator-waiting', lang.spectatorWaiting);
+    safeSetText('txt-spectator-waiting-sub', lang.spectatorWaitingSub);
+    safeSetText('btn-spectator-leave', lang.btnLeaveP2P);
 
     const guideBox = document.getElementById('p2p-guide-box');
     if (guideBox) guideBox.innerHTML = lang.p2pGuide;
+
+    const refGuide = document.getElementById('lobby-referee-guide');
+    if (refGuide) refGuide.innerHTML = lang.lobbyRefGuide;
 
     document.querySelectorAll('.txt-xtreme').forEach(el => el.innerText = lang.xtreme);
     document.querySelectorAll('.txt-over').forEach(el => el.innerText = lang.over);
@@ -694,17 +716,20 @@ function applyLanguage() {
     safeSetText('txt-foul-p3', lang.foulTxt);
 
     safeSetInputPlaceholder('p2p-input-room', currentLang === 'zh' ? '輸入 8 位數房間 ID' : 'Enter 8-digit Room ID');
+    safeSetInputPlaceholder('p2p-player-name', currentLang === 'zh' ? '選手 / 隊伍名稱 (例如 BB)' : 'Player / Team Name (e.g. BB)');
 }
 
 const i18n = {
     zh: {
         rulesTag: "《爆旋陀螺X規則（亞洲版）》第 12 版",
+        p2pBtn: "跨機連線",
         rulesBtn: "規則",
         rosterBtn: "隊伍排陣",
         refreshBtn: "更新",
         modalTitle: "《爆旋陀螺X規則（亞洲版）》第 12 版要點",
         rosterModalTitle: "👥 隊伍名單與對戰排序",
         saveRosterBtn: "儲存排陣名單",
+        teamWinsTitle: "TEAM WINS:",
         xtreme: "極限終結", over: "擊出終結", burst: "爆裂終結", spin: "迴轉勝利", foulTxt: "發射失誤",
         undo: "復原", drawBtn: "平手重賽", reset: "重置賽事", nextKof: "下一局換人",
         logTitle: "⚡ 對局紀錄", winMsg: "率先達到目標分數，獲得本局勝利！",
@@ -727,22 +752,39 @@ const i18n = {
         btnOpenLobby: "🏟️ 等候大廳",
         lblRoom: "房間 ID",
         lblConnected: "已連線設備",
+        optStd: "1v1 Standard (1對1 單人對決)",
+        opt3v3: "3on3 Battle (3隻陀螺對決)",
+        optTeam: "Team Battle (3人 KOF 團隊戰)",
+        optP3: "3-Player (三人亂鬥 5分制)",
         lobbyTitle: "🏟️ 裁判等候大廳 (Host Lobby)",
         lobbyRoomTip: "請告知選手與觀眾輸入此 8 位數房間 ID：",
         lobbySelectMode: "👑 選擇本局賽事模式：",
-        lobbySlotsTip: "選手連線送出後將自動填入，裁判亦可直接手動修改：",
+        lobbyOptStd: "1v1 Standard (4分制)",
+        lobbyOpt3v3: "3on3 Battle (4分制 / 3隻陀螺)",
+        lobbyOptTeam: "Team Battle (KOF 團隊戰 2分制)",
+        lobbyOptP3: "3-Player (三人亂鬥 5分制)",
         lblLobbyP1: "👈 左邊 (選手一 / 隊伍 A)",
         lblLobbyP2: "👉 右邊 (選手二 / 隊伍 B)",
         lblLobbyP3: "👆 中間 (選手三)",
         btnLobbyStart: "🔒 鎖定排陣並邀請全場開賽！",
+        btnSwapSides: "⇄ 左右對調",
+        btnClear: "🗑️ 清空",
         lblAutoAssignTip: "請裁判審核此排陣：",
         btnAutoAccept: "✅ 接收並放入大廳",
+        btnRejectSubmit: "❌ 拒絕/忽略",
         spectatorWaiting: "⏳ 裁判正在大廳排陣準備中，請稍候...",
+        spectatorWaitingSub: "房間持續連線中，裁判開賽後畫面將自動同步！",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 連線玩法指南 (上限 15 人)：</div>
-            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：同一個 Code 全天有效！下一場按「等候大廳」可按「清空」接收新選手，再按「鎖定開賽」。</div>
+            <div style="margin-bottom:3px;">• <b>👑 裁判端</b>：同一個 Code 全天有效！下一場按「等候大廳」可點「清空」接收新選手，再按「鎖定開賽」。</div>
             <div style="margin-bottom:3px;">• <b>🎮 選手端</b>：同一個 Code 可繼續用，換人時重新按「選手連線」並填寫排陣送出。</div>
             <div>• <b>👁️ 觀眾端</b>：無需操作全程自動同步；若離線重新輸入 Code 按「觀眾觀戰」即可。</div>
+        `,
+        lobbyRefGuide: `
+            <div style="color:var(--neon-yellow); font-weight:bold; margin-bottom:2px;">👑 裁判連場操作要點：</div>
+            <div>1. <b>連場通用</b>：同一個房間 ID 可整場大賽持續使用，無需重複開房。</div>
+            <div>2. <b>換人開賽</b>：上一場結束後點擊「等候大廳」，可按「清空」刪除舊選手，接收新選手提交。</div>
+            <div>3. <b>一鍵開賽</b>：確認排陣無誤後點擊「鎖定開賽」，全場選手與觀眾手機將秒速同步登場！</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
@@ -760,12 +802,14 @@ const i18n = {
     },
     en: {
         rulesTag: "BEYBLADE X Regulations (Asia Version) 12th Ed",
+        p2pBtn: "Multi-Device",
         rulesBtn: "Rules",
         rosterBtn: "Roster",
         refreshBtn: "Refresh",
         modalTitle: "BEYBLADE X Regulations (Asia Version) 12th Ed Summary",
         rosterModalTitle: "👥 Team Roster & Order Setup",
         saveRosterBtn: "Save Roster",
+        teamWinsTitle: "TEAM WINS:",
         xtreme: "Xtreme Finish", over: "Over Finish", burst: "Burst Finish", spin: "Spin Finish", foulTxt: "Shooting Error",
         undo: "Undo", drawBtn: "Draw", reset: "Reset Match", nextKof: "Next Round",
         logTitle: "⚡ BATTLE LOG", winMsg: "Reached target score and wins the match!",
@@ -776,7 +820,7 @@ const i18n = {
         privacyNotice: "Privacy by Design: No backend, no cookies, no personal data collected. All data stays local.",
         vsSubMsg: "READY TO BATTLE!",
         btnStartVs: "START BATTLE",
-        p2pTitle: "🌐 WebRTC P2P Multi-Device Hub",
+        p2pTitle: "🌐 WebRTC Multi-Device Hub",
         btnCreateHost: "👑 Host Room (Referee)",
         txtHostDesc: "Create room and share the 8-digit ID with players & spectators.",
         btnJoinPlayer: "🎮 Join as Player",
@@ -787,23 +831,40 @@ const i18n = {
         btnLeaveP2P: "🚪 Leave Room",
         btnOpenLobby: "🏟️ Host Lobby",
         lblRoom: "Room ID",
-        lblConnected: "Devices",
+        lblConnected: "Connected",
+        optStd: "1v1 Standard (Single 1-on-1)",
+        opt3v3: "3on3 Battle (3-Bey Match)",
+        optTeam: "Team Battle (3-Player KOF)",
+        optP3: "3-Player (3-Player Battle 5-pt)",
         lobbyTitle: "🏟️ Referee Host Lobby",
         lobbyRoomTip: "Share this 8-digit Room ID with players & spectators:",
         lobbySelectMode: "👑 Select Match Mode:",
-        lobbySlotsTip: "Rosters auto-fill upon submission, referee can also tweak manually:",
-        lblLobbyP1: "👈 Left Side (Player 1 / Team A)",
-        lblLobbyP2: "👉 Right Side (Player 2 / Team B)",
+        lobbyOptStd: "1v1 Standard (4 pts)",
+        lobbyOpt3v3: "3on3 Battle (4 pts / 3 Beys)",
+        lobbyOptTeam: "Team Battle (KOF 2 pts)",
+        lobbyOptP3: "3-Player (3-Player 5 pts)",
+        lblLobbyP1: "👈 Left (Player 1 / Team A)",
+        lblLobbyP2: "👉 Right (Player 2 / Team B)",
         lblLobbyP3: "👆 Middle (Player 3)",
         btnLobbyStart: "🔒 Lock Rosters & Start Match (All Screens)!",
+        btnSwapSides: "⇄ Swap Sides",
+        btnClear: "🗑️ Clear",
         lblAutoAssignTip: "Please review submitted roster:",
         btnAutoAccept: "✅ Accept & Place in Lobby",
+        btnRejectSubmit: "❌ Reject/Ignore",
         spectatorWaiting: "⏳ Referee is setting up next match in Lobby, please wait...",
+        spectatorWaitingSub: "Connected! Match screen will sync automatically once referee starts.",
         p2pGuide: `
             <div style="color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📖 Connection Guide (Max 15 Devices):</div>
             <div style="margin-bottom:3px;">• <b>👑 Referee (Host)</b>: Same Code valid all day! Click 'Host Lobby' and 'Clear' for next match, then lock to start.</div>
             <div style="margin-bottom:3px;">• <b>🎮 Player</b>: Keep using the same Code, re-click 'Join as Player' to submit new roster.</div>
             <div>• <b>👁️ Spectator</b>: Live sync automatically throughout; if disconnected, simply re-enter Code to join!</div>
+        `,
+        lobbyRefGuide: `
+            <div style="color:var(--neon-yellow); font-weight:bold; margin-bottom:2px;">👑 Referee Tournament Tips:</div>
+            <div>1. <b>Persistent Room</b>: The same Room ID stays active all day. No need to recreate rooms.</div>
+            <div>2. <b>Next Match</b>: Click 'Host Lobby' after each match, click 'Clear' to remove old players, and accept new submissions.</div>
+            <div>3. <b>Instant Start</b>: Click 'Lock & Start' to broadcast the match instantly to all connected devices!</div>
         `,
         rulesBody: `
             <div style="margin-bottom:12px;">
