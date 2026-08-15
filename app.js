@@ -170,7 +170,8 @@ function setMatchMode(mode, shouldReset = false, broadcast = true) {
     applyLanguage();
 
     if (broadcast && myPeerRole === 'host' && typeof broadcastToClients === 'function') {
-        broadcastToClients({ type: 'MODE_SYNC', mode });
+        const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.MODE_SYNC) ? window.P2P_EVENTS.MODE_SYNC : 'MODE_SYNC';
+        broadcastToClients({ type: eventType, mode });
     }
 }
 
@@ -260,16 +261,15 @@ function triggerVersusAnimation(p1, p2, p3 = null) {
 function closeVersusModal() { safeSetDisplay('versus-modal', 'none'); }
 
 function openRosterModal() { 
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-    setVal('roster-t1-name', roster.t1Name || '');
-    setVal('roster-t1-p1', (roster.t1 && roster.t1[0]) || '');
-    setVal('roster-t1-p2', (roster.t1 && roster.t1[1]) || '');
-    setVal('roster-t1-p3', (roster.t1 && roster.t1[2]) || '');
+    safeSetInputValue('roster-t1-name', roster.t1Name || '');
+    safeSetInputValue('roster-t1-p1', (roster.t1 && roster.t1[0]) || '');
+    safeSetInputValue('roster-t1-p2', (roster.t1 && roster.t1[1]) || '');
+    safeSetInputValue('roster-t1-p3', (roster.t1 && roster.t1[2]) || '');
 
-    setVal('roster-t2-name', roster.t2Name || '');
-    setVal('roster-t2-p1', (roster.t2 && roster.t2[0]) || '');
-    setVal('roster-t2-p2', (roster.t2 && roster.t2[1]) || '');
-    setVal('roster-t2-p3', (roster.t2 && roster.t2[2]) || '');
+    safeSetInputValue('roster-t2-name', roster.t2Name || '');
+    safeSetInputValue('roster-t2-p1', (roster.t2 && roster.t2[0]) || '');
+    safeSetInputValue('roster-t2-p2', (roster.t2 && roster.t2[1]) || '');
+    safeSetInputValue('roster-t2-p3', (roster.t2 && roster.t2[2]) || '');
 
     safeSetDisplay('roster-modal', 'flex'); 
 }
@@ -317,10 +317,12 @@ function saveRoster() {
     broadcastCurrentState();
 }
 
+/* 🎯 統一使用 window.P2P_EVENTS 常數廣播 */
 function broadcastCurrentState() {
     if (typeof broadcastToClients === 'function') {
+        const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.STATE_SYNC) ? window.P2P_EVENTS.STATE_SYNC : 'STATE_SYNC';
         broadcastToClients({
-            type: 'STATE_SYNC',
+            type: eventType,
             ...getFullState()
         });
     }
@@ -497,7 +499,8 @@ function undo() {
 
         safeSetDisplay('win-modal', 'none');
         if (typeof broadcastToClients === 'function') {
-            broadcastToClients({ type: 'CLOSE_WIN_SYNC' });
+            const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.CLOSE_WIN_SYNC) ? window.P2P_EVENTS.CLOSE_WIN_SYNC : 'CLOSE_WIN_SYNC';
+            broadcastToClients({ type: eventType });
         }
 
         updatePlayerNamesForMode();
@@ -579,7 +582,8 @@ function checkWinner() {
         let isFinal = matchMode !== 'team'; 
         showWinModal(name1, isFinal);
         if (typeof broadcastToClients === 'function') {
-            broadcastToClients({ type: 'WIN_SYNC', winner: name1, isFinalTeamWin: isFinal });
+            const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.WIN_SYNC) ? window.P2P_EVENTS.WIN_SYNC : 'WIN_SYNC';
+            broadcastToClients({ type: eventType, winner: name1, isFinalTeamWin: isFinal });
         }
         return true;
     } else if (scoreP2 >= targetScore) {
@@ -588,14 +592,16 @@ function checkWinner() {
         let isFinal = matchMode !== 'team'; 
         showWinModal(name2, isFinal);
         if (typeof broadcastToClients === 'function') {
-            broadcastToClients({ type: 'WIN_SYNC', winner: name2, isFinalTeamWin: isFinal });
+            const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.WIN_SYNC) ? window.P2P_EVENTS.WIN_SYNC : 'WIN_SYNC';
+            broadcastToClients({ type: eventType, winner: name2, isFinalTeamWin: isFinal });
         }
         return true;
     } else if (matchMode === 'p3' && scoreP3 >= targetScore) {
         playBeep(880, 'triangle', 0.3);
         showWinModal(name3, true);
         if (typeof broadcastToClients === 'function') {
-            broadcastToClients({ type: 'WIN_SYNC', winner: name3, isFinalTeamWin: true });
+            const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.WIN_SYNC) ? window.P2P_EVENTS.WIN_SYNC : 'WIN_SYNC';
+            broadcastToClients({ type: eventType, winner: name3, isFinalTeamWin: true });
         }
         return true;
     }
@@ -621,7 +627,8 @@ function closeWinModal() {
     safeSetDisplay('win-modal', 'none');
     
     if (typeof broadcastToClients === 'function') {
-        broadcastToClients({ type: 'CLOSE_WIN_SYNC' });
+        const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.CLOSE_WIN_SYNC) ? window.P2P_EVENTS.CLOSE_WIN_SYNC : 'CLOSE_WIN_SYNC';
+        broadcastToClients({ type: eventType });
     }
 
     if (matchMode === 'team') {
@@ -938,6 +945,7 @@ function saveState() {
     localStorage.setItem('bx_score_state', JSON.stringify(state));
 }
 
+/* 🎯 修正：使用 safeSetInputValue 精準還原名稱 */
 function loadState() {
     const saved = localStorage.getItem('bx_score_state');
     if (saved) {
@@ -961,10 +969,10 @@ function loadState() {
 
             if (state.roster) roster = state.roster;
 
-            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-            if (state.p1Name) setVal('p1-title', state.p1Name);
-            if (state.p2Name) setVal('p2-title', state.p2Name);
-            if (state.p3Name) setVal('p3-title', state.p3Name);
+            // ✅ 修正：使用全域 safeSetInputValue 還原自訂名稱
+            if (state.p1Name) safeSetInputValue('p1-title', state.p1Name);
+            if (state.p2Name) safeSetInputValue('p2-title', state.p2Name);
+            if (state.p3Name) safeSetInputValue('p3-title', state.p3Name);
 
             setMatchMode(matchMode, false, false);
         } catch(e) {
