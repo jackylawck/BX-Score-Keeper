@@ -982,16 +982,10 @@ function loadState() {
     applyLanguage();
 }
 
-// 📲 註冊 Service Worker 並加入新版本自動更新監聽
+// 📲 靜默註冊 Service Worker（零彈窗干擾）
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
-    });
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (confirm(currentLang === 'zh' ? "發現新版本！是否立即載入最新功能？" : "New update available! Reload to update?")) {
-            window.location.reload();
-        }
     });
 }
 
