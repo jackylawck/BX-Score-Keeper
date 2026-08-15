@@ -1,10 +1,11 @@
 /* =========================================================================
- * 🌐 p2p.js - WebRTC PeerJS Module (Bulletproof Sync & Registration Fix)
+ * 🌐 p2p.js - WebRTC PeerJS Module (Ultra-Optimized Tournament Edition)
  * ========================================================================= */
 
 const MAX_DEVICES = 15;
 
-const P2P_EVENTS = {
+// 🎯 掛載至 window，全域統一常數
+window.P2P_EVENTS = {
     PING: 'PING',
     PONG: 'PONG',
     REQUEST_SYNC: 'REQUEST_SYNC',
@@ -47,6 +48,12 @@ const PEER_CONFIG = {
     }
 };
 
+// 🎯 事件比對輔助函數
+function isEventType(data, eventKey) {
+    if (!data || !data.type) return false;
+    return data.type === window.P2P_EVENTS[eventKey] || data.type === eventKey;
+}
+
 function openP2PModal() { 
     applyLanguage();
     safeSetDisplay('p2p-modal', 'flex'); 
@@ -60,7 +67,7 @@ function updateP2PFormFields() {
 
     if (mode === 'std') {
         if (extraBox) extraBox.style.display = 'none';
-        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 BB)' : 'Player Name (e.g. BB)';
+        if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 假面S)' : 'Player Name (e.g. Mask S)';
     } else if (mode === 'p3') {
         if (extraBox) extraBox.style.display = 'none';
         if (nameInput) nameInput.placeholder = currentLang === 'zh' ? '選手姓名 (例如 嚟沒火)' : 'Player Name (e.g. Player 3)';
@@ -118,7 +125,6 @@ function initP2PHost() {
     });
 }
 
-/* 🎯 終極防禦：只要收到封包，即使漏掉 open 事件也強制註冊廣播名單 */
 function handleNewHostConnection(conn) {
     let isRegistered = false;
 
@@ -127,7 +133,7 @@ function handleNewHostConnection(conn) {
         isRegistered = true;
 
         if (getActiveConnectionCount() >= MAX_DEVICES) {
-            try { conn.send({ type: P2P_EVENTS.ROOM_CAPACITY_FULL }); } catch(e) {}
+            try { conn.send({ type: window.P2P_EVENTS.ROOM_CAPACITY_FULL }); } catch(e) {}
             setTimeout(() => conn.close(), 500);
             return;
         }
@@ -135,10 +141,9 @@ function handleNewHostConnection(conn) {
         p2pConnMap[conn.peer] = conn;
         updateConnectedCount();
 
-        // 立即發送初始化資料給剛連線的手機
         try {
             conn.send({
-                type: P2P_EVENTS.INIT_SYNC,
+                type: window.P2P_EVENTS.INIT_SYNC,
                 ...getFullState(),
                 connectedCount: getActiveConnectionCount()
             });
@@ -154,19 +159,18 @@ function handleNewHostConnection(conn) {
     }
 
     conn.on('data', (data) => {
-        // 🔥 絕對防禦機制：一旦收到資料，若未註冊則強制註冊！
         if (!isRegistered) {
             registerConnection();
         }
 
-        if (data.type === P2P_EVENTS.PING) {
-            try { conn.send({ type: P2P_EVENTS.PONG }); } catch(e) {}
+        if (isEventType(data, 'PING')) {
+            try { conn.send({ type: window.P2P_EVENTS.PONG }); } catch(e) {}
             return;
         }
-        if (data.type === P2P_EVENTS.REQUEST_SYNC) {
+        if (isEventType(data, 'REQUEST_SYNC')) {
             try {
                 conn.send({
-                    type: P2P_EVENTS.INIT_SYNC,
+                    type: window.P2P_EVENTS.STATE_SYNC,
                     ...getFullState(),
                     connectedCount: getActiveConnectionCount()
                 });
@@ -207,11 +211,11 @@ function startHeartbeat() {
     heartbeatTimer = setInterval(() => {
         if (myPeerRole === 'host') {
             cleanDeadConnections();
-            broadcastToClients({ type: P2P_EVENTS.PING });
+            broadcastToClients({ type: window.P2P_EVENTS.PING });
         } else if (hostConn && hostConn.open) {
-            try { hostConn.send({ type: P2P_EVENTS.PING }); } catch(e) {}
+            try { hostConn.send({ type: window.P2P_EVENTS.PING }); } catch(e) {}
         }
-    }, 4000);
+    }, 3000);
 }
 
 function updateConnectedCount(overrideCount = null) {
@@ -225,7 +229,7 @@ function updateConnectedCount(overrideCount = null) {
 
 function broadcastDeviceCount() {
     let count = getActiveConnectionCount();
-    broadcastToClients({ type: P2P_EVENTS.DEVICE_COUNT_SYNC, count });
+    broadcastToClients({ type: window.P2P_EVENTS.DEVICE_COUNT_SYNC, count });
 }
 
 function openLobbyModal() {
@@ -243,7 +247,7 @@ function openLobbyModal() {
     safeSetDisplay('lobby-modal', 'flex');
 
     isMatchLocked = false;
-    broadcastToClients({ type: P2P_EVENTS.LOBBY_WAITING });
+    broadcastToClients({ type: window.P2P_EVENTS.LOBBY_WAITING });
 }
 
 function closeLobbyModal() { safeSetDisplay('lobby-modal', 'none'); }
@@ -252,7 +256,7 @@ function handleLobbyModeChange() {
     let newMode = document.getElementById('lobby-match-mode').value;
     setMatchMode(newMode, false, false);
     applyLobbyLayout();
-    broadcastToClients({ type: P2P_EVENTS.MODE_SYNC, mode: newMode });
+    broadcastToClients({ type: window.P2P_EVENTS.MODE_SYNC, mode: newMode });
 }
 
 function applyLobbyLayout() {
@@ -346,7 +350,7 @@ function clearLobbySlot(slotNum) {
     }
 
     isMatchLocked = false;
-    broadcastToClients({ type: P2P_EVENTS.LOBBY_WAITING });
+    broadcastToClients({ type: window.P2P_EVENTS.LOBBY_WAITING });
 }
 
 function swapLobbySides() {
@@ -443,7 +447,7 @@ function startMatchFromLobby() {
     let p3Show = document.getElementById('p3-title') ? document.getElementById('p3-title').value : '';
 
     broadcastToClients({
-        type: P2P_EVENTS.MATCH_START_SYNC,
+        type: window.P2P_EVENTS.MATCH_START_SYNC,
         ...getFullState(),
         p1Show, p2Show, p3Show
     });
@@ -509,7 +513,7 @@ function joinP2PRoom(roleType) {
                 updateP2PFormFields();
             }
 
-            try { hostConn.send({ type: P2P_EVENTS.REQUEST_SYNC }); } catch(e) {}
+            try { hostConn.send({ type: window.P2P_EVENTS.REQUEST_SYNC }); } catch(e) {}
 
             startHeartbeat();
             setUIPermissions();
@@ -517,8 +521,8 @@ function joinP2PRoom(roleType) {
         });
 
         hostConn.on('data', (data) => {
-            if (data.type === P2P_EVENTS.PING) {
-                try { hostConn.send({ type: P2P_EVENTS.PONG }); } catch(e) {}
+            if (isEventType(data, 'PING')) {
+                try { hostConn.send({ type: window.P2P_EVENTS.PONG }); } catch(e) {}
                 return;
             }
             handleClientReceivedData(data);
@@ -558,15 +562,22 @@ function leaveP2PRoom() {
 }
 
 function setUIPermissions() {
-    const isReadOnly = (myPeerRole === 'spectator');
+    const isReadOnly = (myPeerRole === 'spectator' || myPeerRole === 'player');
     
     document.querySelectorAll('.score-btn').forEach(btn => {
         btn.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-        btn.style.opacity = isReadOnly ? '0.6' : '1';
+        btn.style.opacity = isReadOnly ? '0.7' : '1';
     });
 
     const mainControls = document.getElementById('main-controls');
     if (mainControls) mainControls.style.display = isReadOnly ? 'none' : 'flex';
+
+    const p1Title = document.getElementById('p1-title');
+    const p2Title = document.getElementById('p2-title');
+    const p3Title = document.getElementById('p3-title');
+    if (p1Title) p1Title.readOnly = isReadOnly;
+    if (p2Title) p2Title.readOnly = isReadOnly;
+    if (p3Title) p3Title.readOnly = isReadOnly;
 }
 
 function sendClientDeckToHost() {
@@ -588,26 +599,27 @@ function sendClientDeckToHost() {
     let item3 = document.getElementById('p2p-item-3').value.trim() || '3';
 
     let payload = {
-        type: P2P_EVENTS.SUBMIT_DECK,
+        type: window.P2P_EVENTS.SUBMIT_DECK,
         formMode: mode,
         name: name,
         items: [item1, item2, item3]
     };
 
     hostConn.send(payload);
+    closeP2PModal();
     alert(currentLang === 'zh' ? "已送出給裁判，等待裁判審核並排入大廳！" : "Submitted! Waiting for Referee approval.");
 }
 
 function handleHostReceivedData(data, conn) {
-    if (data.type === P2P_EVENTS.SUBMIT_DECK) {
+    if (isEventType(data, 'SUBMIT_DECK')) {
         if (isMatchLocked) {
-            try { conn.send({ type: P2P_EVENTS.REJECT_FULL }); } catch(e) {}
+            try { conn.send({ type: window.P2P_EVENTS.REJECT_FULL }); } catch(e) {}
             return;
         }
 
         let isFull = (occupiedSlots.slot1 && occupiedSlots.slot2 && occupiedSlots.slot3);
         if (isFull) {
-            try { conn.send({ type: P2P_EVENTS.REJECT_FULL }); } catch(e) {}
+            try { conn.send({ type: window.P2P_EVENTS.REJECT_FULL }); } catch(e) {}
             return;
         }
 
@@ -687,7 +699,7 @@ function handleLobbyModeChangeFromData(newMode) {
     if (modeSelect) modeSelect.value = newMode;
     setMatchMode(newMode, false, false);
     applyLobbyLayout();
-    broadcastToClients({ type: P2P_EVENTS.MODE_SYNC, mode: newMode });
+    broadcastToClients({ type: window.P2P_EVENTS.MODE_SYNC, mode: newMode });
 }
 
 function rejectClientSubmission() {
@@ -695,13 +707,16 @@ function rejectClientSubmission() {
     safeSetDisplay('p2p-confirm-modal', 'none');
 }
 
+/* 🎯 簡潔流暢的事件路由處理 */
 function handleClientReceivedData(data) {
-    if (data.type === P2P_EVENTS.ROOM_CAPACITY_FULL) {
+    if (!data || !data.type) return;
+
+    if (isEventType(data, 'ROOM_CAPACITY_FULL')) {
         alert(currentLang === 'zh' ? "⚠️ 本房間人數已達 15 人上限！無法加入。" : "⚠️ Room capacity reached (15/15 max)!");
         leaveP2PRoom();
-    } else if (data.type === P2P_EVENTS.DEVICE_COUNT_SYNC) {
+    } else if (isEventType(data, 'DEVICE_COUNT_SYNC')) {
         if (data.count !== undefined) updateConnectedCount(data.count);
-    } else if (data.type === P2P_EVENTS.INIT_SYNC) {
+    } else if (isEventType(data, 'INIT_SYNC')) {
         isMatchLocked = data.isMatchLocked || false;
         if (isMatchLocked && myPeerRole === 'player') {
             myPeerRole = 'spectator';
@@ -709,11 +724,10 @@ function handleClientReceivedData(data) {
             safeSetDisplay('p2p-client-submit-box', 'none');
             closeP2PModal();
             setUIPermissions();
-            alert(currentLang === 'zh' ? "⚠️ 本局對戰已鎖定開賽！您已自動轉為【觀眾直播】模式。" : "⚠️ Match is in progress! Automatically switched to Spectator mode.");
         }
         if (data.connectedCount !== undefined) updateConnectedCount(data.connectedCount);
         applyStateSync(data);
-    } else if (data.type === P2P_EVENTS.LOBBY_WAITING) {
+    } else if (isEventType(data, 'LOBBY_WAITING')) {
         safeSetDisplay('win-modal', 'none');
         if (myPeerRole === 'player') {
             safeSetDisplay('p2p-client-submit-box', 'block');
@@ -721,25 +735,25 @@ function handleClientReceivedData(data) {
         } else {
             safeSetDisplay('spectator-waiting-overlay', 'flex');
         }
-    } else if (data.type === P2P_EVENTS.REJECT_FULL) {
+    } else if (isEventType(data, 'REJECT_FULL')) {
         alert(currentLang === 'zh' ? "⚠️ 本局對戰名額已滿並由裁判鎖定！系統已自動將你切換為【觀眾觀戰】模式。" : "⚠️ Match slots are full! Switched to Spectator mode.");
         myPeerRole = 'spectator';
         safeSetText('p2p-role-badge', currentLang === 'zh' ? '👁️ SPECTATOR (觀眾)' : '👁️ SPECTATOR');
         safeSetDisplay('p2p-client-submit-box', 'none');
         closeP2PModal();
         setUIPermissions();
-    } else if (data.type === P2P_EVENTS.STATE_SYNC || data.type === P2P_EVENTS.MATCH_START_SYNC) {
+    } else if (isEventType(data, 'STATE_SYNC') || isEventType(data, 'MATCH_START_SYNC')) {
         safeSetDisplay('spectator-waiting-overlay', 'none');
         applyStateSync(data);
 
-        if (data.type === P2P_EVENTS.MATCH_START_SYNC) {
+        if (isEventType(data, 'MATCH_START_SYNC')) {
             triggerVersusAnimation(data.p1Show, data.p2Show, data.p3Show);
         }
-    } else if (data.type === P2P_EVENTS.WIN_SYNC) {
+    } else if (isEventType(data, 'WIN_SYNC')) {
         showWinModal(data.winner, data.isFinalTeamWin);
-    } else if (data.type === P2P_EVENTS.CLOSE_WIN_SYNC) {
+    } else if (isEventType(data, 'CLOSE_WIN_SYNC')) {
         safeSetDisplay('win-modal', 'none');
-    } else if (data.type === P2P_EVENTS.MODE_SYNC) {
+    } else if (isEventType(data, 'MODE_SYNC')) {
         setMatchMode(data.mode, false, false);
     }
 }
@@ -747,17 +761,18 @@ function handleClientReceivedData(data) {
 function applyStateSync(data) {
     if (data.roster) roster = data.roster;
     if (data.isMatchLocked !== undefined) isMatchLocked = data.isMatchLocked;
-    scoreP1 = data.scoreP1 || 0;
-    scoreP2 = data.scoreP2 || 0;
-    scoreP3 = data.scoreP3 || 0;
-    foulsP1 = data.foulsP1 || 0;
-    foulsP2 = data.foulsP2 || 0;
-    foulsP3 = data.foulsP3 || 0;
-    teamWinsP1 = data.teamWinsP1 || 0;
-    teamWinsP2 = data.teamWinsP2 || 0;
-    kofIndexP1 = data.kofIndexP1 || 0;
-    kofIndexP2 = data.kofIndexP2 || 0;
-    battleCount = data.battleCount || 1;
+    scoreP1 = data.scoreP1 !== undefined ? data.scoreP1 : 0;
+    scoreP2 = data.scoreP2 !== undefined ? data.scoreP2 : 0;
+    scoreP3 = data.scoreP3 !== undefined ? data.scoreP3 : 0;
+    foulsP1 = data.foulsP1 !== undefined ? data.foulsP1 : 0;
+    foulsP2 = data.foulsP2 !== undefined ? data.foulsP2 : 0;
+    foulsP3 = data.foulsP3 !== undefined ? data.foulsP3 : 0;
+    teamWinsP1 = data.teamWinsP1 !== undefined ? data.teamWinsP1 : 0;
+    teamWinsP2 = data.teamWinsP2 !== undefined ? data.teamWinsP2 : 0;
+    kofIndexP1 = data.kofIndexP1 !== undefined ? data.kofIndexP1 : 0;
+    kofIndexP2 = data.kofIndexP2 !== undefined ? data.kofIndexP2 : 0;
+    battleCount = data.battleCount !== undefined ? data.battleCount : 1;
+    
     if (data.matchMode) {
         matchMode = data.matchMode;
         const scoreboard = document.getElementById('main-scoreboard');
@@ -765,7 +780,7 @@ function applyStateSync(data) {
         if (scoreboard) scoreboard.classList.toggle('p3-mode', matchMode === 'p3');
         if (p3Card) p3Card.style.display = (matchMode === 'p3') ? 'flex' : 'none';
     }
-    if (Array.isArray(data.logs)) logs = data.logs;
+    if (Array.isArray(data.logs)) logs = [...data.logs];
 
     updatePlayerNamesForMode();
     updateDisplay();
