@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>404 Page Not Found | BX Score Keeper 爆旋計分器</title>
+    
+    <!-- 🛡️ SEO: 禁止搜尋引擎收錄錯誤頁面 -->
+    <meta name="robots" content="noindex, follow">
+    
     <link rel="icon" type="image/png" sizes="192x192" href="./BXScoreKeepericon-192.png">
+    <link rel="apple-touch-icon" href="./BXScoreKeepericon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -102,6 +107,8 @@
             border-radius: 6px;
             transition: all 0.2s ease;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            cursor: pointer;
+            border: none;
         }
 
         .btn-home:hover {
@@ -145,23 +152,46 @@
             <span id="timer-text">系統將在 <b id="seconds">5</b> 秒後自動返回主頁...</span><br>
             <span style="font-size:0.75rem; color:var(--text-sub);">Auto-redirecting in <b id="seconds-en">5</b>s...</span>
         </div>
+
+        <!-- 企業級：加入反饋渠道 -->
+        <p style="font-size:0.75rem; margin-top:20px; color:var(--text-sub);">
+            💬 遇到問題？<a href="https://github.com/jackylawck/BX-Score-Keeper/issues" 
+            target="_blank" rel="noopener noreferrer" 
+            style="color:var(--neon-blue); text-decoration:underline;">回報給我們 / Report Issue</a>
+        </p>
     </div>
 
     <script>
         let timeLeft = 5;
+        let countdownTimer = null;
         const secEl = document.getElementById('seconds');
         const secEnEl = document.getElementById('seconds-en');
+        const btnReturn = document.getElementById('btn-return');
 
-        const countdownTimer = setInterval(() => {
+        function redirectToHome() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            window.location.href = './';
+        }
+
+        countdownTimer = setInterval(() => {
             timeLeft--;
             if (secEl) secEl.innerText = timeLeft;
             if (secEnEl) secEnEl.innerText = timeLeft;
 
             if (timeLeft <= 0) {
-                clearInterval(countdownTimer);
-                window.location.href = './';
+                redirectToHome();
             }
         }, 1000);
+
+        if (btnReturn) {
+            btnReturn.addEventListener('click', (e) => {
+                e.preventDefault();
+                redirectToHome();
+            });
+        }
     </script>
 </body>
 </html>
