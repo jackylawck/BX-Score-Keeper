@@ -1,6 +1,6 @@
 # ⚡ BX Score Keeper 爆旋計分器
 
-[English](#english) | [繁體中文](#繁體中文)
+[繁體中文](#繁體中文) | [English](#english)
 
 ---
 
@@ -22,7 +22,7 @@
   * 👑 **裁判主機 (Host Lobby)**：建立全天通用 8 位數房間，自由審核、清空、一鍵左右/三人輪調並鎖定全場開賽。
   * 🎮 **選手私密提交 (Player)**：選手在自己手機填寫陀螺/隊伍排陣，私密送出給裁判審核。
   * 👁️ **現場觀眾同步直播 (Spectator)**：最多支援 15 部設備同時在線，比分、登場動畫、對局紀錄（Log）與金光勝利彈窗 100% 秒速同步！
-  * 💓 **心跳防休眠 (Keepalive)**：每 5 秒 Ping/Pong 保持連線，徹底防止手機背景休眠斷線。
+  * 💓 **心跳防休眠 (Keepalive)**：每 3 秒雙向 Ping/Pong 保持連線，徹底防止手機背景休眠斷線。
 * **全賽事模式支援**：
   * ⚔️ **1v1 Standard**：經典單人 4 分獲勝制。
   * 🛡️ **3on3 Battle**：支援 3 隻陀螺排陣對決，打完 3 戰未滿 4 分自動提示重新組合順序。
@@ -53,50 +53,81 @@
   2. 點擊右上角 **選單**（三個點）。
   3. 選擇 **「安裝應用程式」** 或 **「加至主螢幕」 (Install App / Add to Home screen)**。
 
+---
+
+<a name="english"></a>
 ## 📖 About This Project
+
 This repository is a non-commercial personal project created to capture precious bonding moments between my son and me! Driven by our shared passion for competitive play, we built this tool to make every battle seamless, engaging, and fully aligned with official tournament standards across Asia. We warmly invite parents, kids, and bladers of all ages to use it, enjoy fair battles, and create unforgettable memories together!
+
+---
+
 ### ✨ Features
- * **Official 12th Edition Scoring Alignment (Asia Version)**:
-   * 🔴 **Xtreme Finish**: +3 pts
-   * 🟠 **Over Finish**: +2 pts
-   * 🟡 **Burst Finish**: +2 pts
-   * 🟢 **Spin Finish**: +1 pt
-   * 🟣 **Shooting Error / Foul Penalty**: 2 fouls in a single battle automatically award +1 pt to the opponent.
- * **🌐 WebRTC P2P Multi-Device Live Hub (Major Feature)**:
-   * 👑 **Referee Host Lobby**: Host persistent all-day rooms, review secret rosters, clear/swap slots, and start matches simultaneously.
-   * 🎮 **Player Secret Submission**: Players privately enter Beyblade deck / team member lineups and submit directly to the referee.
-   * 👁️ **Spectator Live Sync**: Supports up to 15 concurrent devices! Scoreboard, Versus animations, Battle Logs, and Victory Popups sync seamlessly in real time.
-   * 💓 **Heartbeat Keepalive**: Auto-pings every 5 seconds to prevent mobile browser background sleep/disconnects.
- * **Multiple Tournament Formats**:
-   * ⚔️ **1v1 Standard**: Classic first-to-4 points format.
-   * 🛡️ **3on3 Battle**: 3-Bey deck battle format with auto prompt for order re-arrangement after 3 battles if under 4 points.
-   * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. 1st Vanguard ➔ 2nd Middle ➔ 3rd General rotation. Winner stays, loser rotates out.
-   * 🌀 **3-Player Battle (5-pt System)**: Official 3-blader battle royale format! First to 5 points wins. Features 3-way Versus animation (XX VS YY VS ZZ).
- * **Tournament Utilities & Visual Enhancements**:
-   * 📢 **Voice Countdown**: Built-in "3, 2, 1, Go Shoot!" vocal and audio tone countdown.
-   * 📱 **Mobile Landscape Fullscreen**: Rotating your phone horizontally maximizes the scoreboard into a clean, fullscreen dual-card layout.
-   * ⚡ **Versus & Victory Popups**: Anime-styled Versus intro and winner celebration modals synchronized across all screens.
-   * 🤝 **Draw Support**: One-tap draw recording for simultaneous finishes.
-   * 📜 **Real-time Battle Log** and **Undo** support.
-   * 💾 **State Persistence**: Auto-saves current score state to localStorage.
-   * 🌐 **100% Bilingual Support**: Instant toggle between Traditional Chinese and International English.
- * **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional for offline single-device scoring without internet access.
+* **Official 12th Edition Scoring Alignment (Asia Version)**:
+  * 🔴 **Xtreme Finish**: +3 pts
+  * 🟠 **Over Finish**: +2 pts
+  * 🟡 **Burst Finish**: +2 pts
+  * 🟢 **Spin Finish**: +1 pt
+  * 🟣 **Shooting Error / Foul Penalty**: 2 fouls in a single battle automatically award +1 pt to the opponent.
+* **🌐 WebRTC P2P Multi-Device Live Hub (Major Feature)**:
+  * 👑 **Referee Host Lobby**: Host persistent all-day rooms, review secret rosters, clear/swap slots, and start matches simultaneously.
+  * 🎮 **Player Secret Submission**: Players privately enter Beyblade deck / team member lineups and submit directly to the referee.
+  * 👁️ **Spectator Live Sync**: Supports up to 15 concurrent devices! Scoreboard, Versus animations, Battle Logs, and Victory Popups sync seamlessly in real time.
+  * 💓 **Heartbeat Keepalive**: Auto-pings every 3 seconds to prevent mobile browser background sleep/disconnects.
+* **Multiple Tournament Formats**:
+  * ⚔️ **1v1 Standard**: Classic first-to-4 points format.
+  * 🛡️ **3on3 Battle**: 3-Bey deck battle format with auto prompt for order re-arrangement after 3 battles if under 4 points.
+  * 👥 **Team Battle (KOF Format)**: First to 2 points per individual battle. 1st Vanguard ➔ 2nd Middle ➔ 3rd General rotation. Winner stays, loser rotates out.
+  * 🌀 **3-Player Battle (5-pt System)**: Official 3-blader battle royale format! First to 5 points wins. Features 3-way Versus animation (XX VS YY VS ZZ).
+* **Tournament Utilities & Visual Enhancements**:
+  * 📢 **Voice Countdown**: Built-in "3, 2, 1, Go Shoot!" vocal and audio tone countdown.
+  * 📱 **Mobile Landscape Fullscreen**: Rotating your phone horizontally maximizes the scoreboard into a clean, fullscreen dual-card layout.
+  * ⚡ **Versus & Victory Popups**: Anime-styled Versus intro and winner celebration modals synchronized across all screens.
+  * 🤝 **Draw Support**: One-tap draw recording for simultaneous finishes.
+  * 📜 **Real-time Battle Log** and **Undo** support.
+  * 💾 **State Persistence**: Auto-saves current score state to localStorage.
+  * 🌐 **100% Bilingual Support**: Instant toggle between Traditional Chinese and International English.
+* **PWA & Offline-First**: Installable directly to your mobile home screen. Fully functional for offline single-device scoring without internet access.
+
+---
+
 ### 📲 How to Install & Run
+
 #### Instant Mobile Setup (Recommended: PWA)
 This project is built as a Progressive Web App (PWA) — **no App Store / Google Play download required**:
- * **iOS (Safari)**:
-   1. Open the web link in **Safari**.
-   2. Tap the **Share** button at the bottom.
-   3. Scroll down and tap **"Add to Home Screen"**.
- * **Android (Chrome)**:
-   1. Open the web link in **Chrome**.
-   2. Tap the top-right menu (three dots).
-   3. Select **"Install app"** or **"Add to Home screen"**.
+* **iOS (Safari)**:
+  1. Open the web link in **Safari**.
+  2. Tap the **Share** button at the bottom.
+  3. Scroll down and tap **"Add to Home Screen"**.
+* **Android (Chrome)**:
+  1. Open the web link in **Chrome**.
+  2. Tap the top-right menu (three dots).
+  3. Select **"Install app"** or **"Add to Home screen"**.
+
+---
 
 ### 🛡️ Privacy & Security / 私隱聲明
- * **Zero-Backend (純前端架構)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
- * **P2P Direct Connection (端對端直連)**：所有跨機數據透過 WebRTC Peer-to-Peer 於裝置間直連傳輸，不經由第三方伺服器儲存。
- * **Privacy by Design**：所有對戰數據僅儲存於使用者本地瀏覽器 (localStorage) 中。
+* **Zero-Backend (純前端架構)**：不設後端伺服器，不使用 Cookie，不收集任何個人可識別資料 (PII)。
+* **P2P Direct Connection (端對端直連)**：所有跨機數據透過 WebRTC Peer-to-Peer 於裝置間直連傳輸，不經由第三方伺服器儲存。
+* **Privacy by Design**：所有對戰數據僅儲存於使用者本地瀏覽器 (localStorage) 中。
+
+---
+
 ### 📄 Disclaimer / 免責聲明
-This is an unofficial fan-made tool created for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition. All product names and trademarks belong to their respective owners.
+This is an unofficial fan-made tool created for scoring purposes only, based on BEYBLADE X Regulations (Asia Version) 12th Edition. All product names and trademarks belong to their respective owners.  
 本工具為玩家自製非官方社群對戰計分器，依據《爆旋陀螺X規則（亞洲版）》第 12 版製作。版權歸原著作權所有者所有。
+
+---
+
+## 📄 Compliance, Legal & Governance (合規與法律文件索引)
+
+| Document | Description / 說明 | Standards & Laws / 對應標準 |
+| :--- | :--- | :--- |
+| ⚖️ [LICENSE](./LICENSE) | Open Source MIT License & Warranty Disclaimer | Open Source Initiative |
+| 🔒 [PRIVACY.md](./PRIVACY.md) | Privacy by Design & Zero Data Collection Policy | GDPR / HK PDPO / ISO 27701 |
+| ⚠️ [DISCLAIMER.md](./DISCLAIMER.md) | Non-Affiliation & Fair Use Trademark Notice | Trademark & Copyright Law |
+| 🤖 [AI-GOVERNANCE.md](./AI-GOVERNANCE.md) | Algorithmic Fairness & Risk Tier Assessment | EU AI Act / ISO 42001 / NIST |
+| 🛡️ [SECURITY.md](./SECURITY.md) | Security Policy & Vulnerability Disclosure | ISO 27001 / Security Best Practices |
+| 📜 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) | Community Code of Conduct & Mediation-First | Contributor Covenant / Mediation |
+| 📋 [CHANGELOG.md](./CHANGELOG.md) | Version Release History & Evolution Log | Keep a Changelog / SemVer |
+| 🤝 [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution Guidelines & Coding Standards | Open Source Best Practices |
