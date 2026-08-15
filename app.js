@@ -651,9 +651,11 @@ function toggleLanguage() {
     saveState();
 }
 
+/* 🎯 支援大標題中/英文動態替換 */
 function applyLanguage() {
     const lang = i18n[currentLang];
 
+    safeSetText('app-main-title', lang.appTitle);
     safeSetText('rules-tag', lang.rulesTag);
     safeSetText('btn-p2p-txt', lang.p2pBtn);
     safeSetText('btn-rules-txt', lang.rulesBtn);
@@ -756,6 +758,7 @@ function applyLanguage() {
 
 const i18n = {
     zh: {
+        appTitle: "爆旋計分器",
         rulesTag: "《爆旋陀螺X規則（亞洲版）》第 12 版",
         p2pBtn: "跨機連線",
         rulesBtn: "規則",
@@ -838,6 +841,7 @@ const i18n = {
         `
     },
     en: {
+        appTitle: "BX SCORE KEEPER",
         rulesTag: "BEYBLADE X Regulations (Asia Version) 12th Ed",
         p2pBtn: "Multi-Device",
         rulesBtn: "Rules",
