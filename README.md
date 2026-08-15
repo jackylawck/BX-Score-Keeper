@@ -127,6 +127,5 @@ This is an unofficial fan-made tool created for scoring purposes only, based on 
 | 🔒 [PRIVACY.md](./PRIVACY.md) | Privacy by Design & Zero Data Collection Policy | GDPR / HK PDPO / ISO 27701 |
 | ⚠️ [DISCLAIMER.md](./DISCLAIMER.md) | Non-Affiliation & Fair Use Trademark Notice | Trademark & Copyright Law |
 | 🤖 [AI-GOVERNANCE.md](./AI-GOVERNANCE.md) | Algorithmic Fairness & Risk Tier Assessment | EU AI Act / ISO 42001 / NIST |
-| 🛡️ [SECURITY.md](./SECURITY.md) | Security Policy & Vulnerability Disclosure | ISO 27001 / Security Best Practices |
 | 📋 [CHANGELOG.md](./CHANGELOG.md) | Version Release History & Evolution Log | Keep a Changelog / SemVer |
 | 🤝 [CONTRIBUTING.md](./CONTRIBUTING.md) | Contribution Guidelines & Coding Standards | Open Source Best Practices |
