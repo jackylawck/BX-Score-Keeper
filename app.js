@@ -1,5 +1,5 @@
 /* =========================================================================
- * ⚡ app.js - BX Score Keeper Main Application Logic
+ * ⚡ app.js - BX Score Keeper Main Application Logic (Production Final)
  * ========================================================================= */
 
 let scoreP1 = 0, scoreP2 = 0, scoreP3 = 0;
@@ -34,6 +34,39 @@ function playBeep(freq = 440, type = 'sine', duration = 0.1) {
     } catch(e) {}
 }
 
+/* 🎯 輕量非阻塞式浮動提示 (Toast) */
+function showToast(msg) {
+    let toast = document.getElementById('bx-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'bx-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 99999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        `;
+        document.body.appendChild(toast);
+    }
+    toast.innerText = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 2500);
+}
+
 function forceRefreshApp() {
     if (confirm(currentLang === 'zh' ? "是否重新載入並清除舊資料？" : "Reload and clear cache?")) {
         localStorage.removeItem('bx_score_state');
@@ -55,7 +88,7 @@ function forceRefreshApp() {
     }
 }
 
-/* 📢 完美還原官方比賽節奏：3, 2, 1 沉穩定拍，Go~~~ Shoot! 帶起全場爆發 */
+/* 📢 官方比賽節奏倒數 */
 function startShootCountdown() {
     const btn = document.getElementById('shoot-btn');
     if (!btn) return;
@@ -120,13 +153,42 @@ function safeSetText(id, val) { const el = document.getElementById(id); if (el) 
 function safeSetInputValue(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function safeSetInputPlaceholder(id, txt) { const el = document.getElementById(id); if (el) el.placeholder = txt; }
 
-/* 🎯 封裝完整狀態標準物件 */
+/* 🎯 全域統一預設值判斷函數 */
+function isDefaultVal(val) {
+    if (!val) return true;
+    let v = val.trim();
+    return (
+        v === '1' || v === '2' || v === '3' || v === 'A' || v === 'B' || v === 'C' ||
+        v === '選手一' || v === '選手二' || v === '選手三' ||
+        v === 'Player 1' || v === 'Player 2' || v === 'Player 3' ||
+        v === '先鋒' || v === '中堅' || v === '大將' ||
+        v.includes('Vanguard') || v.includes('Middle') || v.includes('General') ||
+        v === '隊伍 A' || v === '隊伍 B' || v === 'Team A' || v === 'Team B'
+    );
+}
+
+/* 🎯 統一歷史快照抽取函數 */
+function snapshotHistory() {
+    history.push({
+        p1: scoreP1, p2: scoreP2, p3: scoreP3,
+        f1: foulsP1, f2: foulsP2, f3: foulsP3,
+        teamP1: teamWinsP1, teamP2: teamWinsP2,
+        k1: kofIndexP1, k2: kofIndexP2,
+        battle: battleCount,
+        logs: logs.slice()
+    });
+    if (history.length > 15) history = history.slice(-15);
+}
+
+/* 🎯 全域唯一權威：封裝完整狀態物件 */
 function getFullState() {
     return {
         roster, scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
         teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
-        battleCount, matchMode, logs,
+        battleCount, matchMode, targetScore,
+        logs: Array.isArray(logs) ? logs.slice(0, 30) : [],
+        history: Array.isArray(history) ? history.slice(-15) : [],
         isMatchLocked: typeof isMatchLocked !== 'undefined' ? isMatchLocked : false
     };
 }
@@ -167,9 +229,8 @@ function setMatchMode(mode, shouldReset = false, broadcast = true) {
     }
 
     updatePlayerNamesForMode();
-    applyLanguage();
 
-    if (broadcast && myPeerRole === 'host' && typeof broadcastToClients === 'function') {
+    if (broadcast && typeof myPeerRole !== 'undefined' && myPeerRole === 'host' && typeof broadcastToClients === 'function') {
         const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.MODE_SYNC) ? window.P2P_EVENTS.MODE_SYNC : 'MODE_SYNC';
         broadcastToClients({ type: eventType, mode });
     }
@@ -186,19 +247,6 @@ function updatePlayerNamesForMode() {
 
     let rolesZh = ['先鋒', '中堅', '大將'];
     let rolesEn = ['1st Vanguard', '2nd Middle', '3rd General'];
-
-    let isDefaultVal = (val) => {
-        if (!val) return true;
-        let v = val.trim();
-        return (
-            v === '1' || v === '2' || v === '3' || v === 'A' || v === 'B' || v === 'C' ||
-            v === '選手一' || v === '選手二' || v === '選手三' ||
-            v === 'Player 1' || v === 'Player 2' || v === 'Player 3' ||
-            v === '先鋒' || v === '中堅' || v === '大將' ||
-            v.includes('Vanguard') || v.includes('Middle') || v.includes('General') ||
-            v === '隊伍 A' || v === '隊伍 B' || v === 'Team A' || v === 'Team B'
-        );
-    };
 
     if (matchMode === 'team') {
         let t1Name = !isDefaultVal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
@@ -248,7 +296,6 @@ function handleManualNameChange(slot) {
     broadcastCurrentState();
 }
 
-/* 🎯 支援三人大亂鬥動漫風登場彈窗 */
 function triggerVersusAnimation(p1, p2, p3 = null) {
     if (matchMode === 'p3' && p3) {
         safeSetText('vs-player-names', `${p1} VS ${p2} VS ${p3}`);
@@ -317,7 +364,6 @@ function saveRoster() {
     broadcastCurrentState();
 }
 
-/* 🎯 統一使用 window.P2P_EVENTS 常數廣播 */
 function broadcastCurrentState() {
     if (typeof broadcastToClients === 'function') {
         const eventType = (window.P2P_EVENTS && window.P2P_EVENTS.STATE_SYNC) ? window.P2P_EVENTS.STATE_SYNC : 'STATE_SYNC';
@@ -332,13 +378,7 @@ function addScore(player, pts, typeName) {
     if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore) || isFinalTeamWinActive) return;
 
     playBeep(600, 'square', 0.08);
-
-    history.push({
-        p1: scoreP1, p2: scoreP2, p3: scoreP3,
-        f1: foulsP1, f2: foulsP2, f3: foulsP3,
-        teamP1: teamWinsP1, teamP2: teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
-        battle: battleCount, logs: [...logs]
-    });
+    snapshotHistory();
 
     const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
     let name1 = getVal('p1-title');
@@ -360,6 +400,7 @@ function addScore(player, pts, typeName) {
     }
 
     logs.unshift(`Round ${battleCount}: ${pName} +${pts} (${displayType})`);
+    if (logs.length > 30) logs = logs.slice(0, 30);
 
     if (player === 1) scoreP1 += pts;
     else if (player === 2) scoreP2 += pts;
@@ -377,7 +418,7 @@ function addScore(player, pts, typeName) {
     if (matchMode === '3v3' && (battleCount - 1) % 3 === 0) {
         if (scoreP1 < 4 && scoreP2 < 4) {
             setTimeout(() => {
-                alert(i18n[currentLang].reorderMsg);
+                showToast(i18n[currentLang].reorderMsg);
                 battleCount = 1;
                 updateDisplay();
                 saveState();
@@ -391,13 +432,7 @@ function addFoul(player) {
     if (scoreP1 >= targetScore || scoreP2 >= targetScore || (matchMode === 'p3' && scoreP3 >= targetScore) || isFinalTeamWinActive) return;
 
     playBeep(350, 'sawtooth', 0.12);
-
-    history.push({
-        p1: scoreP1, p2: scoreP2, p3: scoreP3,
-        f1: foulsP1, f2: foulsP2, f3: foulsP3,
-        teamP1: teamWinsP1, teamP2: teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
-        battle: battleCount, logs: [...logs]
-    });
+    snapshotHistory();
 
     const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
     let name1 = getVal('p1-title');
@@ -433,6 +468,8 @@ function addFoul(player) {
         battleCount++;
     }
 
+    if (logs.length > 30) logs = logs.slice(0, 30);
+
     updateDisplay();
     saveState();
     broadcastCurrentState();
@@ -441,14 +478,12 @@ function addFoul(player) {
 
 function addDraw() {
     playBeep(300, 'sine', 0.1);
-    history.push({
-        p1: scoreP1, p2: scoreP2, p3: scoreP3,
-        f1: foulsP1, f2: foulsP2, f3: foulsP3,
-        teamP1: teamWinsP1, teamP2: teamWinsP2, k1: kofIndexP1, k2: kofIndexP2,
-        battle: battleCount, logs: [...logs]
-    });
+    snapshotHistory();
+
     let txt = currentLang === 'zh' ? '平手重賽' : 'DRAW (Replay)';
     logs.unshift(`Round ${battleCount}: ${txt}`);
+    if (logs.length > 30) logs = logs.slice(0, 30);
+
     battleCount++;
     updateDisplay();
     saveState();
@@ -492,9 +527,10 @@ function undo() {
         const last = history.pop();
         scoreP1 = last.p1; scoreP2 = last.p2; scoreP3 = last.p3 || 0;
         foulsP1 = last.f1 || 0; foulsP2 = last.f2 || 0; foulsP3 = last.f3 || 0;
-        teamWinsP1 = last.teamP1; teamWinsP2 = last.teamP2;
+        teamWinsP1 = last.teamP1 !== undefined ? last.teamP1 : 0;
+        teamWinsP2 = last.teamP2 !== undefined ? last.teamP2 : 0;
         kofIndexP1 = last.k1 || 0; kofIndexP2 = last.k2 || 0;
-        battleCount = last.battle; logs = last.logs;
+        battleCount = last.battle; logs = last.logs || [];
         isFinalTeamWinActive = false;
 
         safeSetDisplay('win-modal', 'none');
@@ -520,7 +556,9 @@ function resetMatch(askConfirm = true) {
         history = []; logs = [];
         isFinalTeamWinActive = false;
         
-        occupiedSlots = { slot1: false, slot2: false, slot3: false };
+        if (typeof occupiedSlots !== 'undefined') {
+            occupiedSlots = { slot1: false, slot2: false, slot3: false };
+        }
         if (typeof isMatchLocked !== 'undefined') isMatchLocked = false;
 
         localStorage.removeItem('bx_score_state');
@@ -546,11 +584,6 @@ function updateDisplay() {
     const f3 = document.getElementById('btn-foul-p3'); if (f3) f3.classList.toggle('active-foul', foulsP3 > 0);
 
     if (matchMode === 'team') {
-        let isDefaultVal = (val) => {
-            if (!val) return true;
-            let v = val.trim();
-            return (v === '1' || v === 'A' || v === '隊伍 A' || v === '隊伍 B' || v === 'Team A' || v === 'Team B');
-        };
         let t1Label = !isDefaultVal(roster.t1Name) ? roster.t1Name : (currentLang === 'zh' ? '隊伍 A' : 'Team A');
         let t2Label = !isDefaultVal(roster.t2Name) ? roster.t2Name : (currentLang === 'zh' ? '隊伍 B' : 'Team B');
         safeSetText('team-wins-p1', `${t1Label}: ${teamWinsP1}`);
@@ -658,7 +691,6 @@ function toggleLanguage() {
     saveState();
 }
 
-/* 🎯 支援大標題中/英文動態替換 */
 function applyLanguage() {
     const lang = i18n[currentLang];
 
@@ -689,7 +721,6 @@ function applyLanguage() {
     safeSetText('vs-sub-msg', lang.vsSubMsg);
     safeSetText('btn-start-vs', lang.btnStartVs);
 
-    /* 🌐 P2P Modal 雙語 */
     safeSetText('p2p-modal-title', lang.p2pTitle);
     safeSetText('btn-create-host', lang.btnCreateHost);
     safeSetText('txt-host-desc', lang.txtHostDesc);
@@ -703,7 +734,6 @@ function applyLanguage() {
     safeSetText('p2p-lbl-room', lang.lblRoom);
     safeSetText('p2p-lbl-connected', lang.lblConnected);
 
-    /* 下拉選項雙語 */
     safeSetText('opt-std', lang.optStd);
     safeSetText('opt-3v3', lang.opt3v3);
     safeSetText('opt-team', lang.optTeam);
@@ -714,7 +744,6 @@ function applyLanguage() {
     safeSetText('lobby-opt-team', lang.lobbyOptTeam);
     safeSetText('lobby-opt-p3', lang.lobbyOptP3);
 
-    /* 🏟️ Lobby 雙語 */
     safeSetText('lbl-lobby-title', lang.lobbyTitle);
     safeSetText('lbl-lobby-room-tip', lang.lobbyRoomTip);
     safeSetText('lbl-lobby-dev-count', lang.lblConnected);
@@ -924,6 +953,8 @@ const i18n = {
                     <li><b>Over Finish (2 pts)</b>: Bey completely enters Over Zone.</li>
                     <li><b>Burst Finish (2 pts)</b>: Opponent's Bey parts detach first.</li>
                     <li><b>Spin Finish (1 pt)</b>: Opponent's Bey stops spinning first.</li>
+                    <li><b>Simultaneous / Draw</b>: Both Beys finish simultaneously; no points awarded, replay round.</li>
+                    <li><b>Shooting Error / Foul</b>: 2 errors in the same battle awards +1 pt to opponent and replays.</li>
                 </ul>
             </div>
         `
@@ -935,41 +966,44 @@ function saveState() {
     const state = {
         scoreP1, scoreP2, scoreP3,
         foulsP1, foulsP2, foulsP3,
-        teamWinsP1, teamWinsP2, kofIndexP1, kofIndexP2,
-        battleCount, matchMode, roster, isFinalTeamWinActive,
+        teamWinsP1, teamWinsP2,
+        kofIndexP1, kofIndexP2,
+        battleCount, matchMode, targetScore, roster, isFinalTeamWinActive,
         p1Name: getVal('p1-title'),
         p2Name: getVal('p2-title'),
         p3Name: getVal('p3-title'),
-        logs, currentLang
+        logs: Array.isArray(logs) ? logs.slice(0, 30) : [],
+        history: Array.isArray(history) ? history.slice(-15) : [],
+        currentLang
     };
     localStorage.setItem('bx_score_state', JSON.stringify(state));
 }
 
-/* 🎯 修正：使用 safeSetInputValue 精準還原名稱 */
 function loadState() {
     const saved = localStorage.getItem('bx_score_state');
     if (saved) {
         try {
             const state = JSON.parse(saved);
-            scoreP1 = state.scoreP1 || 0;
-            scoreP2 = state.scoreP2 || 0;
-            scoreP3 = state.scoreP3 || 0;
-            foulsP1 = state.foulsP1 || 0;
-            foulsP2 = state.foulsP2 || 0;
-            foulsP3 = state.foulsP3 || 0;
-            teamWinsP1 = state.teamWinsP1 || 0;
-            teamWinsP2 = state.teamWinsP2 || 0;
-            kofIndexP1 = state.k1 || 0;
-            kofIndexP2 = state.k2 || 0;
+            scoreP1 = state.scoreP1 !== undefined ? state.scoreP1 : 0;
+            scoreP2 = state.scoreP2 !== undefined ? state.scoreP2 : 0;
+            scoreP3 = state.scoreP3 !== undefined ? state.scoreP3 : 0;
+            foulsP1 = state.foulsP1 !== undefined ? state.foulsP1 : 0;
+            foulsP2 = state.foulsP2 !== undefined ? state.foulsP2 : 0;
+            foulsP3 = state.foulsP3 !== undefined ? state.foulsP3 : 0;
+            teamWinsP1 = state.teamWinsP1 !== undefined ? state.teamWinsP1 : 0;
+            teamWinsP2 = state.teamWinsP2 !== undefined ? state.teamWinsP2 : 0;
+            
+            kofIndexP1 = state.kofIndexP1 !== undefined ? state.kofIndexP1 : (state.k1 || 0);
+            kofIndexP2 = state.kofIndexP2 !== undefined ? state.kofIndexP2 : (state.k2 || 0);
             isFinalTeamWinActive = state.isFinalTeamWinActive || false;
-            battleCount = state.battleCount || 1;
+            battleCount = state.battleCount !== undefined ? state.battleCount : 1;
             matchMode = state.matchMode || 'std';
-            logs = Array.isArray(state.logs) ? state.logs : [];
+            logs = Array.isArray(state.logs) ? state.logs.slice(0, 30) : [];
+            history = Array.isArray(state.history) ? state.history.slice(-15) : [];
             currentLang = state.currentLang || 'zh';
 
             if (state.roster) roster = state.roster;
 
-            // ✅ 修正：使用全域 safeSetInputValue 還原自訂名稱
             if (state.p1Name) safeSetInputValue('p1-title', state.p1Name);
             if (state.p2Name) safeSetInputValue('p2-title', state.p2Name);
             if (state.p3Name) safeSetInputValue('p3-title', state.p3Name);
@@ -982,7 +1016,7 @@ function loadState() {
     applyLanguage();
 }
 
-// 📲 靜默註冊 Service Worker（零彈窗干擾）
+// 📲 靜默註冊 Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
