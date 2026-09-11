@@ -36,6 +36,7 @@ let heartbeatTimer = null;
 let connectTimeoutTimer = null;
 let lastHostMessageAt = Date.now();
 let isDisconnecting = false; // 🎯 斷線守衛，防止雙重彈窗
+let wakeLock = null; // 🎯 螢幕常亮控制指標
 
 // 🌐 強化版 STUN 伺服器池
 const PEER_CONFIG = {
@@ -52,10 +53,25 @@ const PEER_CONFIG = {
     }
 };
 
-// 🎯 手機切回前景時更新時間戳，防止被誤判逾時踢除
-document.addEventListener('visibilitychange', () => {
+/* 🎯 螢幕常亮請求 (Wake Lock) */
+async function requestWakeLock() {
+    if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+                wakeLock = null; // 系統釋放時清空，方便前景重連
+            });
+        } catch(e) {}
+    }
+}
+
+// 🎯 手機切回前景時更新時間戳，並自動重新請求 Wake Lock
+document.addEventListener('visibilitychange', async () => {
     if (!document.hidden) {
         lastHostMessageAt = Date.now();
+        if (wakeLock === null && (myPeerRole === 'host' || myPeerRole === 'player' || myPeerRole === 'spectator')) {
+            await requestWakeLock();
+        }
     }
 });
 
@@ -129,6 +145,7 @@ function initP2PHost() {
         occupiedSlots = { slot1: false, slot2: false, slot3: false };
         isMatchLocked = false;
         setUIPermissions();
+        requestWakeLock(); // 🎯 Host 端啟用螢幕常亮
         
         safeSetDisplay('p2p-status-bar', 'block');
         safeSetText('p2p-role-badge', getLang() === 'zh' ? 'HOST (裁判)' : 'HOST (Referee)');
@@ -589,6 +606,7 @@ function joinP2PRoom(roleType) {
             currentRoomId = inputId;
             safeSetDisplay('p2p-status-bar', 'block');
             safeSetDisplay('btn-open-lobby', 'none');
+            requestWakeLock(); // 🎯 Client 端啟用螢幕常亮
             
             let curLang = getLang();
             if (roleType === 'spectator') {
@@ -655,14 +673,30 @@ function leaveP2PRoom() {
 function setUIPermissions() {
     const isReadOnly = (myPeerRole === 'spectator' || myPeerRole === 'player');
     
+    // 1. 鎖定計分按鈕
     document.querySelectorAll('.score-btn').forEach(btn => {
         btn.style.pointerEvents = isReadOnly ? 'none' : 'auto';
         btn.style.opacity = isReadOnly ? '0.7' : '1';
     });
 
+    // 2. 隱藏裁判控制列（復原、重置、平手）
     const mainControls = document.getElementById('main-controls');
     if (mainControls) mainControls.style.display = isReadOnly ? 'none' : 'flex';
 
+    // 🎯 3. 雙重鎖死模式列與發射按鈕（CSS pointer-events + DOM disabled）
+    const topBanner = document.getElementById('top-mode-banner');
+    if (topBanner) {
+        topBanner.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+        topBanner.style.opacity = isReadOnly ? '0.6' : '1';
+    }
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.disabled = isReadOnly;
+    });
+
+    const shootBtn = document.getElementById('shoot-btn');
+    if (shootBtn) shootBtn.disabled = isReadOnly;
+
+    // 4. 選手姓名輸入框唯讀
     const p1Title = document.getElementById('p1-title');
     const p2Title = document.getElementById('p2-title');
     const p3Title = document.getElementById('p3-title');
@@ -905,7 +939,7 @@ function handleClientReceivedData(data) {
     }
 }
 
-// 🎯 修正點 1：收斂狀態同步，並調用 setMatchMode 保持 targetScore 一致
+// 🎯 狀態同步：精準更新賽制與目標分數，避免重複重繪 DOM
 function applyStateSync(data) {
     if (data.scoreP1 !== undefined) scoreP1 = data.scoreP1;
     if (data.scoreP2 !== undefined) scoreP2 = data.scoreP2;
@@ -924,16 +958,14 @@ function applyStateSync(data) {
     if (Array.isArray(data.logs)) logs = [...data.logs];
     if (Array.isArray(data.history)) history = [...data.history];
 
-    // ✅ 自動刷新目標分數 (targetScore) 與 UI 版型
-    if (data.matchMode && typeof setMatchMode === 'function') {
+    // ✅ 當賽制確實改變時，才重新配置 targetScore 與版型
+    if (data.matchMode && data.matchMode !== matchMode && typeof setMatchMode === 'function') {
         setMatchMode(data.matchMode, false, false);
     }
 
     updatePlayerNamesForMode();
     updateDisplay();
 }
-
-// 🎯 修正點 2：刪除重複的 getFullState()，直接使用 app.js 唯一權威版本
 
 function broadcastToClients(payload) {
     if (myPeerRole !== 'host') return;
