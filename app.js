@@ -12,6 +12,7 @@ let matchMode = 'std';
 let targetScore = 4;
 let history = [], logs = [];
 let currentLang = 'zh';
+let isMuted = false;
 
 let roster = {
     t1Name: '', t1: ['', '', ''],
@@ -20,7 +21,16 @@ let roster = {
 };
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+/* 🎯 靜音切換 */
+function toggleMute() {
+    isMuted = !isMuted;
+    safeSetText('mute-btn', isMuted ? '🔇' : '🔊');
+    showToast(isMuted ? (currentLang === 'zh' ? '🔇 已開啟靜音' : '🔇 Muted') : (currentLang === 'zh' ? '🔊 已開啟音效' : '🔊 Unmuted'));
+}
+
 function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+    if (isMuted) return;
     try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -103,6 +113,26 @@ function startShootCountdown() {
 
     let stepIndex = 0;
 
+    // 🎯 靜音模式：純視覺切換，不觸碰音訊與語音合成
+    if (isMuted) {
+        function playMutedStep() {
+            if (stepIndex >= steps.length) {
+                setTimeout(() => {
+                    btn.innerText = "📢 3, 2, 1, Go Shoot!";
+                    btn.disabled = false;
+                }, 1000);
+                return;
+            }
+            btn.innerText = steps[stepIndex].label;
+            let pauseTime = steps[stepIndex].pause;
+            stepIndex++;
+            setTimeout(playMutedStep, pauseTime);
+        }
+        playMutedStep();
+        return;
+    }
+
+    // 正常有聲模式
     function playStep() {
         if (stepIndex >= steps.length) {
             setTimeout(() => {
@@ -753,6 +783,7 @@ function applyLanguage() {
     safeSetText('lbl-lobby-p3', lang.lblLobbyP3);
     safeSetText('btn-lobby-start', lang.btnLobbyStart);
     safeSetText('btn-swap-sides', lang.btnSwapSides);
+    safeSetText('btnClear', lang.btnClear);
     safeSetText('btn-clear-slot1', lang.btnClear);
     safeSetText('btn-clear-slot2', lang.btnClear);
     safeSetText('btn-clear-slot3', lang.btnClear);
@@ -960,6 +991,30 @@ const i18n = {
         `
     }
 };
+
+/* 🎯 賽後匯出對局紀錄至剪貼簿 */
+function exportLogs() {
+    if (!logs || logs.length === 0) {
+        showToast(currentLang === 'zh' ? '目前尚無對局紀錄' : 'No battle logs yet');
+        return;
+    }
+    const header = currentLang === 'zh' 
+        ? `⚡ BX Score Keeper 對局紀錄 (${matchMode.toUpperCase()} 模式)\n----------------------------------------\n` 
+        : `⚡ BX Score Keeper Battle Logs (${matchMode.toUpperCase()} Mode)\n----------------------------------------\n`;
+    
+    const content = [...logs].reverse().join('\n');
+    const fullText = header + content;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullText).then(() => {
+            showToast(currentLang === 'zh' ? '📋 已複製對局紀錄至剪貼簿！' : '📋 Logs copied to clipboard!');
+        }).catch(() => {
+            prompt(currentLang === 'zh' ? '請手動複製紀錄：' : 'Copy logs manually:', fullText);
+        });
+    } else {
+        prompt(currentLang === 'zh' ? '請手動複製紀錄：' : 'Copy logs manually:', fullText);
+    }
+}
 
 function saveState() {
     const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
