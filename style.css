@@ -1,5 +1,5 @@
 /* =========================================================================
- * 🎨 style.css - BX Score Keeper Complete Stylesheet
+ * 🎨 style.css - BX Score Keeper Complete Stylesheet (Production Final)
  * ========================================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Orbitron:wght@600;800;900&display=swap');
@@ -24,6 +24,12 @@
     padding: 0;
     user-select: none;
     -webkit-user-select: none;
+}
+
+/* 🎯 P1 修復：明確放行輸入框與紀錄文字選取，避免舊版 Safari 長按無法選字 */
+input, textarea, .log-item, #p2p-request-body {
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 body {
@@ -344,13 +350,14 @@ h1 {
     padding: 3px 0;
 }
 
+/* 🎯 P1 修復：提高背景不透明度至 0.92，降低舊機 GPU 模糊計算負擔 */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(4, 6, 11, 0.85);
+    background: rgba(4, 6, 11, 0.92);
     backdrop-filter: blur(4px);
     display: none;
     justify-content: center;
@@ -463,19 +470,63 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* 🎯 P2 修復：窄螢幕 (<400px) 下的 P3 模式自適應微調，防文字被卡片撐破 */
+@media (max-width: 400px) {
+    .scoreboard.p3-mode {
+        gap: 6px;
+    }
+    .scoreboard.p3-mode .player-card {
+        padding: 8px 6px;
+    }
+    .scoreboard.p3-mode .score-display {
+        font-size: 2.2rem;
+    }
+    .scoreboard.p3-mode .score-btn {
+        padding: 6px 4px;
+        font-size: 0.72rem;
+    }
+    .scoreboard.p3-mode .pts-badge {
+        padding: 1px 4px;
+        font-size: 0.72rem;
+    }
+    .scoreboard.p3-mode .player-name-input {
+        font-size: 0.95rem;
+    }
+}
+
 /* =========================================================================
- * 📱 僅在小型手機打橫時 (Mobile Landscape) 觸發頂格滿版
+ * 📱 🎯 P0 核心修復：手機橫屏 (Mobile Landscape) 緊湊佈局
+ * 保留 header 導覽功能，僅隱藏冗餘的賽制切換列與 footer，裁判在支架上操作不卡手
  * ========================================================================= */
 @media screen and (orientation: landscape) and (max-height: 480px) and (max-width: 900px) {
-    header,
-    .subtitle,
+    /* 隱藏非即時操作區塊 */
     #top-mode-banner,
-    footer {
+    footer,
+    header .subtitle {
         display: none !important;
     }
 
     body {
-        padding: 4px 8px !important;
+        padding: 4px 10px !important;
+    }
+
+    /* header 保留並極限緊湊化 */
+    header {
+        padding-bottom: 3px !important;
+        margin-bottom: 4px !important;
+    }
+
+    header h1 {
+        font-size: 1rem !important;
+    }
+
+    .nav-btns {
+        gap: 4px !important;
+    }
+
+    .top-btn {
+        padding: 3px 6px !important;
+        font-size: 0.72rem !important;
     }
 
     .scoreboard {
@@ -489,7 +540,7 @@ footer {
     }
 
     .player-name-input {
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
         margin-bottom: 2px !important;
     }
 
@@ -506,6 +557,7 @@ footer {
 
     .controls {
         margin-top: 4px !important;
+        margin-bottom: 4px !important;
         gap: 4px !important;
     }
 
@@ -515,7 +567,25 @@ footer {
     }
 
     .log-panel {
-        margin-top: 4px !important;
+        margin-top: 2px !important;
         padding: 6px !important;
+        max-height: 80px !important;
+    }
+}
+
+/* 🎯 P2 修復：無障礙減低動態偏好 (Reduced Motion) 支援 */
+@media (prefers-reduced-motion: reduce) {
+    .btn-foul.active-foul {
+        animation: none;
+        border: 2px solid #ef4444;
+    }
+    .modal-content {
+        animation: none;
+    }
+    .score-btn:active,
+    .ctrl-btn:active,
+    .top-btn:active,
+    .shoot-btn:active {
+        transform: none;
     }
 }
