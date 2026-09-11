@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -72,11 +72,11 @@
 
     <header>
         <div>
-            <!-- 🎯 加入 id="app-main-title"，支援多語言即時動態切換 -->
             <h1 id="app-main-title">爆旋計分器</h1>
             <div class="subtitle" id="rules-tag">《爆旋陀螺X規則（亞洲版）》第 12 版</div>
         </div>
         <div class="nav-btns">
+            <button class="top-btn" onclick="toggleMute()" id="mute-btn" title="切換音效開關">🔊</button>
             <button class="top-btn" onclick="openP2PModal()" title="跨機對戰/遠端提交/觀眾直播">🌐 <span id="btn-p2p-txt">跨機連線</span></button>
             <button class="top-btn" onclick="forceRefreshApp()" title="重新載入 / 檢查更新">🔄 <span id="btn-refresh-txt">更新</span></button>
             <button class="top-btn" onclick="openRosterModal()">👥 <span id="btn-roster-txt">隊伍排陣</span></button>
@@ -186,7 +186,10 @@
 
     <!-- 對局紀錄面板 -->
     <div class="log-panel">
-        <div class="log-title" id="log-title">⚡ 對局紀錄</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="log-title" id="log-title">⚡ 對局紀錄</div>
+            <button class="ctrl-btn" onclick="exportLogs()" style="font-size: 0.75rem; padding: 3px 8px; background: rgba(56, 189, 248, 0.2); border: 1px solid var(--neon-blue); color: var(--neon-blue);" id="btn-export-logs">📋 複製紀錄</button>
+        </div>
         <ul class="log-list" id="log-list"></ul>
     </div>
 
